@@ -217,11 +217,28 @@ code{background:rgba(255,255,255,.1);padding:2px 7px;border-radius:5px;font-size
 .le-msg .payload{display:block;color:#4b5563;font-size:10px;margin-top:1px;word-break:break-all;}
 .debug-stats{display:flex;gap:14px;padding:7px 14px;background:rgba(0,0,0,.2);border-top:1px solid rgba(255,255,255,.04);font-size:11px;color:var(--muted);flex-wrap:wrap;}
 .debug-stats b{color:var(--text);}
-@media(max-width:500px){
+@media(max-width:600px){
+  body{font-size:17px;}
   .metrics{grid-template-columns:repeat(2,1fr);}
   .projected-time{font-size:44px;}
   .readiness-grid{grid-template-columns:repeat(2,1fr);}
   .split-input-row{grid-template-columns:44px 1fr 1fr auto;}
+  .card-label{font-size:13px;}
+  .tab{font-size:16px;padding:9px 14px;}
+  .topbar-title{font-size:19px;}
+  .section-title{font-size:19px;}
+  .stat-val{font-size:26px;}
+  .stat-lbl{font-size:13px;}
+  .metric input[type=number],.metric input[type=text]{font-size:22px;}
+  .range-val{font-size:30px;}
+  .btn{font-size:19px;}
+  .piano-day-name{font-size:15px;}
+  .piano-session{font-size:15px;}
+  .hist-met-val{font-size:20px;}
+  .hist-met-lbl{font-size:12px;}
+  /* Fix date input overflow */
+  input[type=date]{font-size:15px;padding:8px 10px;}
+  .week-day .wd-num{font-size:16px;}
 }
 </style>
 </head>
@@ -258,10 +275,10 @@ code{background:rgba(255,255,255,.1);padding:2px 7px;border-radius:5px;font-size
 <!-- ═══ DIARIO ═══ -->
 <div id="tab-diario">
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
-    <div class="card" style="padding:14px;">
+    <div class="card" style="padding:14px;overflow:hidden;">
       <div class="card-label">Data</div>
-      <input type="date" id="logDate" onchange="onDateChange()">
-      <div id="dayName" style="font-size:12px;color:var(--muted);margin-top:5px;"></div>
+      <input type="date" id="logDate" onchange="onDateChange()" style="max-width:100%;">
+      <div id="dayName" style="font-size:12px;color:var(--muted);margin-top:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
     </div>
     <div class="card" style="padding:14px;">
       <div class="card-label">Questa settimana</div>
