@@ -92,7 +92,7 @@ textarea:focus{border-color:var(--blue);}
 .stat-box{background:rgba(255,255,255,.05);border-radius:10px;padding:10px 14px;text-align:center;flex:1;min-width:65px;}
 .stat-val{font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:900;color:var(--accent);}
 .stat-lbl{font-size:10px;color:var(--muted);margin-top:2px;}
-input[type=date]{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:9px;padding:10px 14px;color:white;font-size:16px;font-family:'Barlow',sans-serif;outline:none;width:100%;}
+input[type=date]{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:9px;padding:10px 14px;color:white;font-size:16px;font-family:'Barlow',sans-serif;outline:none;width:100%;box-sizing:border-box;display:block;}
 input[type=date]::-webkit-calendar-picker-indicator{filter:invert(1);}
 /* READINESS */
 .readiness-hero{background:linear-gradient(135deg,#0a1628,#0f2a4a);border:1px solid rgba(59,130,246,.2);border-radius:18px;padding:24px;margin-bottom:18px;}
@@ -274,15 +274,15 @@ code{background:rgba(255,255,255,.1);padding:2px 7px;border-radius:5px;font-size
 
 <!-- ═══ DIARIO ═══ -->
 <div id="tab-diario">
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
-    <div class="card" style="padding:14px;overflow:hidden;">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;align-items:start;">
+    <div class="card" style="padding:14px;overflow:hidden;min-width:0;">
       <div class="card-label">Data</div>
       <input type="date" id="logDate" onchange="onDateChange()" style="max-width:100%;">
       <div id="dayName" style="font-size:12px;color:var(--muted);margin-top:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
     </div>
     <div class="card" style="padding:14px;">
       <div class="card-label">Questa settimana</div>
-      <div class="stats-row" style="margin:0;">
+      <div style="display:flex;flex-direction:column;gap:8px;">
         <div class="stat-box"><div class="stat-val" id="wkKm">0</div><div class="stat-lbl">km</div></div>
         <div class="stat-box"><div class="stat-val" id="wkSteps">0k</div><div class="stat-lbl">passi</div></div>
         <div class="stat-box"><div class="stat-val" id="wkCal">0</div><div class="stat-lbl">kcal</div></div>
