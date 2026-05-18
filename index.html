@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>🏅 Marathon Tracker v12</title>
+<title>🏅 Marathon Tracker v13</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -279,7 +279,7 @@ code{background:rgba(255,255,255,.1);padding:2px 7px;border-radius:5px;font-size
   <div class="topbar-inner">
     <div class="topbar-row1">
       <div>
-        <div class="topbar-sub">Marathon Tracker <span class="v-badge">v12</span></div>
+        <div class="topbar-sub">Marathon Tracker <span class="v-badge">v13</span></div>
         <div class="topbar-title">🏅 25.10.2026 — 5h00'</div>
       </div>
       <!-- SYNC STATUS STRIP -->
@@ -352,7 +352,7 @@ code{background:rgba(255,255,255,.1);padding:2px 7px;border-radius:5px;font-size
     <div id="splitsNote" style="font-size:11px;color:var(--muted);margin-top:6px;"></div>
   </div>
 
-  <!-- ── SEZIONE PASTI (v12) ── -->
+  <!-- ── SEZIONE PASTI (v13) ── -->
   <div class="section-banner" style="background:linear-gradient(135deg,rgba(245,158,11,.1),rgba(245,158,11,.04));border:1px solid rgba(245,158,11,.2);">
     <div class="section-banner-icon">🍽️</div>
     <div>
@@ -1087,12 +1087,129 @@ async function pullFromSheets() {
     }
   }
   saveLocal();
-  logOk(`Pull completato`, `${data.length} righe totali, ${updated} aggiornate localmente`);
+
+  // ── v13: pull abitudini e pasti (richiede backend v8+) ──
+  // Failure non bloccante: se il backend è ancora v7, queste chiamate non rompono il pull principale.
+  let habitsUpdated = 0, mealsUpdated = 0;
+  try {
+    habitsUpdated = await pullHabitsFromSheets();
+  } catch(e) {
+    logWarn("Pull abitudini saltato (backend v7?)", e.message);
+  }
+  try {
+    mealsUpdated = await pullNutritionFromSheets();
+  } catch(e) {
+    logWarn("Pull pasti saltato (backend v7?)", e.message);
+  }
+
+  logOk(`Pull completato`, `${data.length} log, ${updated} aggiornati · ${habitsUpdated} abitudini · ${mealsUpdated} pasti`);
+  return updated;
+}
+
+// ── v13: PULL ABITUDINI ──
+// Legge tutte le righe di Habits_v1 e ricostruisce mt_habit_logs_v10.
+// Struttura target: { "YYYY-MM-DD": { habitId: {sets:[...], value:N, ...details, _savedAt, _status} } }
+// Tiebreaker: se locale ha savedAt più recente, NON sovrascrivere.
+async function pullHabitsFromSheets() {
+  const data = await fetchFromSheets("getHabits");
+  if (!Array.isArray(data)) {
+    // Backend v7: risponde {status:"ok"} su action sconosciute → non è un errore vero
+    return 0;
+  }
+  const habitLogs = loadHabitLogs(); // { date: { habitId: {...} } }
+  let updated = 0;
+
+  for (const row of data) {
+    if (!row.date || !row.habit_id) continue;
+    // Normalize date
+    let dateStr = String(row.date).trim();
+    const parsed = new Date(dateStr);
+    if (!isNaN(parsed.getTime()) && !/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+      dateStr = parsed.toISOString().slice(0,10);
+    }
+
+    const remoteSavedAt = String(row.savedAt || "");
+    const existing = habitLogs[dateStr]?.[row.habit_id];
+    const localSavedAt = String(existing?._savedAt || "");
+
+    // Skip se locale è più recente
+    if (existing && localSavedAt && remoteSavedAt && remoteSavedAt < localSavedAt) continue;
+
+    // details può già essere un oggetto (parsato dal backend v8) o stringa JSON (fallback)
+    let details = row.details;
+    if (typeof details === "string") {
+      try { details = JSON.parse(details); } catch(e) { details = {}; }
+    }
+    if (!details || typeof details !== "object") details = {};
+
+    if (!habitLogs[dateStr]) habitLogs[dateStr] = {};
+    habitLogs[dateStr][row.habit_id] = {
+      ...details,
+      _savedAt: remoteSavedAt,
+      _status: row.status || ""
+    };
+    updated++;
+  }
+  saveHabitLogs(habitLogs);
+  // Refresh UI se la tab Abitudini è aperta
+  try { if (typeof renderAbitudini === "function") renderAbitudini(); } catch(e) {}
+  return updated;
+}
+
+// ── v13: PULL PASTI ──
+// Legge tutte le righe di Nutrition_v1 e popola logs[date].pasti
+// Dedupe: chiave (meal+time+food). Se locale ha già un pasto con stessa chiave,
+// preserva il locale (è già pushato o in coda).
+async function pullNutritionFromSheets() {
+  const data = await fetchFromSheets("getNutrition");
+  if (!Array.isArray(data)) return 0;
+
+  // Raggruppa per data
+  const byDate = {};
+  for (const row of data) {
+    if (!row.date) continue;
+    let dateStr = String(row.date).trim();
+    const parsed = new Date(dateStr);
+    if (!isNaN(parsed.getTime()) && !/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+      dateStr = parsed.toISOString().slice(0,10);
+    }
+    if (!byDate[dateStr]) byDate[dateStr] = [];
+    byDate[dateStr].push({
+      meal: row.meal || "",
+      time: row.time || "",
+      food: row.food || "",
+      kcal: row.kcal || "",
+      protein_g: row.protein_g || "",
+      carbs_g: row.carbs_g || "",
+      fat_g: row.fat_g || "",
+      notes: row.notes || "",
+      savedAt: row.savedAt || ""
+    });
+  }
+
+  let updated = 0;
+  for (const dateStr in byDate) {
+    if (!logs[dateStr]) logs[dateStr] = { date: dateStr };
+    const localPasti = Array.isArray(logs[dateStr].pasti) ? logs[dateStr].pasti : [];
+    const localKeys = new Set(localPasti.map(p => `${p.meal}|${p.time}|${p.food}`));
+
+    for (const remote of byDate[dateStr]) {
+      const key = `${remote.meal}|${remote.time}|${remote.food}`;
+      if (!localKeys.has(key)) {
+        localPasti.push(remote);
+        updated++;
+      }
+    }
+    logs[dateStr].pasti = localPasti;
+  }
+  saveLocal();
+  // Refresh UI pasti per la data corrente
+  try { if (typeof renderPasti === "function") renderPasti(); } catch(e) {}
   return updated;
 }
 
 // ═══════════════════════════════════════════════════════════
-// WRITE API (v12) — chiama script v7 per scrivere pasti/abitudini su Sheets
+// WRITE API (v13) — chiama script v8 per scrivere pasti/abitudini su Sheets
 // ═══════════════════════════════════════════════════════════
 
 async function writeToSheets(type, data) {
@@ -1179,7 +1296,7 @@ async function testWriteAPI() {
     const result = await writeToSheets("weight", {
       date: todayStr(),
       peso_kg: "test",
-      note: "Test write API v12 — riga test, poi cancellala"
+      note: "Test write API v13 — riga test, poi cancellala"
     });
     showToast("✅ Write API OK! Verifica su Sheets", "ok");
     logOk("Test Write API riuscito", JSON.stringify(result));
@@ -1583,8 +1700,8 @@ function getHabitVariantBreakdown(habit, date) {
   return breakdown;
 }
 
-function addHabitSet(habitId, variant) {
-  const date = todayStr();
+function addHabitSet(habitId, variant, dateOverride) {
+  const date = dateOverride || currentAbitudineDate || todayStr();
   const existing = getHabitDayLog(date, habitId) || { sets: [] };
   if (!existing.sets) existing.sets = [];
   existing.sets.push({ variant: variant || "full", reps: 0 });
@@ -1597,8 +1714,8 @@ function addHabitSet(habitId, variant) {
   }, 50);
 }
 
-function updateHabitSetReps(habitId, setIndex, val) {
-  const date = todayStr();
+function updateHabitSetReps(habitId, setIndex, val, dateOverride) {
+  const date = dateOverride || currentAbitudineDate || todayStr();
   const existing = getHabitDayLog(date, habitId) || { sets: [] };
   if (!existing.sets || !existing.sets[setIndex]) return;
   existing.sets[setIndex].reps = parseInt(val) || 0;
@@ -1607,8 +1724,8 @@ function updateHabitSetReps(habitId, setIndex, val) {
   updateHabitTotalDisplay(habitId);
 }
 
-function updateHabitSetVariant(habitId, setIndex, variant) {
-  const date = todayStr();
+function updateHabitSetVariant(habitId, setIndex, variant, dateOverride) {
+  const date = dateOverride || currentAbitudineDate || todayStr();
   const existing = getHabitDayLog(date, habitId) || { sets: [] };
   if (!existing.sets || !existing.sets[setIndex]) return;
   existing.sets[setIndex].variant = variant;
@@ -1616,8 +1733,8 @@ function updateHabitSetVariant(habitId, setIndex, variant) {
   renderAbitudini();
 }
 
-function removeHabitSet(habitId, setIndex) {
-  const date = todayStr();
+function removeHabitSet(habitId, setIndex, dateOverride) {
+  const date = dateOverride || currentAbitudineDate || todayStr();
   const existing = getHabitDayLog(date, habitId);
   if (!existing || !existing.sets) return;
   existing.sets.splice(setIndex, 1);
@@ -1633,8 +1750,8 @@ function updateHabitTotalDisplay(habitId) {
   const habits = loadHabits();
   const habit = habits.find(h => h.id === habitId);
   if (!habit) return;
-  const today = todayStr();
-  const total = getHabitTotalToday(habit, today);
+  const date = currentAbitudineDate || todayStr();
+  const total = getHabitTotalToday(habit, date);
   const target = habit.targetTotal;
   const totalEl = document.getElementById("habit-total-" + habitId);
   if (totalEl) {
@@ -1644,7 +1761,7 @@ function updateHabitTotalDisplay(habitId) {
   // Also update breakdown if exists
   const breakEl = document.getElementById("habit-break-" + habitId);
   if (breakEl) {
-    const breakdown = getHabitVariantBreakdown(habit, today);
+    const breakdown = getHabitVariantBreakdown(habit, date);
     breakEl.innerHTML = (habit.variants || []).map(v => {
       const count = breakdown[v.key] || 0;
       return count > 0 ? `<span style="margin-right:10px;"><span style="opacity:.7;">${v.icon}</span> <strong style="color:${count>0?"var(--text)":"var(--muted)"};">${count}</strong></span>` : "";
@@ -1689,7 +1806,7 @@ function quickToggleHabit(habitId) {
   const habits = loadHabits();
   const habit = habits.find(h => h.id === habitId);
   if (!habit) return;
-  const date = todayStr();
+  const date = currentAbitudineDate || todayStr();
   const status = isHabitDoneToday(habit, date);
   if (status === "full") {
     setHabitDayLog(date, habitId, null);
@@ -1711,7 +1828,7 @@ function quickToggleHabit(habitId) {
 }
 
 function updateHabitDetail(habitId, field, val) {
-  const date = todayStr();
+  const date = currentAbitudineDate || todayStr();
   const existing = getHabitDayLog(date, habitId) || {};
   const num = parseFloat(val) || 0;
   existing[field] = num;
@@ -1761,19 +1878,49 @@ function addNewHabit() {
   renderAbitudini();
 }
 
+// State for viewing abitudini on a specific date
+let currentAbitudineDate = null; // null = today
+let currentAbitudineMonth = null; // {year, month} or null = current
+
+function selectAbitudineDate(dateStr) {
+  currentAbitudineDate = dateStr === todayStr() ? null : dateStr;
+  renderAbitudini();
+}
+
+function goAbitudiniToday() {
+  currentAbitudineDate = null;
+  currentAbitudineMonth = null;
+  renderAbitudini();
+}
+
+function changeAbitudineMonth(delta) {
+  const base = currentAbitudineMonth || (() => {
+    const d = new Date();
+    return { year: d.getFullYear(), month: d.getMonth() };
+  })();
+  let m = base.month + delta;
+  let y = base.year;
+  if (m < 0) { m = 11; y--; }
+  if (m > 11) { m = 0; y++; }
+  currentAbitudineMonth = { year: y, month: m };
+  renderAbitudini();
+}
+
 function renderAbitudini() {
   const c = document.getElementById("abitudiniDashboard");
   const habits = loadHabits();
   const today = todayStr();
-  const todayDate = new Date(today + "T12:00:00");
+  const viewingDate = currentAbitudineDate || today;
+  const viewingToday = viewingDate === today;
+  const viewDateObj = new Date(viewingDate + "T12:00:00");
 
-  // Compute today summary
+  // Compute summary for VIEWING date
   const totalToday = habits.length;
-  const doneToday = habits.filter(h => isHabitDoneToday(h, today) === "full").length;
-  const partialToday = habits.filter(h => isHabitDoneToday(h, today) === "partial").length;
+  const doneToday = habits.filter(h => isHabitDoneToday(h, viewingDate) === "full").length;
+  const partialToday = habits.filter(h => isHabitDoneToday(h, viewingDate) === "partial").length;
   const compliancePct = totalToday > 0 ? Math.round((doneToday / totalToday) * 100) : 0;
 
-  // Best streak across all habits
+  // Best streak across all habits (always based on today)
   let bestStreak = 0;
   habits.forEach(h => { const s = calcHabitStreak(h); if (s > bestStreak) bestStreak = s; });
 
@@ -1781,31 +1928,34 @@ function renderAbitudini() {
   const allLogs = loadHabitLogs();
   const trackedDays = Object.keys(allLogs).length;
 
-  // Monthly calendar — current month
-  const year = todayDate.getFullYear();
-  const month = todayDate.getMonth();
-  const monthName = todayDate.toLocaleDateString("it-IT", { month: "long", year: "numeric" });
+  // Monthly calendar — based on currentAbitudineMonth or viewing date
+  const calMonth = currentAbitudineMonth || { year: viewDateObj.getFullYear(), month: viewDateObj.getMonth() };
+  const year = calMonth.year;
+  const month = calMonth.month;
+  const monthDate = new Date(year, month, 1);
+  const monthName = monthDate.toLocaleDateString("it-IT", { month: "long", year: "numeric" });
   const calDays = getMonthCalendar(year, month);
-  const todayDay = todayDate.getDate();
 
   const calCellsHtml = calDays.map(d => {
     if (!d) return `<div class="cal-cell empty"></div>`;
     const ds = year + "-" + String(month+1).padStart(2,"0") + "-" + String(d).padStart(2,"0");
     const isFuture = ds > today;
     const isToday = ds === today;
-    if (isFuture) return `<div class="cal-cell future ${isToday?"today":""}">${d}</div>`;
+    const isViewing = ds === viewingDate;
     // count done habits this day
     const dayDone = habits.filter(h => isHabitDoneToday(h, ds) === "full").length;
     const ratio = totalToday > 0 ? dayDone / totalToday : 0;
     let cls = "empty";
     if (ratio >= 0.8) cls = "full";
     else if (ratio > 0) cls = "partial";
-    return `<div class="cal-cell ${cls} ${isToday?"today":""}" title="${ds}: ${dayDone}/${totalToday}">${d}</div>`;
+    if (isFuture) cls = "future";
+    const extraStyle = isViewing && !isToday ? "box-shadow:0 0 0 2px #fcd34d;" : "";
+    return `<div class="cal-cell ${cls} ${isToday?"today":""}" style="cursor:${isFuture?"default":"pointer"};${extraStyle}" ${isFuture?"":`onclick="selectAbitudineDate('${ds}')"`} title="${ds}: ${dayDone}/${totalToday}">${d}</div>`;
   }).join("");
 
   const habitsHtml = habits.map(h => {
-    const status = isHabitDoneToday(h, today);
-    const log = getHabitDayLog(today, h.id) || {};
+    const status = isHabitDoneToday(h, viewingDate);
+    const log = getHabitDayLog(viewingDate, h.id) || {};
     const streak = calcHabitStreak(h);
 
     let btnClass = "habit-checkbtn";
@@ -1815,10 +1965,10 @@ function renderAbitudini() {
 
     let detailHtml = "";
     if (h.type === "sets") {
-      const log = getHabitDayLog(today, h.id) || {};
+      const log = getHabitDayLog(viewingDate, h.id) || {};
       const sets = log.sets || [];
-      const total = getHabitTotalToday(h, today);
-      const breakdown = getHabitVariantBreakdown(h, today);
+      const total = getHabitTotalToday(h, viewingDate);
+      const breakdown = getHabitVariantBreakdown(h, viewingDate);
       const variants = h.variants || [{key:"full",label:"Completi",icon:"💯"}];
 
       const setsHtml = sets.length === 0
@@ -1914,7 +2064,10 @@ function renderAbitudini() {
   c.innerHTML = `
     <!-- HERO -->
     <div style="background:linear-gradient(135deg,#0a1628,#0f2a4a);border:1px solid rgba(59,130,246,.2);border-radius:18px;padding:22px;margin-bottom:16px;">
-      <div style="font-size:11px;color:var(--muted);letter-spacing:2px;margin-bottom:6px;">OGGI · ${todayDate.toLocaleDateString("it-IT",{weekday:"long",day:"numeric",month:"long"})}</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+        <div style="font-size:11px;color:${viewingToday?"var(--muted)":"#fcd34d"};letter-spacing:2px;">${viewingToday?"OGGI":"📅 STAI VEDENDO"} · ${viewDateObj.toLocaleDateString("it-IT",{weekday:"long",day:"numeric",month:"long"})}</div>
+        ${!viewingToday ? `<button onclick="goAbitudiniToday()" style="background:rgba(252,211,77,.15);border:1px solid rgba(252,211,77,.4);color:#fcd34d;padding:5px 12px;border-radius:14px;cursor:pointer;font-size:11px;font-weight:700;">← Torna a oggi</button>` : ""}
+      </div>
       <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:14px;">
         <div style="font-family:'Barlow Condensed',sans-serif;font-size:54px;font-weight:900;color:${compliancePct>=80?"var(--green)":compliancePct>=50?"var(--accent)":"var(--red)"};line-height:1;">${doneToday}/${totalToday}</div>
         <div style="font-size:16px;color:var(--muted);">abitudini completate</div>
@@ -1926,7 +2079,7 @@ function renderAbitudini() {
       <div class="totals-grid">
         <div class="total-card">
           <div class="total-val">${compliancePct}%</div>
-          <div class="total-lbl">Compliance oggi</div>
+          <div class="total-lbl">Compliance ${viewingToday?"oggi":"giorno"}</div>
         </div>
         <div class="total-card">
           <div class="total-val">🔥 ${bestStreak}</div>
@@ -1941,7 +2094,11 @@ function renderAbitudini() {
 
     <!-- CALENDARIO MENSILE -->
     <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:18px;">
-      <div style="font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:800;margin-bottom:8px;text-transform:capitalize;">📅 ${monthName}</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <button onclick="changeAbitudineMonth(-1)" style="background:rgba(255,255,255,.06);border:none;color:var(--text);width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:15px;">‹</button>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:800;text-transform:capitalize;">📅 ${monthName}</div>
+        <button onclick="changeAbitudineMonth(1)" style="background:rgba(255,255,255,.06);border:none;color:var(--text);width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:15px;">›</button>
+      </div>
       <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;font-size:10px;color:var(--muted);text-align:center;font-weight:700;">
         <div>L</div><div>M</div><div>M</div><div>G</div><div>V</div><div>S</div><div>D</div>
       </div>
@@ -1950,11 +2107,12 @@ function renderAbitudini() {
         <span><span style="display:inline-block;width:10px;height:10px;background:var(--green);border-radius:2px;vertical-align:middle;"></span> ≥80% completate</span>
         <span><span style="display:inline-block;width:10px;height:10px;background:rgba(245,158,11,.4);border-radius:2px;vertical-align:middle;"></span> Parziale</span>
         <span><span style="display:inline-block;width:10px;height:10px;background:rgba(255,255,255,.04);border-radius:2px;vertical-align:middle;"></span> Niente</span>
+        <span style="color:#fcd34d;">💡 Tap su un giorno per modificarne le abitudini</span>
       </div>
     </div>
 
     <!-- LISTA ABITUDINI -->
-    <div style="font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:800;margin-bottom:10px;">💪 Le tue abitudini</div>
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:800;margin-bottom:10px;">💪 ${viewingToday?"Le tue abitudini di oggi":"Abitudini del "+viewDateObj.toLocaleDateString("it-IT",{day:"numeric",month:"long"})}</div>
     ${habitsHtml || `<div style="text-align:center;color:var(--muted);padding:30px;">Nessuna abitudine. Aggiungine una qui sotto.</div>`}
 
     <!-- ADD NEW HABIT -->
@@ -2625,7 +2783,7 @@ window.onload = function() {
   currentDate = todayStr();
 
   // Log startup info
-  logInfo("Marathon Tracker v12 avviato");
+  logInfo("Marathon Tracker v13 avviato");
 
   // Auto-seed baseline VO2max test if empty
   const vo2Tests = loadVO2Tests();
