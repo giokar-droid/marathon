@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>🏅 Marathon Tracker v11</title>
+<title>🏅 Marathon Tracker v12</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -279,7 +279,7 @@ code{background:rgba(255,255,255,.1);padding:2px 7px;border-radius:5px;font-size
   <div class="topbar-inner">
     <div class="topbar-row1">
       <div>
-        <div class="topbar-sub">Marathon Tracker <span class="v-badge">v11</span></div>
+        <div class="topbar-sub">Marathon Tracker <span class="v-badge">v12</span></div>
         <div class="topbar-title">🏅 25.10.2026 — 5h00'</div>
       </div>
       <!-- SYNC STATUS STRIP -->
@@ -350,6 +350,19 @@ code{background:rgba(255,255,255,.1);padding:2px 7px;border-radius:5px;font-size
     <div id="splitsInputContainer"></div>
     <div id="splitsPreview" style="margin-top:10px;"></div>
     <div id="splitsNote" style="font-size:11px;color:var(--muted);margin-top:6px;"></div>
+  </div>
+
+  <!-- ── SEZIONE PASTI (v12) ── -->
+  <div class="section-banner" style="background:linear-gradient(135deg,rgba(245,158,11,.1),rgba(245,158,11,.04));border:1px solid rgba(245,158,11,.2);">
+    <div class="section-banner-icon">🍽️</div>
+    <div>
+      <div class="section-banner-title" style="color:#fcd34d;">Pasti del giorno</div>
+      <div class="section-banner-sub">Calorie e macronutrienti · push automatico su Sheets se configurato</div>
+    </div>
+  </div>
+  <div class="card" id="pastiContainer" style="padding:14px;">
+    <div id="pastiList"></div>
+    <div id="pastiTotals" style="display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--border);"></div>
   </div>
 
   <!-- ── SEZIONE GIORNATA ── -->
@@ -429,10 +442,17 @@ code{background:rgba(255,255,255,.1);padding:2px 7px;border-radius:5px;font-size
     <input type="text" id="sheetUrl" class="settings-input" placeholder="https://script.google.com/macros/s/..." oninput="saveSettings()">
     <div id="urlStatus" style="font-size:12px;margin-top:8px;color:var(--muted);">Nessun URL</div>
   </div>
+  <div class="card">
+    <div class="card-label">🔑 Chiave segreta script (per scritture estese)</div>
+    <input type="text" id="secretKey" class="settings-input" placeholder="es. marathon_giorgio_2026" oninput="saveSettings()">
+    <div style="font-size:11px;color:var(--muted);margin-top:6px;">Deve corrispondere alla SECRET_KEY nel tuo script Apps Script v7. Serve per push di pasti e abitudini su Sheets.</div>
+  </div>
   <div style="margin-bottom:12px;display:grid;gap:8px;">
     <button class="btn" style="background:var(--blue);color:white;" onclick="testConnection()">🔗 Testa connessione</button>
     <button class="btn" style="background:var(--green);color:white;" onclick="manualSync()">↻ Sync completo ora</button>
     <button class="btn" style="background:var(--purple);color:white;" onclick="forcePushAll()">⬆️ Push tutto a Sheets</button>
+    <button class="btn" style="background:#ec4899;color:white;" onclick="testWriteAPI()">🧪 Test Write API (pasti/abitudini)</button>
+    <button class="btn" style="background:rgba(255,255,255,.1);color:white;border:1px solid rgba(255,255,255,.2);" onclick="pushAllNutritionAndHabits()">📤 Push tutti pasti & abitudini</button>
   </div>
   <div class="card">
     <div class="card-label">Script Apps Script v4</div>
@@ -762,6 +782,7 @@ const WEEK_STRUCTURE=[
 let logs = {};           // { date: logObject }
 let pendingQueue = [];   // [date, date, ...] — dates not yet pushed to Sheets
 let sheetUrl = "";
+let secretKey = "";
 let isOnline = navigator.onLine;
 let syncInProgress = false;
 let currentDate = todayStr();
@@ -776,11 +797,13 @@ let activeWorkout = "A";
 const KEY_LOGS    = "mt_logs_v4";
 const KEY_PENDING = "mt_pending_v4";
 const KEY_URL     = "mt_url_v4";
+const KEY_SECRET  = "mt_secret_v12";
 
 function loadLocal() {
   try { logs = JSON.parse(localStorage.getItem(KEY_LOGS)||"{}"); } catch { logs={}; }
   try { pendingQueue = JSON.parse(localStorage.getItem(KEY_PENDING)||"[]"); } catch { pendingQueue=[]; }
   sheetUrl = localStorage.getItem(KEY_URL) || localStorage.getItem("marathon_sheet_url_v3") || localStorage.getItem("marathon_sheet_url_v2") || localStorage.getItem("marathon_sheet_url") || "";
+  secretKey = localStorage.getItem(KEY_SECRET) || "";
 }
 function saveLocal() {
   localStorage.setItem(KEY_LOGS, JSON.stringify(logs));
@@ -1066,6 +1089,138 @@ async function pullFromSheets() {
   saveLocal();
   logOk(`Pull completato`, `${data.length} righe totali, ${updated} aggiornate localmente`);
   return updated;
+}
+
+// ═══════════════════════════════════════════════════════════
+// WRITE API (v12) — chiama script v7 per scrivere pasti/abitudini su Sheets
+// ═══════════════════════════════════════════════════════════
+
+async function writeToSheets(type, data) {
+  if (!sheetUrl) throw new Error("URL Apps Script non configurato");
+  if (!secretKey) throw new Error("Chiave segreta non configurata (Settings)");
+
+  const dataStr = encodeURIComponent(JSON.stringify(data));
+  const url = `${sheetUrl}?action=write&key=${encodeURIComponent(secretKey)}&type=${type}&data=${dataStr}&t=${Date.now()}`;
+
+  logDebug(`Write API → ${type}`, JSON.stringify(data).slice(0,100));
+
+  try {
+    const r = await Promise.race([
+      fetch(url),
+      new Promise((_,rej) => setTimeout(()=>rej(new Error("Timeout write")), 15000))
+    ]);
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    const result = await r.json();
+    if (result.error) throw new Error(result.error);
+    logOk(`Write OK → ${type}`, JSON.stringify(result).slice(0,80));
+    return result;
+  } catch(fetchErr) {
+    // Fallback to JSONP (URL may be too long for GET if many meals)
+    logWarn("Fetch write fallito, retry JSONP", fetchErr.message);
+    try {
+      const result = await jsonpFetch(url, 15000);
+      if (result.error) throw new Error(result.error);
+      logOk(`Write OK (JSONP) → ${type}`, JSON.stringify(result).slice(0,80));
+      return result;
+    } catch(jsonpErr) {
+      logError(`Write API fallita → ${type}`, jsonpErr.message);
+      throw jsonpErr;
+    }
+  }
+}
+
+async function pushNutritionForDate(date, pasti) {
+  if (!Array.isArray(pasti) || pasti.length === 0) return;
+  const meals = pasti.map(p => ({
+    date,
+    meal: p.meal || "",
+    time: p.time || "",
+    food: p.food || "",
+    kcal: p.kcal || "",
+    protein_g: p.protein_g || "",
+    carbs_g: p.carbs_g || "",
+    fat_g: p.fat_g || "",
+    notes: p.notes || ""
+  }));
+  return await writeToSheets("nutrition", { meals });
+}
+
+async function pushHabitsForDate(date, habitsData) {
+  if (!habitsData || typeof habitsData !== "object") return;
+  const habits = loadHabits();
+  for (const habitId in habitsData) {
+    const data = habitsData[habitId];
+    const habit = habits.find(h => h.id === habitId);
+    if (!habit) continue;
+    let status = "logged";
+    if (habit.type === "sets") {
+      const total = (data.sets || []).reduce((s,x) => s + (parseInt(x.reps)||0), 0);
+      status = total >= habit.targetTotal ? "full" : (total > 0 ? "partial" : "none");
+    } else if (habit.type === "value") {
+      const v = parseFloat(data.value) || 0;
+      status = v >= habit.targetValue ? "full" : (v > 0 ? "partial" : "none");
+    } else {
+      status = data.done ? "full" : "none";
+    }
+    try {
+      await writeToSheets("habit", {
+        date, habit_id: habitId, habit_name: habit.name,
+        status, details: data
+      });
+    } catch(e) { logError(`Push abitudine ${habitId} fallita`, e.message); }
+  }
+}
+
+async function testWriteAPI() {
+  if (!sheetUrl) { showToast("⚠️ Configura URL Sheets prima", "warn"); return; }
+  if (!secretKey) { showToast("⚠️ Configura chiave segreta prima", "warn"); return; }
+  logInfo("Test Write API avviato");
+  try {
+    const result = await writeToSheets("weight", {
+      date: todayStr(),
+      peso_kg: "test",
+      note: "Test write API v12 — riga test, poi cancellala"
+    });
+    showToast("✅ Write API OK! Verifica su Sheets", "ok");
+    logOk("Test Write API riuscito", JSON.stringify(result));
+  } catch(e) {
+    showToast("❌ Write API fallita: " + e.message, "err");
+    logError("Test Write API fallito", e.message);
+  }
+}
+
+async function pushAllNutritionAndHabits() {
+  if (!sheetUrl) { showToast("⚠️ Configura URL", "warn"); return; }
+  if (!secretKey) { showToast("⚠️ Configura chiave segreta", "warn"); return; }
+
+  showToast("⏳ Push pasti e abitudini in corso...", "info");
+  let mealsPushed = 0;
+  let habitsPushed = 0;
+  let errors = 0;
+
+  // Push all meals from logs
+  for (const date in logs) {
+    const log = logs[date];
+    if (Array.isArray(log.pasti) && log.pasti.length > 0) {
+      try {
+        await pushNutritionForDate(date, log.pasti);
+        mealsPushed += log.pasti.length;
+      } catch(e) { errors++; }
+    }
+  }
+
+  // Push all habit logs
+  const habitLogs = loadHabitLogs();
+  for (const date in habitLogs) {
+    try {
+      await pushHabitsForDate(date, habitLogs[date]);
+      habitsPushed += Object.keys(habitLogs[date]).length;
+    } catch(e) { errors++; }
+  }
+
+  const msg = `✅ Push completato: ${mealsPushed} pasti, ${habitsPushed} abitudini${errors>0?` (${errors} errori)`:""}`;
+  showToast(msg, errors > 0 ? "warn" : "ok");
+  logOk("Push completo pasti e abitudini", msg);
 }
 
 async function pushLog(log) {
@@ -2470,7 +2625,7 @@ window.onload = function() {
   currentDate = todayStr();
 
   // Log startup info
-  logInfo("Marathon Tracker v11 avviato");
+  logInfo("Marathon Tracker v12 avviato");
 
   // Auto-seed baseline VO2max test if empty
   const vo2Tests = loadVO2Tests();
@@ -2499,8 +2654,12 @@ window.onload = function() {
   document.getElementById("logDate").value = currentDate;
   if (sheetUrl) {
     document.getElementById("sheetUrl").value = sheetUrl;
-    document.getElementById("urlStatus").textContent = "✅ URL configurato";
+    document.getElementById("urlStatus").textContent = "✅ URL configurato" + (secretKey ? " · 🔑 Chiave OK" : " · ⚠️ manca chiave");
     document.getElementById("urlStatus").style.color = "#6ee7b7";
+  }
+  if (secretKey) {
+    const sec = document.getElementById("secretKey");
+    if (sec) sec.value = secretKey;
   }
   onDateChange();
   // Initial sync state
@@ -2553,8 +2712,95 @@ function onDateChange(){
   document.getElementById("logNote").value=saved.note||"";
   document.getElementById("logScarpe").value=currentMetrics.scarpe;
   document.getElementById("logMeteo").value=currentMetrics.meteo;
-  refreshPills();refreshAllMetricValues();renderWeekStrip();updateWeekStats();renderSplitsInput();
+  refreshPills();refreshAllMetricValues();renderWeekStrip();updateWeekStats();renderSplitsInput();renderPasti();
 }
+function renderPasti(){
+  const log = logs[currentDate] || {};
+  const pasti = Array.isArray(log.pasti) ? log.pasti : [];
+  const list = document.getElementById("pastiList");
+  const totalsEl = document.getElementById("pastiTotals");
+  if (!list) return;
+
+  if (pasti.length === 0) {
+    list.innerHTML = `<div style="color:var(--muted);font-size:13px;padding:14px;text-align:center;font-style:italic;">
+      Nessun pasto registrato per oggi.<br><br>
+      <span style="font-size:12px;">Usa <strong style="color:#fcd34d;">📋 Incolla giornata</strong> per importare i pasti che dici a Claude.</span>
+    </div>`;
+    totalsEl.style.display = "none";
+    return;
+  }
+
+  // Group meals by type
+  const mealOrder = { "colazione": 1, "spuntino_am": 2, "pranzo": 3, "spuntino_pm": 4, "cena": 5, "spuntino": 6 };
+  const mealIcons = { "colazione": "☕", "pranzo": "🍝", "cena": "🍽️", "spuntino": "🍎", "spuntino_am": "🍎", "spuntino_pm": "🍎" };
+  const sorted = [...pasti].sort((a,b) => (mealOrder[a.meal]||99) - (mealOrder[b.meal]||99));
+
+  let totalKcal = 0, totalProt = 0, totalCarb = 0, totalFat = 0;
+  list.innerHTML = sorted.map((p, i) => {
+    const icon = mealIcons[p.meal] || "🍴";
+    const kcal = parseFloat(p.kcal) || 0;
+    const prot = parseFloat(p.protein_g) || 0;
+    const carb = parseFloat(p.carbs_g) || 0;
+    const fat = parseFloat(p.fat_g) || 0;
+    totalKcal += kcal; totalProt += prot; totalCarb += carb; totalFat += fat;
+
+    return `<div style="background:var(--surface2);border-radius:10px;padding:12px 14px;margin-bottom:8px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+        <div style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:14px;text-transform:capitalize;">${icon} ${(p.meal || "pasto").replace(/_/g," ")} ${p.time ? `<span style="font-size:11px;color:var(--muted);font-weight:600;">· ${p.time}</span>` : ""}</div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:18px;color:#fcd34d;">${kcal} <span style="font-size:11px;color:var(--muted);font-weight:600;">kcal</span></div>
+      </div>
+      <div style="font-size:13px;color:var(--text);margin-bottom:6px;line-height:1.4;">${p.food || "—"}</div>
+      <div style="display:flex;gap:14px;font-size:11px;color:var(--muted);">
+        ${prot ? `<span>P: <strong style="color:#93c5fd;">${prot}g</strong></span>` : ""}
+        ${carb ? `<span>C: <strong style="color:#fcd34d;">${carb}g</strong></span>` : ""}
+        ${fat ? `<span>G: <strong style="color:#fca5a5;">${fat}g</strong></span>` : ""}
+        ${p.notes ? `<span style="font-style:italic;">${p.notes}</span>` : ""}
+      </div>
+    </div>`;
+  }).join("");
+
+  // Targets
+  const tgtKcal = 1700, tgtProt = 140, tgtCarb = 180, tgtFat = 65;
+  const pct = (v, t) => Math.min(100, Math.round((v / t) * 100));
+  const color = (v, t, reverse) => {
+    const r = v / t;
+    if (reverse) {
+      // for kcal/fat: green if under, red if over
+      if (r > 1.1) return "#ef4444";
+      if (r > 1) return "#f59e0b";
+      return "#10b981";
+    }
+    // for protein: green if at/over target
+    if (r >= 0.9) return "#10b981";
+    if (r >= 0.5) return "#f59e0b";
+    return "#ef4444";
+  };
+
+  totalsEl.innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;">
+      <div style="background:rgba(252,211,77,.08);border-radius:8px;padding:10px;">
+        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;">Calorie</div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;color:${color(totalKcal,tgtKcal,true)};">${totalKcal} <span style="font-size:11px;color:var(--muted);font-weight:600;">/ ${tgtKcal}</span></div>
+        <div style="height:4px;background:rgba(255,255,255,.06);border-radius:4px;margin-top:4px;"><div style="height:100%;background:${color(totalKcal,tgtKcal,true)};border-radius:4px;width:${pct(totalKcal,tgtKcal)}%;"></div></div>
+      </div>
+      <div style="background:rgba(147,197,253,.08);border-radius:8px;padding:10px;">
+        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;">Proteine</div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;color:${color(totalProt,tgtProt,false)};">${totalProt} <span style="font-size:11px;color:var(--muted);font-weight:600;">/ ${tgtProt}g</span></div>
+        <div style="height:4px;background:rgba(255,255,255,.06);border-radius:4px;margin-top:4px;"><div style="height:100%;background:${color(totalProt,tgtProt,false)};border-radius:4px;width:${pct(totalProt,tgtProt)}%;"></div></div>
+      </div>
+      <div style="background:rgba(252,211,77,.05);border-radius:8px;padding:10px;">
+        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;">Carbo</div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:900;color:#fcd34d;">${totalCarb} <span style="font-size:11px;color:var(--muted);font-weight:600;">/ ${tgtCarb}g</span></div>
+      </div>
+      <div style="background:rgba(252,165,165,.05);border-radius:8px;padding:10px;">
+        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;">Grassi</div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:900;color:${color(totalFat,tgtFat,true)};">${totalFat} <span style="font-size:11px;color:var(--muted);font-weight:600;">/ ${tgtFat}g</span></div>
+      </div>
+    </div>
+  `;
+  totalsEl.style.display = "block";
+}
+
 function renderPills(){document.getElementById("pillsContainer").innerHTML=ACTIVITY_TYPES.map(a=>`<button class="pill" id="pill-${a.key}" onclick="toggleActivity('${a.key}')">${a.label}</button>`).join("");}
 function refreshPills(){ACTIVITY_TYPES.forEach(a=>{const el=document.getElementById("pill-"+a.key);if(!el)return;const sel=currentActivity.includes(a.key);el.className="pill"+(sel?" active":"");el.style.borderColor=sel?a.color:"rgba(255,255,255,.1)";el.style.background=sel?a.color+"28":"transparent";el.style.color=sel?a.color:"var(--muted)";});}
 function toggleActivity(key){currentActivity=currentActivity.includes(key)?currentActivity.filter(k=>k!==key):[...currentActivity,key];refreshPills();}
@@ -2726,7 +2972,25 @@ function renderWeekStructure(){document.getElementById("weekStructure").innerHTM
 // ═══════════════════════════════════════════════════════════
 // SETTINGS
 // ═══════════════════════════════════════════════════════════
-function saveSettings(){sheetUrl=document.getElementById("sheetUrl").value.trim();localStorage.setItem(KEY_URL,sheetUrl);const st=document.getElementById("urlStatus");if(sheetUrl){st.textContent="✅ URL salvato";st.style.color="#6ee7b7";updateSyncUI(pendingQueue.length>0?"pending":"ok",pendingQueue.length>0?"Dati in attesa":"Pronto",pendingQueue.length);}else{st.textContent="Nessun URL";st.style.color="var(--muted)";updateSyncUI("offline","Configura Sheets (⚙️)",0);}}
+function saveSettings(){
+  sheetUrl=document.getElementById("sheetUrl").value.trim();
+  localStorage.setItem(KEY_URL,sheetUrl);
+  const secretEl = document.getElementById("secretKey");
+  if (secretEl) {
+    secretKey = secretEl.value.trim();
+    localStorage.setItem(KEY_SECRET, secretKey);
+  }
+  const st=document.getElementById("urlStatus");
+  if(sheetUrl){
+    st.textContent="✅ URL salvato" + (secretKey ? " · 🔑 Chiave OK" : " · ⚠️ manca chiave");
+    st.style.color="#6ee7b7";
+    updateSyncUI(pendingQueue.length>0?"pending":"ok",pendingQueue.length>0?"Dati in attesa":"Pronto",pendingQueue.length);
+  }else{
+    st.textContent="Nessun URL";
+    st.style.color="var(--muted)";
+    updateSyncUI("offline","Configura Sheets (⚙️)",0);
+  }
+}
 // testConnection defined above with JSONP
 function clearAllData(){if(!confirm("Cancellare tutti i dati locali?"))return;logs={};pendingQueue=[];localStorage.removeItem(KEY_LOGS);localStorage.removeItem(KEY_PENDING);onDateChange();renderHistory();showToast("🗑️ Cancellato","warn");logWarn("Dati locali cancellati dall'utente");}
 function renderScriptCode(){document.getElementById("scriptCode").textContent=APPS_SCRIPT_V6;}
@@ -2976,6 +3240,8 @@ function confirmPasteDay() {
 
   let totalChanges = 0;
   const updatedDates = [];
+  const nutritionByDate = {}; // date -> [pasti]
+  const habitsByDate = {};    // date -> {habitId: data}
 
   for (const p of parsedPasteDay) {
     if (p.changes.length === 0) continue;
@@ -2985,26 +3251,32 @@ function confirmPasteDay() {
     if (p.item.abitudini && typeof p.item.abitudini === "object") {
       const habitLogs = loadHabitLogs();
       if (!habitLogs[date]) habitLogs[date] = {};
+      if (!habitsByDate[date]) habitsByDate[date] = {};
       for (const habitId in p.item.abitudini) {
         if (p.item.abitudini[habitId] === null) {
           delete habitLogs[date][habitId];
         } else {
           habitLogs[date][habitId] = { ...p.item.abitudini[habitId], savedAt: new Date().toISOString() };
+          habitsByDate[date][habitId] = habitLogs[date][habitId];
         }
       }
       if (Object.keys(habitLogs[date]).length === 0) delete habitLogs[date];
       saveHabitLogs(habitLogs);
     }
 
+    // Capture pasti for separate push
+    if (Array.isArray(p.item.pasti) && p.item.pasti.length > 0) {
+      nutritionByDate[date] = p.item.pasti;
+    }
+
     // Apply main log merge (excluding the habits sub-object)
     const mergedLog = { ...p.merged };
-    delete mergedLog.abitudini; // habits live in their own storage
-    delete mergedLog.session; // session fields are flattened in mergePasteDayIntoLog
+    delete mergedLog.abitudini;
+    delete mergedLog.session;
     mergedLog.savedAt = new Date().toISOString();
     mergedLog.device = (typeof deviceId !== "undefined" ? deviceId : "claude_paste");
 
     logs[date] = mergedLog;
-    // Add to pending queue if it exists (don't fail if it doesn't)
     if (typeof pendingQueue !== "undefined" && Array.isArray(pendingQueue)) {
       if (!pendingQueue.includes(date)) pendingQueue.push(date);
     }
@@ -3016,25 +3288,50 @@ function confirmPasteDay() {
 
   closePasteDayModal();
 
-  // Reload current view
-  try {
-    if (typeof onDateChange === "function") {
-      onDateChange();
-    }
-  } catch(e) { logError("onDateChange failed", e.message); }
-
-  try {
-    if (typeof renderHistory === "function") renderHistory();
-  } catch(e) { /* ignore */ }
+  try { if (typeof onDateChange === "function") onDateChange(); } catch(e) { logError("onDateChange failed", e.message); }
+  try { if (typeof renderHistory === "function") renderHistory(); } catch(e) { /* ignore */ }
 
   showToast(`✅ Aggiornati ${updatedDates.length} ${updatedDates.length===1?"giorno":"giorni"} con ${totalChanges} modifiche`, "ok");
   logInfo(`Paste day completato`, `${updatedDates.length} giorni, ${totalChanges} modifiche`);
 
-  // Trigger sync if online (use existing manualSync if available)
+  // Trigger sync for main log
   if (typeof manualSync === "function" && typeof isOnline !== "undefined" && isOnline && typeof sheetUrl !== "undefined" && sheetUrl) {
     setTimeout(() => {
       try { manualSync(); } catch(e) { logError("autosync failed", e.message); }
     }, 800);
+  }
+
+  // Push nutrition and habits via write API (async, non-blocking)
+  if (sheetUrl && secretKey) {
+    setTimeout(async () => {
+      let nutritionOk = 0, nutritionErr = 0;
+      for (const date in nutritionByDate) {
+        try {
+          await pushNutritionForDate(date, nutritionByDate[date]);
+          nutritionOk += nutritionByDate[date].length;
+        } catch(e) {
+          nutritionErr++;
+          logError(`Push nutrition ${date} fallito`, e.message);
+        }
+      }
+      let habitsOk = 0, habitsErr = 0;
+      for (const date in habitsByDate) {
+        try {
+          await pushHabitsForDate(date, habitsByDate[date]);
+          habitsOk += Object.keys(habitsByDate[date]).length;
+        } catch(e) {
+          habitsErr++;
+          logError(`Push habits ${date} fallito`, e.message);
+        }
+      }
+      if (nutritionOk > 0 || habitsOk > 0) {
+        showToast(`📤 Sheets: ${nutritionOk} pasti, ${habitsOk} abitudini pushate${(nutritionErr+habitsErr)>0?` (${nutritionErr+habitsErr} err)`:""}`, (nutritionErr+habitsErr) > 0 ? "warn" : "ok");
+      }
+    }, 1500);
+  } else if (Object.keys(nutritionByDate).length > 0 || Object.keys(habitsByDate).length > 0) {
+    if (!secretKey) {
+      showToast("⚠️ Pasti/abitudini salvati localmente. Configura chiave in ⚙️ per pushare a Sheets", "warn");
+    }
   }
 }
 
