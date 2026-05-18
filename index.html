@@ -2980,6 +2980,7 @@ function confirmPasteDay() {
   for (const p of parsedPasteDay) {
     if (p.changes.length === 0) continue;
     const date = p.date;
+
     // Apply habit data to localStorage habit logs if present
     if (p.item.abitudini && typeof p.item.abitudini === "object") {
       const habitLogs = loadHabitLogs();
@@ -2998,31 +2999,42 @@ function confirmPasteDay() {
     // Apply main log merge (excluding the habits sub-object)
     const mergedLog = { ...p.merged };
     delete mergedLog.abitudini; // habits live in their own storage
+    delete mergedLog.session; // session fields are flattened in mergePasteDayIntoLog
     mergedLog.savedAt = new Date().toISOString();
-    mergedLog.device = deviceId || "claude_paste";
+    mergedLog.device = (typeof deviceId !== "undefined" ? deviceId : "claude_paste");
 
     logs[date] = mergedLog;
-    pendingDates.add(date);
+    // Add to pending queue if it exists (don't fail if it doesn't)
+    if (typeof pendingQueue !== "undefined" && Array.isArray(pendingQueue)) {
+      if (!pendingQueue.includes(date)) pendingQueue.push(date);
+    }
     totalChanges += p.changes.length;
     updatedDates.push(date);
   }
 
-  saveLocal();
-  updatePendingBadge();
+  try { saveLocal(); } catch(e) { logError("saveLocal failed", e.message); }
+
   closePasteDayModal();
 
   // Reload current view
-  if (currentDate && logs[currentDate]) {
-    loadDay(currentDate);
-  }
-  renderHistory();
+  try {
+    if (typeof onDateChange === "function") {
+      onDateChange();
+    }
+  } catch(e) { logError("onDateChange failed", e.message); }
+
+  try {
+    if (typeof renderHistory === "function") renderHistory();
+  } catch(e) { /* ignore */ }
 
   showToast(`✅ Aggiornati ${updatedDates.length} ${updatedDates.length===1?"giorno":"giorni"} con ${totalChanges} modifiche`, "ok");
   logInfo(`Paste day completato`, `${updatedDates.length} giorni, ${totalChanges} modifiche`);
 
-  // Trigger sync if online
-  if (isOnline && sheetUrl) {
-    setTimeout(() => syncPending(), 500);
+  // Trigger sync if online (use existing manualSync if available)
+  if (typeof manualSync === "function" && typeof isOnline !== "undefined" && isOnline && typeof sheetUrl !== "undefined" && sheetUrl) {
+    setTimeout(() => {
+      try { manualSync(); } catch(e) { logError("autosync failed", e.message); }
+    }, 800);
   }
 }
 
