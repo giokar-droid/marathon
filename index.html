@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>🏅 Marathon Tracker v8</title>
+<title>🏅 Marathon Tracker v11</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -167,6 +167,37 @@ code{background:rgba(255,255,255,.1);padding:2px 7px;border-radius:5px;font-size
 ::-webkit-scrollbar{width:6px;}
 ::-webkit-scrollbar-track{background:var(--bg);}
 ::-webkit-scrollbar-thumb{background:#2a3a55;border-radius:3px;}
+/* ABITUDINI */
+.habit-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin-bottom:10px;border-left:4px solid;}
+.habit-row{display:grid;grid-template-columns:38px 1fr auto;gap:12px;align-items:center;}
+.habit-icon{font-size:24px;}
+.habit-name{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:800;}
+.habit-meta{font-size:11px;color:var(--muted);margin-top:2px;}
+.habit-status{display:flex;align-items:center;gap:8px;}
+.habit-checkbtn{width:36px;height:36px;border-radius:50%;border:2px solid rgba(255,255,255,.15);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:20px;color:transparent;transition:all .2s;flex-shrink:0;}
+.habit-checkbtn.done{background:var(--green);border-color:var(--green);color:white;}
+.habit-checkbtn.partial{background:rgba(245,158,11,.4);border-color:var(--accent);color:white;}
+.habit-detail-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,.05);}
+.habit-detail-input{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:8px 10px;color:white;font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;outline:none;text-align:center;width:100%;box-sizing:border-box;}
+.habit-detail-input:focus{border-color:var(--blue);}
+.habit-detail-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;text-align:center;margin-bottom:3px;}
+.habit-streak{display:flex;align-items:center;gap:4px;font-size:12px;color:var(--accent);justify-content:flex-end;margin-top:4px;}
+.habit-streak-num{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:900;}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-top:8px;}
+.cal-cell{aspect-ratio:1;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--muted);position:relative;}
+.cal-cell.empty{background:rgba(255,255,255,.04);}
+.cal-cell.partial{background:rgba(245,158,11,.4);color:white;}
+.cal-cell.full{background:var(--green);color:white;font-weight:700;}
+.cal-cell.future{background:rgba(255,255,255,.02);color:#374151;}
+.cal-cell.today{box-shadow:0 0 0 2px var(--accent);}
+.habit-add-form{background:rgba(255,255,255,.03);border:1px dashed rgba(255,255,255,.15);border-radius:12px;padding:14px;margin-top:14px;}
+.habit-add-form input,.habit-add-form select{width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:9px 10px;color:white;font-size:14px;outline:none;margin-bottom:8px;box-sizing:border-box;}
+.totals-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:16px;}
+.total-card{background:linear-gradient(135deg,rgba(59,130,246,.1),rgba(16,185,129,.05));border:1px solid rgba(59,130,246,.2);border-radius:12px;padding:14px;text-align:center;}
+.total-val{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:900;color:var(--accent);}
+.total-lbl{font-size:11px;color:var(--muted);margin-top:2px;}
+.habit-edit-btn{background:rgba(255,255,255,.05);border:none;color:var(--muted);width:28px;height:28px;border-radius:6px;cursor:pointer;font-size:13px;}
+.habit-edit-btn:hover{color:var(--text);background:rgba(255,255,255,.1);}
 /* PIANO TAB */
 .piano-week{background:var(--surface);border:1px solid var(--border);border-radius:14px;margin-bottom:14px;overflow:hidden;}
 .piano-week-header{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;background:rgba(255,255,255,.03);border-bottom:1px solid var(--border);}
@@ -248,11 +279,12 @@ code{background:rgba(255,255,255,.1);padding:2px 7px;border-radius:5px;font-size
   <div class="topbar-inner">
     <div class="topbar-row1">
       <div>
-        <div class="topbar-sub">Marathon Tracker <span class="v-badge">v8</span></div>
-        <div class="topbar-title">🏅 25.10.2026 — 4h30'</div>
+        <div class="topbar-sub">Marathon Tracker <span class="v-badge">v11</span></div>
+        <div class="topbar-title">🏅 25.10.2026 — 5h00'</div>
       </div>
       <!-- SYNC STATUS STRIP -->
       <div class="sync-strip">
+        <button onclick="openPasteDayModal()" style="background:linear-gradient(90deg,var(--purple),#7c3aed);border:none;color:white;padding:6px 14px;border-radius:20px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:13px;box-shadow:0 4px 12px rgba(139,92,246,.3);">📋 Incolla giornata</button>
         <div class="sync-dot offline" id="syncDot"></div>
         <span class="sync-label offline" id="syncLabel">Caricamento...</span>
         <span class="pending-badge" id="pendingBadge" style="display:none;"></span>
@@ -261,8 +293,10 @@ code{background:rgba(255,255,255,.1);padding:2px 7px;border-radius:5px;font-size
     </div>
     <div class="tabs">
       <button class="tab active" onclick="showTab('diario')">📊 Diario</button>
+      <button class="tab" onclick="showTab('abitudini')">🔥 Abitudini</button>
       <button class="tab" onclick="showTab('piano')">📋 Piano</button>
       <button class="tab" onclick="showTab('readiness')">🎯 Readiness</button>
+      <button class="tab" onclick="showTab('vo2')">🫁 VO₂</button>
       <button class="tab" onclick="showTab('storico')">📅 Storico</button>
       <button class="tab" onclick="showTab('forza')">🏋️ Forza</button>
       <button class="tab" onclick="showTab('settings')">⚙️</button>
@@ -342,6 +376,12 @@ code{background:rgba(255,255,255,.1);padding:2px 7px;border-radius:5px;font-size
 
 <!-- ═══ PIANO ═══ -->
 <div id="tab-piano" style="display:none;"><div id="pianoDashboard"></div></div>
+
+<!-- ═══ ABITUDINI ═══ -->
+<div id="tab-abitudini" style="display:none;"><div id="abitudiniDashboard"></div></div>
+
+<!-- ═══ VO2MAX ═══ -->
+<div id="tab-vo2" style="display:none;"><div id="vo2Dashboard"></div></div>
 
 <!-- ═══ READINESS ═══ -->
 <div id="tab-readiness" style="display:none;"><div id="readinessDashboard"></div></div>
@@ -426,6 +466,52 @@ code{background:rgba(255,255,255,.1);padding:2px 7px;border-radius:5px;font-size
 </div>
 
 </div><!-- /main -->
+<!-- ═══ PASTE DAY MODAL (v11) ═══ -->
+<div class="modal-overlay hidden" id="pasteDayModal" onclick="closePasteDayModal(event)">
+  <div class="modal-sheet" onclick="event.stopPropagation()">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">
+      <div>
+        <div class="modal-title">📋 Incolla giornata</div>
+        <div class="modal-sub">Incolla il JSON unificato di Claude — allenamento, pasti, peso, abitudini, note tutto in un solo paste. Merge intelligente: campi assenti non vengono toccati.</div>
+      </div>
+      <button onclick="closePasteDayModal()" style="background:rgba(255,255,255,.08);border:none;color:var(--muted);width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;">×</button>
+    </div>
+
+    <textarea class="import-textarea" id="pasteDayJson" placeholder='Incolla qui il JSON di Claude. Esempio:
+{
+  "date": "2026-05-17",
+  "peso": 96.5,
+  "pasti": [
+    {"meal": "cena", "food": "frittata 2 uova", "kcal": 280, "protein_g": 22}
+  ],
+  "session": {
+    "activities": ["walk", "run_easy"],
+    "km": 9.28
+  },
+  "abitudini": {
+    "pushup_am": {"sets": [{"variant": "full", "reps": 25}]}
+  }
+}' oninput="previewPasteDay()"></textarea>
+
+    <div id="pasteDayError" style="color:var(--red);font-size:13px;margin-top:6px;display:none;"></div>
+
+    <!-- PREVIEW -->
+    <div id="pasteDayPreview" style="display:none;">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:800;margin:14px 0 8px;color:var(--accent);">📋 Anteprima merge — solo le modifiche</div>
+      <div id="pasteDayPreviewContent"></div>
+
+      <div style="background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);border-radius:10px;padding:12px 14px;font-size:13px;color:#6ee7b7;margin:14px 0;">
+        ℹ️ <strong>Merge intelligente:</strong> Solo i campi qui sopra verranno aggiornati. Tutto il resto del/i giorno/i resta intatto. Array vuoti (<code>[]</code>) cancellano esplicitamente.
+      </div>
+
+      <div style="display:flex;gap:10px;">
+        <button onclick="confirmPasteDay()" style="flex:1;background:linear-gradient(90deg,var(--green),#059669);color:white;padding:14px;border-radius:10px;border:none;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:17px;">✅ Conferma merge</button>
+        <button onclick="closePasteDayModal()" style="background:rgba(255,255,255,.08);color:var(--muted);padding:14px 20px;border-radius:10px;border:none;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:16px;">Annulla</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ═══ IMPORT MODAL ═══ -->
 <div class="modal-overlay hidden" id="importModal" onclick="closeImportModal(event)">
   <div class="modal-sheet" onclick="event.stopPropagation()">
@@ -1220,6 +1306,799 @@ function computeWeekCompliance(weekNum) {
   return { done, total: required.length, pct: required.length > 0 ? Math.round((done/required.length)*100) : 0 };
 }
 
+// ═══════════════════════════════════════════════════════════
+// ABITUDINI ENGINE — tracking abitudini quotidiane
+// ═══════════════════════════════════════════════════════════
+
+const KEY_HABITS = "mt_habits_v10";       // configurazione abitudini
+const KEY_HABIT_LOGS = "mt_habit_logs_v10"; // log giornaliero { date: { habitId: {done, sets, reps, value} } }
+
+// Abitudini default — pre-configurate per Giorgio
+const DEFAULT_HABITS = [
+  { id: "pushup_am", icon: "💪", name: "Push-up mattina", color: "#f97316", type: "sets", targetTotal: 25, variants: [{key:"full",label:"Completi",icon:"💯"},{key:"knee",label:"Ginocchia",icon:"🦵"}], frequency: "daily" },
+  { id: "squat_am",  icon: "🦵", name: "Squat mattina",   color: "#10b981", type: "sets", targetTotal: 25, variants: [{key:"full",label:"Completi",icon:"💯"},{key:"assisted",label:"Assistiti",icon:"🤝"}], frequency: "daily" },
+  { id: "pushup_pm", icon: "💪", name: "Push-up sera",    color: "#f97316", type: "sets", targetTotal: 25, variants: [{key:"full",label:"Completi",icon:"💯"},{key:"knee",label:"Ginocchia",icon:"🦵"}], frequency: "daily" },
+  { id: "squat_pm",  icon: "🦵", name: "Squat sera",      color: "#10b981", type: "sets", targetTotal: 25, variants: [{key:"full",label:"Completi",icon:"💯"},{key:"assisted",label:"Assistiti",icon:"🤝"}], frequency: "daily" },
+  { id: "walk7k",    icon: "🚶", name: "7000+ passi",     color: "#3b82f6", type: "value", targetValue: 7000, unit: "passi", frequency: "daily" },
+  { id: "water2l",   icon: "💧", name: "Acqua 2L+",       color: "#06b6d4", type: "value", targetValue: 2, unit: "L", frequency: "daily" },
+  { id: "sleep7h",   icon: "😴", name: "Sonno 7h+",       color: "#8b5cf6", type: "value", targetValue: 7, unit: "h", frequency: "daily" }
+];
+
+function loadHabits() {
+  try {
+    const stored = JSON.parse(localStorage.getItem(KEY_HABITS) || "null");
+    if (!stored || !Array.isArray(stored) || stored.length === 0) {
+      localStorage.setItem(KEY_HABITS, JSON.stringify(DEFAULT_HABITS));
+      return [...DEFAULT_HABITS];
+    }
+    // Migration: convert old "reps" type to new "sets" type
+    let migrated = false;
+    const upgraded = stored.map(h => {
+      if (h.type === "reps") {
+        migrated = true;
+        const def = DEFAULT_HABITS.find(d => d.id === h.id);
+        return def || {
+          ...h, type: "sets",
+          targetTotal: (h.targetSets || 1) * (h.targetReps || 25),
+          variants: [{key:"full",label:"Completi",icon:"💯"}]
+        };
+      }
+      return h;
+    });
+    if (migrated) {
+      saveHabits(upgraded);
+      logInfo("Abitudini migrate al nuovo formato sets");
+    }
+    return upgraded;
+  } catch {
+    return [...DEFAULT_HABITS];
+  }
+}
+
+function saveHabits(habits) {
+  localStorage.setItem(KEY_HABITS, JSON.stringify(habits));
+}
+
+function loadHabitLogs() {
+  try { return JSON.parse(localStorage.getItem(KEY_HABIT_LOGS) || "{}"); }
+  catch { return {}; }
+}
+
+function saveHabitLogs(logsObj) {
+  localStorage.setItem(KEY_HABIT_LOGS, JSON.stringify(logsObj));
+}
+
+function getHabitDayLog(date, habitId) {
+  const all = loadHabitLogs();
+  return all[date]?.[habitId] || null;
+}
+
+function setHabitDayLog(date, habitId, data) {
+  const all = loadHabitLogs();
+  if (!all[date]) all[date] = {};
+  if (data === null) {
+    delete all[date][habitId];
+    if (Object.keys(all[date]).length === 0) delete all[date];
+  } else {
+    all[date][habitId] = { ...data, savedAt: new Date().toISOString() };
+  }
+  saveHabitLogs(all);
+}
+
+function isHabitDoneToday(habit, date) {
+  const log = getHabitDayLog(date, habit.id);
+  if (!log) return "none";
+  if (habit.type === "sets") {
+    // Sum all reps from all sets (any variant)
+    const totalReps = (log.sets || []).reduce((sum, s) => sum + (parseInt(s.reps)||0), 0);
+    if (totalReps >= habit.targetTotal) return "full";
+    if (totalReps > 0) return "partial";
+    return "none";
+  } else if (habit.type === "reps") {
+    // Legacy support
+    const totalReps = (log.sets || 0) * (log.reps || 0);
+    const targetReps = habit.targetSets * habit.targetReps;
+    if (totalReps >= targetReps) return "full";
+    if (totalReps > 0) return "partial";
+    return "none";
+  } else if (habit.type === "value") {
+    const v = parseFloat(log.value) || 0;
+    if (v >= habit.targetValue) return "full";
+    if (v > 0) return "partial";
+    return "none";
+  } else {
+    return log.done ? "full" : "none";
+  }
+}
+
+function getHabitTotalToday(habit, date) {
+  const log = getHabitDayLog(date, habit.id);
+  if (!log || habit.type !== "sets") return 0;
+  return (log.sets || []).reduce((sum, s) => sum + (parseInt(s.reps)||0), 0);
+}
+
+function getHabitVariantBreakdown(habit, date) {
+  const log = getHabitDayLog(date, habit.id);
+  if (!log || habit.type !== "sets" || !log.sets) return {};
+  const breakdown = {};
+  for (const s of log.sets) {
+    const k = s.variant || "full";
+    breakdown[k] = (breakdown[k] || 0) + (parseInt(s.reps)||0);
+  }
+  return breakdown;
+}
+
+function addHabitSet(habitId, variant) {
+  const date = todayStr();
+  const existing = getHabitDayLog(date, habitId) || { sets: [] };
+  if (!existing.sets) existing.sets = [];
+  existing.sets.push({ variant: variant || "full", reps: 0 });
+  setHabitDayLog(date, habitId, existing);
+  renderAbitudini();
+  // Focus on the newly added input
+  setTimeout(() => {
+    const inputs = document.querySelectorAll(`[data-habit="${habitId}"][data-set="${existing.sets.length-1}"]`);
+    if (inputs.length > 0) inputs[0].focus();
+  }, 50);
+}
+
+function updateHabitSetReps(habitId, setIndex, val) {
+  const date = todayStr();
+  const existing = getHabitDayLog(date, habitId) || { sets: [] };
+  if (!existing.sets || !existing.sets[setIndex]) return;
+  existing.sets[setIndex].reps = parseInt(val) || 0;
+  setHabitDayLog(date, habitId, existing);
+  // Update only the totals display, not full re-render (to keep focus)
+  updateHabitTotalDisplay(habitId);
+}
+
+function updateHabitSetVariant(habitId, setIndex, variant) {
+  const date = todayStr();
+  const existing = getHabitDayLog(date, habitId) || { sets: [] };
+  if (!existing.sets || !existing.sets[setIndex]) return;
+  existing.sets[setIndex].variant = variant;
+  setHabitDayLog(date, habitId, existing);
+  renderAbitudini();
+}
+
+function removeHabitSet(habitId, setIndex) {
+  const date = todayStr();
+  const existing = getHabitDayLog(date, habitId);
+  if (!existing || !existing.sets) return;
+  existing.sets.splice(setIndex, 1);
+  if (existing.sets.length === 0) {
+    setHabitDayLog(date, habitId, null);
+  } else {
+    setHabitDayLog(date, habitId, existing);
+  }
+  renderAbitudini();
+}
+
+function updateHabitTotalDisplay(habitId) {
+  const habits = loadHabits();
+  const habit = habits.find(h => h.id === habitId);
+  if (!habit) return;
+  const today = todayStr();
+  const total = getHabitTotalToday(habit, today);
+  const target = habit.targetTotal;
+  const totalEl = document.getElementById("habit-total-" + habitId);
+  if (totalEl) {
+    totalEl.innerHTML = `${total}<span style="font-size:13px;color:var(--muted);font-weight:600;"> / ${target}</span>`;
+    totalEl.style.color = total >= target ? "var(--green)" : total > 0 ? "var(--accent)" : "var(--muted)";
+  }
+  // Also update breakdown if exists
+  const breakEl = document.getElementById("habit-break-" + habitId);
+  if (breakEl) {
+    const breakdown = getHabitVariantBreakdown(habit, today);
+    breakEl.innerHTML = (habit.variants || []).map(v => {
+      const count = breakdown[v.key] || 0;
+      return count > 0 ? `<span style="margin-right:10px;"><span style="opacity:.7;">${v.icon}</span> <strong style="color:${count>0?"var(--text)":"var(--muted)"};">${count}</strong></span>` : "";
+    }).filter(Boolean).join("") || `<span style="color:var(--muted);font-size:11px;">Nessuna serie ancora</span>`;
+  }
+}
+
+function calcHabitStreak(habit) {
+  // Conta giorni consecutivi (inclusi oggi se completato) all'indietro con stato "full"
+  const today = todayStr();
+  let streak = 0;
+  let d = new Date(today + "T12:00:00");
+  // If today not done, start from yesterday
+  if (isHabitDoneToday(habit, today) !== "full") {
+    d.setDate(d.getDate() - 1);
+  }
+  for (let i = 0; i < 365; i++) {
+    const ds = d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+    if (isHabitDoneToday(habit, ds) === "full") {
+      streak++;
+      d.setDate(d.getDate() - 1);
+    } else {
+      break;
+    }
+  }
+  return streak;
+}
+
+function getMonthCalendar(year, month) {
+  // month 0-indexed
+  const first = new Date(year, month, 1);
+  const last = new Date(year, month + 1, 0);
+  const firstDay = (first.getDay() + 6) % 7; // Mon=0
+  const days = [];
+  // Padding before
+  for (let i = 0; i < firstDay; i++) days.push(null);
+  for (let d = 1; d <= last.getDate(); d++) days.push(d);
+  return days;
+}
+
+function quickToggleHabit(habitId) {
+  const habits = loadHabits();
+  const habit = habits.find(h => h.id === habitId);
+  if (!habit) return;
+  const date = todayStr();
+  const status = isHabitDoneToday(habit, date);
+  if (status === "full") {
+    setHabitDayLog(date, habitId, null);
+    showToast(`✕ ${habit.name} azzerato`, "warn");
+  } else {
+    if (habit.type === "sets") {
+      // Quick-fill: 1 set with target total reps as "full" variant
+      setHabitDayLog(date, habitId, { sets: [{ variant: "full", reps: habit.targetTotal }] });
+    } else if (habit.type === "reps") {
+      setHabitDayLog(date, habitId, { sets: habit.targetSets, reps: habit.targetReps });
+    } else if (habit.type === "value") {
+      setHabitDayLog(date, habitId, { value: habit.targetValue });
+    } else {
+      setHabitDayLog(date, habitId, { done: true });
+    }
+    showToast(`✅ ${habit.name} completato!`, "ok");
+  }
+  renderAbitudini();
+}
+
+function updateHabitDetail(habitId, field, val) {
+  const date = todayStr();
+  const existing = getHabitDayLog(date, habitId) || {};
+  const num = parseFloat(val) || 0;
+  existing[field] = num;
+  setHabitDayLog(date, habitId, existing);
+  renderAbitudini();
+}
+
+function deleteHabit(habitId) {
+  if (!confirm("Cancellare questa abitudine? I log passati restano salvati.")) return;
+  const habits = loadHabits().filter(h => h.id !== habitId);
+  saveHabits(habits);
+  showToast("Abitudine rimossa", "warn");
+  renderAbitudini();
+}
+
+function addNewHabit() {
+  const icon = document.getElementById("newHabitIcon").value.trim() || "✨";
+  const name = document.getElementById("newHabitName").value.trim();
+  const type = document.getElementById("newHabitType").value;
+  const target = parseFloat(document.getElementById("newHabitTarget").value) || 0;
+  const unit = document.getElementById("newHabitUnit").value.trim();
+  if (!name) { showToast("⚠️ Inserisci un nome", "warn"); return; }
+
+  const habits = loadHabits();
+  const id = "custom_" + Date.now();
+  const newHabit = { id, icon, name, color: "#3b82f6", frequency: "daily" };
+  if (type === "reps" || type === "sets") {
+    newHabit.type = "sets";
+    newHabit.targetTotal = target || 25;
+    newHabit.variants = [
+      {key:"full",label:"Completi",icon:"💯"},
+      {key:"easy",label:"Facili",icon:"🤝"}
+    ];
+  } else if (type === "value") {
+    newHabit.type = "value";
+    newHabit.targetValue = target || 1;
+    newHabit.unit = unit || "";
+  } else {
+    newHabit.type = "boolean";
+  }
+  habits.push(newHabit);
+  saveHabits(habits);
+  showToast("✅ Abitudine aggiunta", "ok");
+  document.getElementById("newHabitName").value = "";
+  document.getElementById("newHabitTarget").value = "";
+  document.getElementById("newHabitUnit").value = "";
+  renderAbitudini();
+}
+
+function renderAbitudini() {
+  const c = document.getElementById("abitudiniDashboard");
+  const habits = loadHabits();
+  const today = todayStr();
+  const todayDate = new Date(today + "T12:00:00");
+
+  // Compute today summary
+  const totalToday = habits.length;
+  const doneToday = habits.filter(h => isHabitDoneToday(h, today) === "full").length;
+  const partialToday = habits.filter(h => isHabitDoneToday(h, today) === "partial").length;
+  const compliancePct = totalToday > 0 ? Math.round((doneToday / totalToday) * 100) : 0;
+
+  // Best streak across all habits
+  let bestStreak = 0;
+  habits.forEach(h => { const s = calcHabitStreak(h); if (s > bestStreak) bestStreak = s; });
+
+  // Days tracked (any habit logged)
+  const allLogs = loadHabitLogs();
+  const trackedDays = Object.keys(allLogs).length;
+
+  // Monthly calendar — current month
+  const year = todayDate.getFullYear();
+  const month = todayDate.getMonth();
+  const monthName = todayDate.toLocaleDateString("it-IT", { month: "long", year: "numeric" });
+  const calDays = getMonthCalendar(year, month);
+  const todayDay = todayDate.getDate();
+
+  const calCellsHtml = calDays.map(d => {
+    if (!d) return `<div class="cal-cell empty"></div>`;
+    const ds = year + "-" + String(month+1).padStart(2,"0") + "-" + String(d).padStart(2,"0");
+    const isFuture = ds > today;
+    const isToday = ds === today;
+    if (isFuture) return `<div class="cal-cell future ${isToday?"today":""}">${d}</div>`;
+    // count done habits this day
+    const dayDone = habits.filter(h => isHabitDoneToday(h, ds) === "full").length;
+    const ratio = totalToday > 0 ? dayDone / totalToday : 0;
+    let cls = "empty";
+    if (ratio >= 0.8) cls = "full";
+    else if (ratio > 0) cls = "partial";
+    return `<div class="cal-cell ${cls} ${isToday?"today":""}" title="${ds}: ${dayDone}/${totalToday}">${d}</div>`;
+  }).join("");
+
+  const habitsHtml = habits.map(h => {
+    const status = isHabitDoneToday(h, today);
+    const log = getHabitDayLog(today, h.id) || {};
+    const streak = calcHabitStreak(h);
+
+    let btnClass = "habit-checkbtn";
+    let btnIcon = "";
+    if (status === "full") { btnClass += " done"; btnIcon = "✓"; }
+    else if (status === "partial") { btnClass += " partial"; btnIcon = "•"; }
+
+    let detailHtml = "";
+    if (h.type === "sets") {
+      const log = getHabitDayLog(today, h.id) || {};
+      const sets = log.sets || [];
+      const total = getHabitTotalToday(h, today);
+      const breakdown = getHabitVariantBreakdown(h, today);
+      const variants = h.variants || [{key:"full",label:"Completi",icon:"💯"}];
+
+      const setsHtml = sets.length === 0
+        ? `<div style="color:var(--muted);font-size:12px;padding:8px 0;text-align:center;font-style:italic;">Nessuna serie ancora — clicca + per aggiungere</div>`
+        : sets.map((s, i) => {
+            const variantOpts = variants.map(v => `<option value="${v.key}" ${s.variant===v.key?"selected":""}>${v.icon} ${v.label}</option>`).join("");
+            return `<div style="display:grid;grid-template-columns:32px 1fr 90px 32px;gap:6px;align-items:center;margin-bottom:6px;">
+              <div style="text-align:center;font-family:'Barlow Condensed',sans-serif;font-weight:800;color:var(--muted);font-size:14px;">#${i+1}</div>
+              <select onchange="updateHabitSetVariant('${h.id}', ${i}, this.value)" style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:6px 8px;color:white;font-size:13px;outline:none;">${variantOpts}</select>
+              <input type="number" inputmode="numeric" data-habit="${h.id}" data-set="${i}" value="${s.reps || ""}" placeholder="reps" oninput="updateHabitSetReps('${h.id}', ${i}, this.value)" style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:6px 10px;color:white;font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;outline:none;text-align:center;width:100%;box-sizing:border-box;">
+              <button onclick="removeHabitSet('${h.id}', ${i})" style="background:rgba(239,68,68,.15);border:none;color:#fca5a5;width:30px;height:30px;border-radius:6px;cursor:pointer;font-size:14px;">✕</button>
+            </div>`;
+        }).join("");
+
+      // Add buttons - one per variant
+      const addButtonsHtml = variants.map(v =>
+        `<button onclick="addHabitSet('${h.id}', '${v.key}')" style="background:rgba(59,130,246,.2);border:1px solid rgba(59,130,246,.4);color:#93c5fd;padding:7px 12px;border-radius:7px;cursor:pointer;font-size:12px;font-weight:700;flex:1;">+ ${v.icon} ${v.label}</button>`
+      ).join("");
+
+      // Breakdown summary
+      const breakdownHtml = (h.variants || []).map(v => {
+        const count = breakdown[v.key] || 0;
+        return count > 0 ? `<span style="margin-right:10px;"><span style="opacity:.7;">${v.icon}</span> <strong style="color:var(--text);">${count}</strong></span>` : "";
+      }).filter(Boolean).join("") || `<span style="color:var(--muted);font-size:11px;">Nessuna serie ancora</span>`;
+
+      detailHtml = `
+        <div class="habit-detail-row" style="grid-template-columns:1fr;gap:0;">
+          <div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+              <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;">Serie di oggi</div>
+              <div id="habit-total-${h.id}" style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;color:${total>=h.targetTotal?"var(--green)":total>0?"var(--accent)":"var(--muted)"};">${total}<span style="font-size:13px;color:var(--muted);font-weight:600;"> / ${h.targetTotal}</span></div>
+            </div>
+            <div id="habit-break-${h.id}" style="font-size:13px;margin-bottom:10px;">${breakdownHtml}</div>
+            ${setsHtml}
+            <div style="display:flex;gap:6px;margin-top:8px;">
+              ${addButtonsHtml}
+            </div>
+          </div>
+        </div>`;
+    } else if (h.type === "reps") {
+      // Legacy
+      const sets = log.sets || 0;
+      const reps = log.reps || 0;
+      const total = sets * reps;
+      const target = h.targetSets * h.targetReps;
+      detailHtml = `
+        <div class="habit-detail-row">
+          <div>
+            <div class="habit-detail-label">Serie</div>
+            <input type="number" class="habit-detail-input" value="${sets || ""}" placeholder="0" oninput="updateHabitDetail('${h.id}', 'sets', this.value)">
+          </div>
+          <div>
+            <div class="habit-detail-label">Ripetizioni</div>
+            <input type="number" class="habit-detail-input" value="${reps || ""}" placeholder="${h.targetReps}" oninput="updateHabitDetail('${h.id}', 'reps', this.value)">
+          </div>
+          <div>
+            <div class="habit-detail-label">Totale / Target</div>
+            <div style="text-align:center;font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:900;color:${total>=target?"var(--green)":total>0?"var(--accent)":"var(--muted)"};padding-top:6px;">${total}<span style="font-size:13px;color:var(--muted);font-weight:600;"> / ${target}</span></div>
+          </div>
+        </div>`;
+    } else if (h.type === "value") {
+      const value = log.value || 0;
+      detailHtml = `
+        <div class="habit-detail-row" style="grid-template-columns:1fr 1fr;">
+          <div>
+            <div class="habit-detail-label">${h.unit || "Valore"}</div>
+            <input type="number" step="0.1" class="habit-detail-input" value="${value || ""}" placeholder="${h.targetValue}" oninput="updateHabitDetail('${h.id}', 'value', this.value)">
+          </div>
+          <div>
+            <div class="habit-detail-label">Target</div>
+            <div style="text-align:center;font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:900;color:${value>=h.targetValue?"var(--green)":value>0?"var(--accent)":"var(--muted)"};padding-top:6px;">${value}${h.unit?" "+h.unit:""}<span style="font-size:13px;color:var(--muted);font-weight:600;"> / ${h.targetValue}${h.unit?" "+h.unit:""}</span></div>
+          </div>
+        </div>`;
+    }
+
+    return `<div class="habit-card" style="border-left-color:${h.color};">
+      <div class="habit-row">
+        <div class="habit-icon">${h.icon}</div>
+        <div>
+          <div class="habit-name">${h.name}</div>
+          <div class="habit-meta">${h.type === "sets" ? `Target: ${h.targetTotal} reps totali · varianti: ${(h.variants||[]).map(v=>v.icon+" "+v.label).join(", ")}` : h.type === "reps" ? `Target: ${h.targetSets}×${h.targetReps} = ${h.targetSets*h.targetReps} totali` : h.type === "value" ? `Target: ${h.targetValue}${h.unit?" "+h.unit:""}` : "Fatto/Non fatto"} · ${h.frequency==="daily"?"Quotidiana":h.frequency}</div>
+          ${streak > 0 ? `<div class="habit-streak">🔥 <span class="habit-streak-num">${streak}</span> ${streak === 1 ? "giorno" : "giorni"}</div>` : ""}
+        </div>
+        <div class="habit-status">
+          <button class="habit-edit-btn" onclick="deleteHabit('${h.id}')" title="Cancella">✕</button>
+          <button class="${btnClass}" onclick="quickToggleHabit('${h.id}')" title="Toggle">${btnIcon}</button>
+        </div>
+      </div>
+      ${detailHtml}
+    </div>`;
+  }).join("");
+
+  c.innerHTML = `
+    <!-- HERO -->
+    <div style="background:linear-gradient(135deg,#0a1628,#0f2a4a);border:1px solid rgba(59,130,246,.2);border-radius:18px;padding:22px;margin-bottom:16px;">
+      <div style="font-size:11px;color:var(--muted);letter-spacing:2px;margin-bottom:6px;">OGGI · ${todayDate.toLocaleDateString("it-IT",{weekday:"long",day:"numeric",month:"long"})}</div>
+      <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:14px;">
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:54px;font-weight:900;color:${compliancePct>=80?"var(--green)":compliancePct>=50?"var(--accent)":"var(--red)"};line-height:1;">${doneToday}/${totalToday}</div>
+        <div style="font-size:16px;color:var(--muted);">abitudini completate</div>
+      </div>
+      <div style="height:8px;background:rgba(255,255,255,.08);border-radius:8px;overflow:hidden;margin-bottom:14px;">
+        <div style="height:100%;background:linear-gradient(90deg,var(--green),var(--accent));border-radius:8px;width:${compliancePct}%;transition:width .6s;"></div>
+      </div>
+
+      <div class="totals-grid">
+        <div class="total-card">
+          <div class="total-val">${compliancePct}%</div>
+          <div class="total-lbl">Compliance oggi</div>
+        </div>
+        <div class="total-card">
+          <div class="total-val">🔥 ${bestStreak}</div>
+          <div class="total-lbl">Streak migliore</div>
+        </div>
+        <div class="total-card">
+          <div class="total-val">${trackedDays}</div>
+          <div class="total-lbl">Giorni tracciati</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CALENDARIO MENSILE -->
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:18px;">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:800;margin-bottom:8px;text-transform:capitalize;">📅 ${monthName}</div>
+      <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;font-size:10px;color:var(--muted);text-align:center;font-weight:700;">
+        <div>L</div><div>M</div><div>M</div><div>G</div><div>V</div><div>S</div><div>D</div>
+      </div>
+      <div class="cal-grid">${calCellsHtml}</div>
+      <div style="display:flex;gap:14px;margin-top:10px;font-size:11px;color:var(--muted);justify-content:center;flex-wrap:wrap;">
+        <span><span style="display:inline-block;width:10px;height:10px;background:var(--green);border-radius:2px;vertical-align:middle;"></span> ≥80% completate</span>
+        <span><span style="display:inline-block;width:10px;height:10px;background:rgba(245,158,11,.4);border-radius:2px;vertical-align:middle;"></span> Parziale</span>
+        <span><span style="display:inline-block;width:10px;height:10px;background:rgba(255,255,255,.04);border-radius:2px;vertical-align:middle;"></span> Niente</span>
+      </div>
+    </div>
+
+    <!-- LISTA ABITUDINI -->
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:800;margin-bottom:10px;">💪 Le tue abitudini</div>
+    ${habitsHtml || `<div style="text-align:center;color:var(--muted);padding:30px;">Nessuna abitudine. Aggiungine una qui sotto.</div>`}
+
+    <!-- ADD NEW HABIT -->
+    <div class="habit-add-form">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:800;margin-bottom:10px;color:var(--accent);">➕ Aggiungi nuova abitudine</div>
+      <div style="display:grid;grid-template-columns:60px 1fr;gap:8px;">
+        <input type="text" id="newHabitIcon" placeholder="🎯" maxlength="2" style="text-align:center;font-size:20px;">
+        <input type="text" id="newHabitName" placeholder="Nome abitudine (es. Lettura 30 min)">
+      </div>
+      <select id="newHabitType" onchange="document.getElementById('habitUnitField').style.display=this.value==='value'?'block':'none';document.getElementById('habitTargetField').style.display=this.value!=='boolean'?'block':'none';">
+        <option value="sets">📊 Reps con varianti (es. push-up completi/facili)</option>
+        <option value="value">📏 Valore numerico (es. passi, acqua)</option>
+        <option value="boolean">✅ Fatto / Non fatto</option>
+      </select>
+      <div id="habitTargetField">
+        <input type="number" id="newHabitTarget" placeholder="Target (es. 25 reps oppure 7000 passi)">
+      </div>
+      <div id="habitUnitField" style="display:none;">
+        <input type="text" id="newHabitUnit" placeholder="Unità (es. passi, L, h)">
+      </div>
+      <button class="btn btn-save" onclick="addNewHabit()" style="margin-top:4px;">➕ Aggiungi abitudine</button>
+    </div>
+
+    <!-- INFO -->
+    <div style="background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:12px;padding:14px;margin-top:16px;">
+      <div style="font-size:12px;color:var(--muted);line-height:1.7;">
+        <strong style="color:var(--accent);">Come usare:</strong> tap sul ✓ verde per segnare completata l'intera abitudine. Oppure inserisci manualmente serie e ripetizioni per tracking dettagliato.<br><br>
+        <strong style="color:var(--accent);">Perché funziona:</strong> volume basso ma costante. Push-up e squat sotto le 50 ripetizioni totali si possono fare ogni giorno senza sovraccaricare. La <em>routine</em> conta più dell'<em>intensità</em>.<br><br>
+        <strong style="color:var(--accent);">Suggerimento:</strong> aggancia ogni abitudine a un trigger esistente. Es: push-up subito dopo aver lavato i denti, squat mentre aspetti il caffè. Si chiama <em>habit stacking</em>.
+      </div>
+    </div>
+  `;
+}
+
+
+
+// Storage key for VO2max tests
+const KEY_VO2 = "mt_vo2_v9";
+
+// Classificazione VO2max per età/genere (maschio)
+// Riferimento: Cooper Institute + American College of Sports Medicine
+const VO2_CATEGORIES_M = {
+  // età → {veryLow, low, fair, good, excellent, superior}
+  "50-59": {veryLow: 29, low: 32, fair: 37, good: 42, excellent: 46, superior: 50},
+  "60+":   {veryLow: 25, low: 28, fair: 32, good: 37, excellent: 42, superior: 46}
+};
+
+// Obiettivi personali per Giorgio (52 anni, piano maratona 4h30')
+const VO2_TARGETS = [
+  {date: "2026-04-17", value: 29, label: "Baseline", note: "Test Polar iniziale"},
+  {date: "2026-05-29", value: 31, label: "Target 6 settimane", note: "Fine fase Riattivazione"},
+  {date: "2026-07-17", value: 33, label: "Target 12 settimane", note: "Metà Base Aerobica"},
+  {date: "2026-09-25", value: 35, label: "Target pre-gara", note: "Inizio Taper"},
+  {date: "2026-10-25", value: 36, label: "Obiettivo gara", note: "Maratona 4h30'"}
+];
+
+function loadVO2Tests() {
+  try { return JSON.parse(localStorage.getItem(KEY_VO2) || "[]"); }
+  catch { return []; }
+}
+
+function saveVO2Tests(tests) {
+  localStorage.setItem(KEY_VO2, JSON.stringify(tests));
+}
+
+function addVO2Test() {
+  const date = document.getElementById("vo2Date").value;
+  const value = parseFloat(document.getElementById("vo2Value").value);
+  const source = document.getElementById("vo2Source").value;
+  const note = document.getElementById("vo2Note").value;
+
+  if (!date || !value || isNaN(value)) {
+    showToast("⚠️ Inserisci data e valore validi", "warn");
+    return;
+  }
+
+  const tests = loadVO2Tests();
+  // Check if test for this date exists
+  const existing = tests.findIndex(t => t.date === date);
+  const newTest = { date, value, source, note, savedAt: new Date().toISOString() };
+  if (existing >= 0) {
+    tests[existing] = newTest;
+    showToast("✅ Test aggiornato", "ok");
+  } else {
+    tests.push(newTest);
+    showToast("✅ Test aggiunto", "ok");
+  }
+  tests.sort((a, b) => a.date.localeCompare(b.date));
+  saveVO2Tests(tests);
+  logInfo("Test VO2max aggiunto/aggiornato", `${date}: ${value}`);
+
+  // Reset form
+  document.getElementById("vo2Value").value = "";
+  document.getElementById("vo2Note").value = "";
+  renderVO2();
+}
+
+function deleteVO2Test(date) {
+  if (!confirm(`Cancellare il test del ${date}?`)) return;
+  const tests = loadVO2Tests().filter(t => t.date !== date);
+  saveVO2Tests(tests);
+  logInfo("Test VO2max cancellato", date);
+  renderVO2();
+}
+
+// Estimated race time from VO2max (Daniels/Gilbert formula simplified)
+// Returns finishing seconds for a marathon at given VO2max
+function vo2ToMarathonTime(vo2, weightKg, targetWeightKg) {
+  // Simplified: pace(min/km) ≈ 58 / vo2^0.5 * weightFactor
+  // This gives rough estimate; real formula is more complex
+  const weightFactor = weightKg > targetWeightKg ? 1 + (weightKg - targetWeightKg) * 0.004 : 1;
+  const pacePerKm = (58 / Math.sqrt(vo2)) * weightFactor;
+  return pacePerKm * 42.195 * 60; // seconds
+}
+
+function categoryForVO2(vo2) {
+  const cat = VO2_CATEGORIES_M["50-59"]; // Giorgio 52 anni
+  if (vo2 < cat.veryLow) return {label: "Molto basso", color: "#ef4444", next: cat.veryLow};
+  if (vo2 < cat.low) return {label: "Basso", color: "#f97316", next: cat.low};
+  if (vo2 < cat.fair) return {label: "Discreto", color: "#f59e0b", next: cat.fair};
+  if (vo2 < cat.good) return {label: "Buono", color: "#10b981", next: cat.good};
+  if (vo2 < cat.excellent) return {label: "Ottimo", color: "#06b6d4", next: cat.excellent};
+  if (vo2 < cat.superior) return {label: "Eccellente", color: "#8b5cf6", next: cat.superior};
+  return {label: "Superiore", color: "#ec4899", next: null};
+}
+
+function renderVO2() {
+  const c = document.getElementById("vo2Dashboard");
+  const tests = loadVO2Tests();
+  const latest = tests.length > 0 ? tests[tests.length - 1] : null;
+  const latestVal = latest ? latest.value : 29;
+  const cat = categoryForVO2(latestVal);
+
+  // Get latest weight from logs
+  const allDates = Object.keys(logs).sort((a,b) => b.localeCompare(a));
+  const latestWeight = allDates.map(d => parseFloat(logs[d]?.peso)).find(w => !isNaN(w)) || START_WEIGHT;
+
+  // Current projected marathon time
+  const currentSec = vo2ToMarathonTime(latestVal, latestWeight, GOAL_WEIGHT);
+  const projectedSec = vo2ToMarathonTime(latestVal, GOAL_WEIGHT, GOAL_WEIGHT); // at target weight
+  const fmtTime = s => {
+    const h = Math.floor(s/3600);
+    const m = Math.floor((s%3600)/60);
+    return h + "h" + m.toString().padStart(2,"0") + "'";
+  };
+
+  // Progress toward race goal (35 VO2max)
+  const RACE_VO2_TARGET = 35;
+  const BASELINE_VO2 = 29;
+  const vo2Progress = Math.max(0, Math.min(100, ((latestVal - BASELINE_VO2) / (RACE_VO2_TARGET - BASELINE_VO2)) * 100));
+
+  // Trend over time
+  const trendHtml = tests.length > 1 ? (() => {
+    const maxV = Math.max(...tests.map(t => t.value), ...VO2_TARGETS.map(t => t.value));
+    const minV = Math.min(...tests.map(t => t.value), BASELINE_VO2 - 2);
+    return `
+    <div class="card" style="padding:16px;">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:800;margin-bottom:12px;">📈 Progressione test</div>
+      <div style="display:flex;align-items:flex-end;gap:8px;height:120px;margin-bottom:8px;">
+        ${tests.map(t => {
+          const h = Math.max(20, ((t.value - minV) / (maxV - minV)) * 100);
+          const tcat = categoryForVO2(t.value);
+          return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;">
+            <div style="font-size:14px;font-weight:700;color:${tcat.color};">${t.value}</div>
+            <div style="width:100%;background:${tcat.color};border-radius:5px 5px 0 0;height:${h}px;" title="${t.date}: ${t.value}"></div>
+            <div style="font-size:10px;color:var(--muted);">${t.date.slice(5)}</div>
+          </div>`;
+        }).join("")}
+      </div>
+    </div>`;
+  })() : "";
+
+  // Future targets with status
+  const today = todayStr();
+  const targetsHtml = VO2_TARGETS.map(t => {
+    const isPast = t.date < today;
+    const isAchieved = tests.some(test => test.date >= t.date && test.value >= t.value);
+    const closestTest = tests.filter(test => test.date <= t.date).slice(-1)[0];
+    const status = isAchieved ? "✅" : isPast ? (closestTest && closestTest.value >= t.value ? "✅" : "⚠️") : "⏳";
+    const statusColor = isAchieved ? "#10b981" : isPast ? "#f59e0b" : "#6b7a96";
+    return `<div style="display:grid;grid-template-columns:32px 1fr auto auto;gap:12px;align-items:center;padding:10px 14px;background:rgba(255,255,255,.03);border-radius:10px;margin-bottom:6px;border-left:3px solid ${statusColor};">
+      <span style="font-size:18px;">${status}</span>
+      <div>
+        <div style="font-weight:700;font-size:14px;">${t.label}</div>
+        <div style="font-size:11px;color:var(--muted);">${t.date} · ${t.note}</div>
+      </div>
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:900;color:${statusColor};">${t.value}</div>
+      <div style="font-size:10px;color:var(--muted);">VO₂</div>
+    </div>`;
+  }).join("");
+
+  // Test history table
+  const historyHtml = tests.length === 0 ? `
+    <div style="padding:30px;text-align:center;color:var(--muted);">
+      <div style="font-size:36px;margin-bottom:8px;">📊</div>
+      <div>Nessun test ancora.<br>Aggiungi il primo test qui sopra.</div>
+    </div>` : tests.slice().reverse().map(t => {
+    const tcat = categoryForVO2(t.value);
+    return `<div style="display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;padding:10px 14px;background:var(--surface2);border-radius:10px;margin-bottom:6px;">
+      <div>
+        <div style="font-weight:700;font-size:14px;">${fmtDate(t.date)}</div>
+        <div style="font-size:11px;color:var(--muted);">${t.source||"—"}${t.note?" · "+t.note:""}</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;color:${tcat.color};">${t.value}</div>
+        <div style="font-size:10px;color:${tcat.color};">${tcat.label}</div>
+      </div>
+      <button onclick="deleteVO2Test('${t.date}')" style="background:rgba(239,68,68,.15);border:none;color:#fca5a5;width:28px;height:28px;border-radius:6px;cursor:pointer;font-size:14px;">✕</button>
+    </div>`;
+  }).join("");
+
+  c.innerHTML = `
+    <!-- HERO -->
+    <div style="background:linear-gradient(135deg,#0a1628,#0f2a4a);border:1px solid rgba(59,130,246,.2);border-radius:18px;padding:22px;margin-bottom:16px;">
+      <div style="display:grid;grid-template-columns:1fr auto;gap:16px;align-items:center;">
+        <div>
+          <div style="font-size:11px;color:var(--muted);letter-spacing:2px;margin-bottom:6px;">VO₂MAX ATTUALE</div>
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:64px;font-weight:900;color:${cat.color};line-height:1;">${latestVal}</div>
+          <div style="font-size:13px;color:${cat.color};margin-top:4px;font-weight:700;">${cat.label}</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px;">ml/kg/min · età 50-59 M</div>
+        </div>
+        <div style="text-align:center;background:rgba(255,255,255,.05);border-radius:12px;padding:14px 18px;">
+          <div style="font-size:11px;color:var(--muted);letter-spacing:1.5px;">TARGET GARA</div>
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:38px;font-weight:900;color:var(--accent);line-height:1;">${RACE_VO2_TARGET}</div>
+          <div style="font-size:11px;color:var(--muted);">+${RACE_VO2_TARGET - latestVal} punti</div>
+        </div>
+      </div>
+
+      <!-- Progress bar to race goal -->
+      <div style="margin-top:16px;">
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:5px;">
+          <span>Baseline (29)</span>
+          <span style="color:${cat.color};font-weight:700;">${Math.round(vo2Progress)}%</span>
+          <span style="color:var(--accent);">🎯 Target ${RACE_VO2_TARGET}</span>
+        </div>
+        <div style="height:10px;background:rgba(255,255,255,.08);border-radius:10px;">
+          <div style="height:10px;background:linear-gradient(90deg,${cat.color},var(--accent));border-radius:10px;width:${Math.max(2,vo2Progress)}%;transition:width .8s;"></div>
+        </div>
+      </div>
+
+      <!-- Marathon time estimates -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px;">
+        <div style="background:rgba(255,255,255,.05);border-radius:10px;padding:12px;">
+          <div style="font-size:10px;color:var(--muted);letter-spacing:1px;">TEMPO MARATONA OGGI</div>
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:900;color:${cat.color};">${fmtTime(currentSec)}</div>
+          <div style="font-size:10px;color:var(--muted);">VO₂ ${latestVal} @ ${latestWeight}kg</div>
+        </div>
+        <div style="background:rgba(255,255,255,.05);border-radius:10px;padding:12px;">
+          <div style="font-size:10px;color:var(--muted);letter-spacing:1px;">TEMPO SE ARRIVI 85KG</div>
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:900;color:#10b981;">${fmtTime(projectedSec)}</div>
+          <div style="font-size:10px;color:var(--muted);">-${latestWeight - GOAL_WEIGHT}kg da perdere</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ADD NEW TEST -->
+    <div class="card">
+      <div class="card-label">➕ Nuovo test VO₂max</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+        <div>
+          <div class="metric-label">📅 Data</div>
+          <input type="date" id="vo2Date" value="${todayStr()}" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:9px;padding:9px 12px;color:white;font-size:16px;font-family:'Barlow',sans-serif;outline:none;width:100%;box-sizing:border-box;display:block;">
+        </div>
+        <div>
+          <div class="metric-label">🫁 VO₂max</div>
+          <input type="number" step="0.1" id="vo2Value" placeholder="es. 29" style="width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:8px 10px;color:white;font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;outline:none;box-sizing:border-box;">
+        </div>
+      </div>
+      <div class="metric-label">🔍 Fonte del test</div>
+      <input type="text" id="vo2Source" placeholder="es. Polar H10, Garmin, laboratorio..." value="Polar" style="width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:8px 10px;color:white;font-size:14px;outline:none;box-sizing:border-box;margin-bottom:10px;">
+      <div class="metric-label">📝 Note</div>
+      <textarea id="vo2Note" placeholder="Come ti sentivi, condizioni del test..." style="margin-bottom:12px;"></textarea>
+      <button class="btn btn-save" onclick="addVO2Test()">💾 Salva test</button>
+    </div>
+
+    ${trendHtml}
+
+    <!-- TARGETS -->
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:800;margin:20px 0 10px;">🎯 Roadmap obiettivi</div>
+    <div class="card" style="padding:14px;">
+      ${targetsHtml}
+    </div>
+
+    <!-- HISTORY -->
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:800;margin:20px 0 10px;">📅 Storico test</div>
+    ${historyHtml}
+
+    <!-- INFO -->
+    <div style="background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:12px;padding:14px;margin-top:16px;">
+      <div style="font-size:12px;color:var(--muted);line-height:1.7;">
+        <strong style="color:var(--accent);">Cos'è il VO₂max:</strong> è la capacità massima del tuo corpo di usare ossigeno durante lo sforzo. È il miglior predittore di performance endurance.<br><br>
+        <strong style="color:var(--accent);">Come migliorarlo:</strong> uscite lunghe aerobiche (Long Run), ripetute brevi intense (da W13), Tempo Run (da W13). Si allena sia con volume che con intensità.<br><br>
+        <strong style="color:var(--accent);">Quando ritestare:</strong> ogni 4-6 settimane con Polar o simile. Variazioni giornaliere sono normali — conta il trend.<br><br>
+        <strong style="color:var(--accent);">Stima tempo maratona:</strong> formula Daniels semplificata. Migliora VO₂max + perdi peso = passo maratona sostenibile più veloce.
+      </div>
+    </div>
+  `;
+}
+
 function renderPiano() {
   const c = document.getElementById("pianoDashboard");
   const today = todayStr();
@@ -1591,7 +2470,20 @@ window.onload = function() {
   currentDate = todayStr();
 
   // Log startup info
-  logInfo("Marathon Tracker v8 avviato");
+  logInfo("Marathon Tracker v11 avviato");
+
+  // Auto-seed baseline VO2max test if empty
+  const vo2Tests = loadVO2Tests();
+  if (vo2Tests.length === 0) {
+    saveVO2Tests([{
+      date: "2026-04-17",
+      value: 29,
+      source: "Polar",
+      note: "Test baseline iniziale",
+      savedAt: new Date().toISOString()
+    }]);
+    logInfo("Baseline VO2max seminato", "29 @ 2026-04-17");
+  }
   logInfo("Stato connessione", isOnline ? "Online" : "Offline");
   logInfo("Dati locali", `${Object.keys(logs).length} giorni, ${pendingQueue.length} pending`);
   logInfo("Device ID", DEVICE_ID);
@@ -1633,14 +2525,16 @@ window.onload = function() {
 // TABS
 // ═══════════════════════════════════════════════════════════
 function showTab(name) {
-  ["diario","piano","readiness","storico","forza","settings"].forEach(t=>document.getElementById("tab-"+t).style.display=t===name?"block":"none");
+  ["diario","abitudini","piano","readiness","vo2","storico","forza","settings"].forEach(t=>document.getElementById("tab-"+t).style.display=t===name?"block":"none");
   document.querySelectorAll(".tab").forEach(b=>b.classList.remove("active"));
-  const map={diario:0,piano:1,readiness:2,storico:3,forza:4,settings:5};
+  const map={diario:0,abitudini:1,piano:2,readiness:3,vo2:4,storico:5,forza:6,settings:7};
   document.querySelectorAll(".tab")[map[name]]?.classList.add("active");
   if(name==="storico") renderHistory();
   if(name==="forza") renderWorkout();
   if(name==="readiness") renderReadiness();
   if(name==="piano") renderPiano();
+  if(name==="vo2") renderVO2();
+  if(name==="abitudini") renderAbitudini();
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -1871,6 +2765,266 @@ const NRC_FIELDS = ["km","passo","passo_max","fc","fc_max","durata_corsa","tempo
 const DAILY_FIELDS = ["peso","passi","sonno","acqua","energia","dolori"];
 
 let parsedImport = null;
+
+// ═══════════════════════════════════════════════════════════
+// PASTE DAY ENGINE (v11) — Merge intelligente multi-source
+// ═══════════════════════════════════════════════════════════
+
+let parsedPasteDay = null;
+
+function openPasteDayModal() {
+  document.getElementById("pasteDayModal").classList.remove("hidden");
+  document.getElementById("pasteDayJson").value = "";
+  document.getElementById("pasteDayError").style.display = "none";
+  document.getElementById("pasteDayPreview").style.display = "none";
+  parsedPasteDay = null;
+  setTimeout(() => document.getElementById("pasteDayJson").focus(), 100);
+}
+
+function closePasteDayModal(e) {
+  if (e && e.target !== document.getElementById("pasteDayModal")) return;
+  document.getElementById("pasteDayModal").classList.add("hidden");
+}
+
+// Parse JSON input - supports single object or array of objects
+function parsePasteDayJson(raw) {
+  let parsed;
+  try {
+    parsed = JSON.parse(raw);
+  } catch (e) {
+    throw new Error("JSON non valido: " + e.message);
+  }
+  // Normalize to array
+  const items = Array.isArray(parsed) ? parsed : [parsed];
+  // Validate each has a date
+  for (const it of items) {
+    if (!it.date || !/^\d{4}-\d{2}-\d{2}$/.test(it.date)) {
+      throw new Error(`Manca o errato il campo "date" (formato YYYY-MM-DD) in uno degli oggetti`);
+    }
+  }
+  return items;
+}
+
+// Apply merge to existing log
+// Rules:
+// - missing field => keep existing
+// - empty string "" => ignore
+// - empty array [] => explicit delete
+// - object/array with content => merge or append depending on field
+function mergePasteDayIntoLog(existing, incoming) {
+  const merged = { ...existing };
+  const changes = [];
+
+  // Top-level scalar fields that go into the log record
+  const SCALAR_FIELDS = ["peso","peso_kg","passi","sonno_h","sonno","acqua_L","acqua","energia","dolori","note","meteo","scarpe"];
+  for (const f of SCALAR_FIELDS) {
+    if (incoming.hasOwnProperty(f)) {
+      const val = incoming[f];
+      // Empty string -> ignore
+      if (val === "" || val === null || val === undefined) continue;
+      // Normalize peso/peso_kg
+      let targetKey = f;
+      if (f === "peso_kg") targetKey = "peso";
+      if (f === "sonno_h") targetKey = "sonno";
+      if (f === "acqua_L") targetKey = "acqua";
+      if (String(merged[targetKey]||"") !== String(val)) {
+        changes.push({field: targetKey, from: merged[targetKey]||"-", to: val});
+        merged[targetKey] = val;
+      }
+    }
+  }
+
+  // SESSION object - merges into log's run-related fields
+  if (incoming.session && typeof incoming.session === "object") {
+    const s = incoming.session;
+    const SESSION_FIELDS = ["activities","km","passo","passo_max","durata_corsa","tempo_totale","calorie","fc","fc_max","cadenza","dislivello_pos","dislivello_neg","impegno_nrc","parziali","passo_calcolato"];
+    for (const f of SESSION_FIELDS) {
+      if (s.hasOwnProperty(f)) {
+        const val = s[f];
+        if (val === "" || val === null || val === undefined) continue;
+        // Arrays: empty = delete, non-empty = replace
+        if (Array.isArray(val)) {
+          if (val.length === 0) {
+            if (Array.isArray(merged[f]) && merged[f].length > 0) {
+              changes.push({field: "session."+f, from: `[${merged[f].length} items]`, to: "(cancellato)"});
+              merged[f] = [];
+            }
+          } else {
+            changes.push({field: "session."+f, from: Array.isArray(merged[f])?`[${merged[f].length}]`:"-", to: `[${val.length} items]`});
+            merged[f] = val;
+          }
+        } else {
+          if (String(merged[f]||"") !== String(val)) {
+            changes.push({field: "session."+f, from: merged[f]||"-", to: val});
+            merged[f] = val;
+          }
+        }
+      }
+    }
+  }
+
+  // PASTI (meals) - append by default, replace with empty []
+  if (incoming.pasti !== undefined) {
+    if (Array.isArray(incoming.pasti)) {
+      if (incoming.pasti.length === 0) {
+        // Explicit clear
+        if (Array.isArray(merged.pasti) && merged.pasti.length > 0) {
+          changes.push({field: "pasti", from: `[${merged.pasti.length} pasti]`, to: "(cancellato)"});
+          merged.pasti = [];
+        }
+      } else {
+        const existingPasti = Array.isArray(merged.pasti) ? merged.pasti : [];
+        merged.pasti = [...existingPasti, ...incoming.pasti];
+        changes.push({field: "pasti", from: `${existingPasti.length}`, to: `${merged.pasti.length} (+${incoming.pasti.length})`});
+      }
+    }
+  }
+
+  // ABITUDINI (habits) - merge sub-object
+  if (incoming.abitudini && typeof incoming.abitudini === "object") {
+    if (!merged.abitudini) merged.abitudini = {};
+    for (const habitId in incoming.abitudini) {
+      const habitData = incoming.abitudini[habitId];
+      if (habitData === null) {
+        // Explicit deletion
+        if (merged.abitudini[habitId]) {
+          delete merged.abitudini[habitId];
+          changes.push({field: `abitudini.${habitId}`, from: "(presente)", to: "(cancellato)"});
+        }
+      } else {
+        merged.abitudini[habitId] = habitData;
+        changes.push({field: `abitudini.${habitId}`, from: merged.abitudini[habitId]?"agg.":"-", to: "salvato"});
+      }
+    }
+  }
+
+  return { merged, changes };
+}
+
+function previewPasteDay() {
+  const raw = document.getElementById("pasteDayJson").value.trim();
+  const errEl = document.getElementById("pasteDayError");
+  const previewEl = document.getElementById("pasteDayPreview");
+  const previewContent = document.getElementById("pasteDayPreviewContent");
+
+  if (!raw) {
+    errEl.style.display = "none";
+    previewEl.style.display = "none";
+    return;
+  }
+
+  try {
+    const items = parsePasteDayJson(raw);
+    errEl.style.display = "none";
+
+    // For each item, compute merge preview
+    const previewByDate = items.map(item => {
+      const existing = logs[item.date] || {};
+      const { merged, changes } = mergePasteDayIntoLog(existing, item);
+      return { date: item.date, existing, item, merged, changes };
+    });
+
+    if (previewByDate.every(p => p.changes.length === 0)) {
+      errEl.textContent = "⚠️ Nessuna modifica rilevata — il JSON non aggiorna nulla";
+      errEl.style.display = "block";
+      previewEl.style.display = "none";
+      parsedPasteDay = null;
+      return;
+    }
+
+    // Render preview
+    let html = "";
+    previewByDate.forEach(p => {
+      html += `<div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:10px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <div style="font-family:'Barlow Condensed',sans-serif;font-weight:800;color:var(--accent);font-size:15px;">📅 ${fmtDate(p.date)}</div>
+          <div style="font-size:11px;color:var(--muted);">${p.changes.length} ${p.changes.length===1?"modifica":"modifiche"}</div>
+        </div>`;
+      if (p.changes.length === 0) {
+        html += `<div style="font-size:12px;color:var(--muted);font-style:italic;">Nessuna modifica</div>`;
+      } else {
+        html += `<div style="display:flex;flex-direction:column;gap:4px;">`;
+        for (const c of p.changes) {
+          const fromStr = String(c.from).length > 30 ? String(c.from).slice(0,30)+"..." : String(c.from);
+          const toStr = String(c.to).length > 40 ? String(c.to).slice(0,40)+"..." : String(c.to);
+          html += `<div style="display:grid;grid-template-columns:1fr auto auto;gap:8px;font-size:12px;align-items:center;padding:3px 0;">
+            <div style="color:var(--text);font-weight:600;">${c.field}</div>
+            <div style="color:var(--muted);">${fromStr}</div>
+            <div style="color:var(--green);font-weight:700;">→ ${toStr}</div>
+          </div>`;
+        }
+        html += `</div>`;
+      }
+      html += `</div>`;
+    });
+    previewContent.innerHTML = html;
+    previewEl.style.display = "block";
+    parsedPasteDay = previewByDate;
+  } catch (e) {
+    errEl.textContent = "❌ " + e.message;
+    errEl.style.display = "block";
+    previewEl.style.display = "none";
+    parsedPasteDay = null;
+  }
+}
+
+function confirmPasteDay() {
+  if (!parsedPasteDay) {
+    showToast("⚠️ Nessun JSON valido da importare", "warn");
+    return;
+  }
+
+  let totalChanges = 0;
+  const updatedDates = [];
+
+  for (const p of parsedPasteDay) {
+    if (p.changes.length === 0) continue;
+    const date = p.date;
+    // Apply habit data to localStorage habit logs if present
+    if (p.item.abitudini && typeof p.item.abitudini === "object") {
+      const habitLogs = loadHabitLogs();
+      if (!habitLogs[date]) habitLogs[date] = {};
+      for (const habitId in p.item.abitudini) {
+        if (p.item.abitudini[habitId] === null) {
+          delete habitLogs[date][habitId];
+        } else {
+          habitLogs[date][habitId] = { ...p.item.abitudini[habitId], savedAt: new Date().toISOString() };
+        }
+      }
+      if (Object.keys(habitLogs[date]).length === 0) delete habitLogs[date];
+      saveHabitLogs(habitLogs);
+    }
+
+    // Apply main log merge (excluding the habits sub-object)
+    const mergedLog = { ...p.merged };
+    delete mergedLog.abitudini; // habits live in their own storage
+    mergedLog.savedAt = new Date().toISOString();
+    mergedLog.device = deviceId || "claude_paste";
+
+    logs[date] = mergedLog;
+    pendingDates.add(date);
+    totalChanges += p.changes.length;
+    updatedDates.push(date);
+  }
+
+  saveLocal();
+  updatePendingBadge();
+  closePasteDayModal();
+
+  // Reload current view
+  if (currentDate && logs[currentDate]) {
+    loadDay(currentDate);
+  }
+  renderHistory();
+
+  showToast(`✅ Aggiornati ${updatedDates.length} ${updatedDates.length===1?"giorno":"giorni"} con ${totalChanges} modifiche`, "ok");
+  logInfo(`Paste day completato`, `${updatedDates.length} giorni, ${totalChanges} modifiche`);
+
+  // Trigger sync if online
+  if (isOnline && sheetUrl) {
+    setTimeout(() => syncPending(), 500);
+  }
+}
 
 function openImportModal() {
   document.getElementById("importModal").classList.remove("hidden");
