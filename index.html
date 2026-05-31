@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>🏅 Marathon Tracker v16.2</title>
+<title>🏅 Marathon Tracker v16.3</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -279,7 +279,7 @@ code{background:rgba(255,255,255,.1);padding:2px 7px;border-radius:5px;font-size
   <div class="topbar-inner">
     <div class="topbar-row1">
       <div>
-        <div class="topbar-sub">Marathon Tracker <span class="v-badge">v16.2</span></div>
+        <div class="topbar-sub">Marathon Tracker <span class="v-badge">v16.3</span></div>
         <div class="topbar-title">🏅 25.10.2026 — 5h00'</div>
       </div>
       <!-- SYNC STATUS STRIP -->
@@ -807,6 +807,28 @@ function loadLocal() {
   try { pendingQueue = JSON.parse(localStorage.getItem(KEY_PENDING)||"[]"); } catch { pendingQueue=[]; }
   sheetUrl = localStorage.getItem(KEY_URL) || localStorage.getItem("marathon_sheet_url_v3") || localStorage.getItem("marathon_sheet_url_v2") || localStorage.getItem("marathon_sheet_url") || "";
   secretKey = localStorage.getItem(KEY_SECRET) || "";
+  dedupePastiInLogs();
+}
+// v16.2: ripulisce pasti duplicati (stessa meal+time+food) in tutti i giorni
+function dedupePastiInLogs() {
+  let cleaned = 0;
+  for (const date in logs) {
+    const l = logs[date];
+    if (!l || !Array.isArray(l.pasti) || l.pasti.length === 0) continue;
+    const seen = new Set();
+    const out = [];
+    for (const p of l.pasti) {
+      const key = `${(p.meal||"").trim()}|${(p.time||"").trim()}|${(p.food||"").trim()}`;
+      if (seen.has(key)) { cleaned++; continue; }
+      seen.add(key);
+      out.push(p);
+    }
+    if (out.length !== l.pasti.length) l.pasti = out;
+  }
+  if (cleaned > 0) {
+    try { localStorage.setItem(KEY_LOGS, JSON.stringify(logs)); } catch(e){}
+    try { logInfo(`Pulizia duplicati: ${cleaned} pasti rimossi`); } catch(e){}
+  }
 }
 function saveLocal() {
   localStorage.setItem(KEY_LOGS, JSON.stringify(logs));
@@ -2834,7 +2856,7 @@ window.onload = function() {
   currentDate = todayStr();
 
   // Log startup info
-  logInfo("Marathon Tracker v16.2 avviato");
+  logInfo("Marathon Tracker v16.3 avviato");
 
   // Auto-seed baseline VO2max test if empty
   const vo2Tests = loadVO2Tests();
@@ -3538,7 +3560,7 @@ function mergePasteDayIntoLog(existing, incoming) {
     }
   }
 
-  // PASTI (meals) - append by default, replace with empty []
+  // PASTI (meals) - upsert by (meal+time+food), replace all with empty []
   if (incoming.pasti !== undefined) {
     if (Array.isArray(incoming.pasti)) {
       if (incoming.pasti.length === 0) {
@@ -3548,9 +3570,16 @@ function mergePasteDayIntoLog(existing, incoming) {
           merged.pasti = [];
         }
       } else {
-        const existingPasti = Array.isArray(merged.pasti) ? merged.pasti : [];
-        merged.pasti = [...existingPasti, ...incoming.pasti];
-        changes.push({field: "pasti", from: `${existingPasti.length}`, to: `${merged.pasti.length} (+${incoming.pasti.length})`});
+        const existingPasti = Array.isArray(merged.pasti) ? [...merged.pasti] : [];
+        const mealKey = p => `${(p.meal||"").trim()}|${(p.time||"").trim()}|${(p.food||"").trim()}`;
+        let added = 0, updated = 0;
+        for (const np of incoming.pasti) {
+          const idx = existingPasti.findIndex(ep => mealKey(ep) === mealKey(np));
+          if (idx >= 0) { existingPasti[idx] = np; updated++; }
+          else { existingPasti.push(np); added++; }
+        }
+        merged.pasti = existingPasti;
+        changes.push({field: "pasti", from: `${merged.pasti.length-added}`, to: `${merged.pasti.length}${added>0?` (+${added})`:""}${updated>0?` (${updated} agg.)`:""}`});
       }
     }
   }
