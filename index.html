@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>🏅 Marathon Tracker v13</title>
+<title>🏅 Marathon Tracker v16</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -279,7 +279,7 @@ code{background:rgba(255,255,255,.1);padding:2px 7px;border-radius:5px;font-size
   <div class="topbar-inner">
     <div class="topbar-row1">
       <div>
-        <div class="topbar-sub">Marathon Tracker <span class="v-badge">v13</span></div>
+        <div class="topbar-sub">Marathon Tracker <span class="v-badge">v16</span></div>
         <div class="topbar-title">🏅 25.10.2026 — 5h00'</div>
       </div>
       <!-- SYNC STATUS STRIP -->
@@ -294,6 +294,7 @@ code{background:rgba(255,255,255,.1);padding:2px 7px;border-radius:5px;font-size
     <div class="tabs">
       <button class="tab active" onclick="showTab('diario')">📊 Diario</button>
       <button class="tab" onclick="showTab('abitudini')">🔥 Abitudini</button>
+      <button class="tab" onclick="showTab('crescita')">🎯 Crescita</button>
       <button class="tab" onclick="showTab('piano')">📋 Piano</button>
       <button class="tab" onclick="showTab('readiness')">🎯 Readiness</button>
       <button class="tab" onclick="showTab('vo2')">🫁 VO₂</button>
@@ -392,6 +393,8 @@ code{background:rgba(255,255,255,.1);padding:2px 7px;border-radius:5px;font-size
 
 <!-- ═══ ABITUDINI ═══ -->
 <div id="tab-abitudini" style="display:none;"><div id="abitudiniDashboard"></div></div>
+
+<div id="tab-crescita" style="display:none;"><div id="crescitaDashboard"></div></div>
 
 <!-- ═══ VO2MAX ═══ -->
 <div id="tab-vo2" style="display:none;"><div id="vo2Dashboard"></div></div>
@@ -1288,6 +1291,21 @@ async function pushHabitsForDate(date, habitsData) {
   }
 }
 
+async function pushCrescitaToSheets(session) {
+  if (!sheetUrl || !secretKey) return; // silenzioso se non configurato
+  try {
+    await writeToSheets("crescita", {
+      date: session.date,
+      session_id: session.id,
+      activity_id: session.activity_id,
+      category: session.category,
+      minutes: session.minutes,
+      description: session.description,
+      timestamp: session.timestamp
+    });
+  } catch(e) { logError("Push crescita fallita", e.message); }
+}
+
 async function testWriteAPI() {
   if (!sheetUrl) { showToast("⚠️ Configura URL Sheets prima", "warn"); return; }
   if (!secretKey) { showToast("⚠️ Configura chiave segreta prima", "warn"); return; }
@@ -1367,6 +1385,15 @@ async function syncAll(silent) {
   if (!sheetUrl) { if (!silent) showToast("⚠️ Configura prima l'URL Sheets", "warn"); return; }
   if (syncInProgress) return;
   syncInProgress = true;
+  // v15: watchdog timeout — se il sync rimane bloccato >45 sec, lo sblocco forzato
+  // (previene situazioni in cui un timeout di rete lascia syncInProgress=true e il bottone grigio per sempre)
+  const watchdogId = setTimeout(() => {
+    if (syncInProgress) {
+      logWarn("Sync watchdog: timeout 45s superato, sblocco forzato");
+      syncInProgress = false;
+      updateSyncUI("error", "Timeout sync — riprova", pendingQueue.length);
+    }
+  }, 45000);
   updateSyncUI("syncing", "Sync in corso...", pendingQueue.length);
   logInfo("Sync bidirezionale avviato");
   try {
@@ -1383,6 +1410,7 @@ async function syncAll(silent) {
     if (!silent) showToast("❌ " + e.message, "err", true);
     try { await flushPending(); } catch(e2) { logError("Anche push fallito", e2.message); }
   } finally {
+    clearTimeout(watchdogId);
     syncInProgress = false;
   }
 }
@@ -1587,13 +1615,24 @@ const KEY_HABIT_LOGS = "mt_habit_logs_v10"; // log giornaliero { date: { habitId
 
 // Abitudini default — pre-configurate per Giorgio
 const DEFAULT_HABITS = [
-  { id: "pushup_am", icon: "💪", name: "Push-up mattina", color: "#f97316", type: "sets", targetTotal: 25, variants: [{key:"full",label:"Completi",icon:"💯"},{key:"knee",label:"Ginocchia",icon:"🦵"}], frequency: "daily" },
-  { id: "squat_am",  icon: "🦵", name: "Squat mattina",   color: "#10b981", type: "sets", targetTotal: 25, variants: [{key:"full",label:"Completi",icon:"💯"},{key:"assisted",label:"Assistiti",icon:"🤝"}], frequency: "daily" },
-  { id: "pushup_pm", icon: "💪", name: "Push-up sera",    color: "#f97316", type: "sets", targetTotal: 25, variants: [{key:"full",label:"Completi",icon:"💯"},{key:"knee",label:"Ginocchia",icon:"🦵"}], frequency: "daily" },
-  { id: "squat_pm",  icon: "🦵", name: "Squat sera",      color: "#10b981", type: "sets", targetTotal: 25, variants: [{key:"full",label:"Completi",icon:"💯"},{key:"assisted",label:"Assistiti",icon:"🤝"}], frequency: "daily" },
-  { id: "walk7k",    icon: "🚶", name: "7000+ passi",     color: "#3b82f6", type: "value", targetValue: 7000, unit: "passi", frequency: "daily" },
-  { id: "water2l",   icon: "💧", name: "Acqua 2L+",       color: "#06b6d4", type: "value", targetValue: 2, unit: "L", frequency: "daily" },
-  { id: "sleep7h",   icon: "😴", name: "Sonno 7h+",       color: "#8b5cf6", type: "value", targetValue: 7, unit: "h", frequency: "daily" }
+  // — Allenamento base (giornaliero, 4 sessioni AM/PM)
+  { id: "pushup_am", icon: "💪", name: "Push-up mattina", color: "#f97316", type: "sets", targetTotal: 25, variants: [{key:"full",label:"Completi",icon:"💯"},{key:"knee",label:"Ginocchia",icon:"🦵"}], frequency: "daily", category: "workout" },
+  { id: "squat_am",  icon: "🦵", name: "Squat mattina",   color: "#10b981", type: "sets", targetTotal: 25, variants: [{key:"full",label:"Completi",icon:"💯"},{key:"assisted",label:"Assistiti",icon:"🤝"}], frequency: "daily", category: "workout" },
+  { id: "pushup_pm", icon: "💪", name: "Push-up sera",    color: "#f97316", type: "sets", targetTotal: 25, variants: [{key:"full",label:"Completi",icon:"💯"},{key:"knee",label:"Ginocchia",icon:"🦵"}], frequency: "daily", category: "workout" },
+  { id: "squat_pm",  icon: "🦵", name: "Squat sera",      color: "#10b981", type: "sets", targetTotal: 25, variants: [{key:"full",label:"Completi",icon:"💯"},{key:"assisted",label:"Assistiti",icon:"🤝"}], frequency: "daily", category: "workout" },
+  // — Allenamento core/stabilizzatori (3×/settimana, introdotti v15)
+  { id: "plank_am",       icon: "🧘", name: "Plank mattina",      color: "#ec4899", type: "sets", targetSeconds: 60, variants: [{key:"standard",label:"Standard",icon:"🧘"},{key:"side",label:"Laterale",icon:"↔️"}], frequency: "3x_week", category: "workout" },
+  { id: "calf_raises_am", icon: "🦶", name: "Calf raises mattina", color: "#14b8a6", type: "sets", targetTotal: 30, variants: [{key:"standard",label:"Standard",icon:"⬆️"}], frequency: "3x_week", category: "workout" },
+  // — Integratori (giornaliero)
+  { id: "creatina_am",      icon: "💊", name: "Creatina mattina (10g)",  color: "#a855f7", type: "value", targetValue: 10, unit: "g", frequency: "daily", category: "supplement" },
+  { id: "creatina_pm",      icon: "💊", name: "Creatina sera (10g)",     color: "#a855f7", type: "value", targetValue: 10, unit: "g", frequency: "daily", category: "supplement" },
+  { id: "omega3_am",        icon: "🐟", name: "Omega-3 (3 cps)",         color: "#0ea5e9", type: "value", targetValue: 3, unit: "cps", frequency: "daily", category: "supplement" },
+  { id: "multivitaminico_am", icon: "🌈", name: "Multivitaminico",        color: "#eab308", type: "value", targetValue: 1, unit: "cps", frequency: "daily", category: "supplement" },
+  { id: "magnesio_pm",      icon: "⚡", name: "Magnesio sera",           color: "#84cc16", type: "value", targetValue: 1, unit: "cps", frequency: "daily", category: "supplement" },
+  // — Stile di vita (metriche giornaliere)
+  { id: "walk7k",    icon: "🚶", name: "7000+ passi",     color: "#3b82f6", type: "value", targetValue: 7000, unit: "passi", frequency: "daily", category: "lifestyle" },
+  { id: "water2l",   icon: "💧", name: "Acqua 2L+",       color: "#06b6d4", type: "value", targetValue: 2, unit: "L", frequency: "daily", category: "lifestyle" },
+  { id: "sleep7h",   icon: "😴", name: "Sonno 7h+",       color: "#8b5cf6", type: "value", targetValue: 7, unit: "h", frequency: "daily", category: "lifestyle" }
 ];
 
 function loadHabits() {
@@ -1617,9 +1656,21 @@ function loadHabits() {
       }
       return h;
     });
+    // v15 Migration: merge new default habits introduced (plank, calf raises, supplements)
+    const existingIds = new Set(upgraded.map(h => h.id));
+    let newAdded = 0;
+    for (const def of DEFAULT_HABITS) {
+      if (!existingIds.has(def.id)) {
+        upgraded.push(def);
+        newAdded++;
+        migrated = true;
+      }
+    }
+    if (newAdded > 0) {
+      logInfo(`v15: aggiunte ${newAdded} nuove abitudini (plank, calf raises, integratori)`);
+    }
     if (migrated) {
       saveHabits(upgraded);
-      logInfo("Abitudini migrate al nuovo formato sets");
     }
     return upgraded;
   } catch {
@@ -2783,7 +2834,7 @@ window.onload = function() {
   currentDate = todayStr();
 
   // Log startup info
-  logInfo("Marathon Tracker v13 avviato");
+  logInfo("Marathon Tracker v16 avviato");
 
   // Auto-seed baseline VO2max test if empty
   const vo2Tests = loadVO2Tests();
@@ -2841,10 +2892,196 @@ window.onload = function() {
 // ═══════════════════════════════════════════════════════════
 // TABS
 // ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
+// CRESCITA v16 — Tracking minuti deliberati
+// ═══════════════════════════════════════════════════════════
+const CRESCITA_ACTIVITIES = [
+  { id:"apr_call",          name:"APR Call",          cat:"sales",    icon:"📞", desc:"Chiamate/messaggi nuovi appuntamenti e lead" },
+  { id:"consulenza_fit",    name:"Consulenza FIT",    cat:"sales",    icon:"🤝", desc:"Prime visite" },
+  { id:"consulenza_ac",     name:"Consulenza AC",     cat:"sales",    icon:"✍️", desc:"2° incontri → firma contratti" },
+  { id:"consulenza_as",     name:"Visita Servizio AS",cat:"sales",    icon:"🔧", desc:"Clienti esistenti (6-8 mesi)" },
+  { id:"analisi",           name:"Analisi",           cat:"sales",    icon:"📊", desc:"Prep + analisi pre-incontro" },
+  { id:"client_babysitting",name:"Client Babysitting",cat:"sales",    icon:"🍼", desc:"Follow-up ordini → fatturazione" },
+  { id:"svag_admin",        name:"SVAG Admin",        cat:"sales",    icon:"🗂️", desc:"Amministrazione varia" },
+  { id:"sales_coach",       name:"Sales Coach",       cat:"learning", icon:"🎓", desc:"Studio vendita + contenuti formativi" },
+  { id:"iaf_study",         name:"Studio IAF",        cat:"learning", icon:"📚", desc:"Corso IAF" },
+  { id:"ai_app_dev",        name:"Sviluppo App AI",   cat:"learning", icon:"🤖", desc:"Tracker, automazioni, AI" },
+  { id:"general_study",     name:"Studio generale",   cat:"learning", icon:"📖", desc:"Lettura, formazione" },
+  { id:"finma_response",    name:"FINMA",             cat:"legal",    icon:"⚖️", desc:"Risposta legale (scad. 12 giu)" },
+  { id:"tasse_session",     name:"Tasse",             cat:"legal",    icon:"🧾", desc:"Contabilità/fiscale" },
+  { id:"brand_content",     name:"Brand Contenuti",   cat:"brand",    icon:"✏️", desc:"Produzione contenuti web/social" },
+  { id:"brand_planning",    name:"Brand Strategia",   cat:"brand",    icon:"🧭", desc:"Pianificazione brand" },
+  { id:"family_time",       name:"Famiglia",          cat:"mental",   icon:"👨‍👩‍👦", desc:"Tempo famiglia deliberato" },
+  { id:"journaling",        name:"Journaling",        cat:"mental",   icon:"📓", desc:"Riflessione/diario" },
+  { id:"gym",               name:"Palestra/Forza",    cat:"training", icon:"🏋️", desc:"Pesi, kettlebell, corpo libero" },
+  { id:"walking",           name:"Camminata",         cat:"training", icon:"🚶", desc:"Camminata fitness" },
+  { id:"running",           name:"Corsa",             cat:"training", icon:"🏃", desc:"Running" },
+  { id:"mobility",          name:"Mobilità",          cat:"training", icon:"🧘", desc:"Stretching, mobilità" }
+];
+
+const CRESCITA_CATEGORIES = {
+  sales:    { name:"Sales / SVAG",  icon:"💼", color:"#3b82f6" },
+  learning: { name:"Learning",      icon:"🎓", color:"#a855f7" },
+  legal:    { name:"Legal/Urgent",  icon:"⚖️", color:"#ef4444" },
+  brand:    { name:"Brand",         icon:"🎯", color:"#f59e0b" },
+  mental:   { name:"Mental",        icon:"🧠", color:"#10b981" },
+  training: { name:"Training",      icon:"💪", color:"#ec4899" }
+};
+
+const KEY_CRESCITA = "marathonCrescitaSessions_v1";
+function loadCrescita(){ try { return JSON.parse(localStorage.getItem(KEY_CRESCITA) || "[]"); } catch { return []; } }
+function saveCrescita(arr){ localStorage.setItem(KEY_CRESCITA, JSON.stringify(arr)); }
+let crescitaSessions = loadCrescita();
+
+function addCrescitaSession(activityId, minutes, description){
+  const act = CRESCITA_ACTIVITIES.find(a=>a.id===activityId);
+  if(!act) return;
+  const session = {
+    id: "cs_" + Date.now() + "_" + Math.floor(Math.random()*1000),
+    date: currentDate,
+    activity_id: activityId,
+    category: act.cat,
+    minutes: parseInt(minutes)||0,
+    description: (description||"").trim(),
+    timestamp: new Date().toTimeString().slice(0,5)
+  };
+  crescitaSessions.push(session);
+  saveCrescita(crescitaSessions);
+  try { if(typeof pushCrescitaToSheets==="function") pushCrescitaToSheets(session); } catch(e){}
+  logOk("Crescita +"+minutes+"min", act.name);
+  renderCrescita();
+}
+function deleteCrescitaSession(sessionId){
+  crescitaSessions = crescitaSessions.filter(s=>s.id!==sessionId);
+  saveCrescita(crescitaSessions);
+  renderCrescita();
+}
+function crescitaMinutesByDate(dateStr){ return crescitaSessions.filter(s=>s.date===dateStr).reduce((sum,s)=>sum+s.minutes,0); }
+function crescitaSessionsByDate(dateStr){ return crescitaSessions.filter(s=>s.date===dateStr).sort((a,b)=>a.timestamp.localeCompare(b.timestamp)); }
+function crescitaByCategoryForDate(dateStr){ const out={}; crescitaSessions.filter(s=>s.date===dateStr).forEach(s=>{ out[s.category]=(out[s.category]||0)+s.minutes; }); return out; }
+function crescitaWeekMinutes(refDate){
+  const ref = new Date(refDate+"T12:00:00"); let tot=0;
+  for(let i=0;i<7;i++){ const d=new Date(ref); d.setDate(ref.getDate()-i);
+    const ds = d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+    tot += crescitaMinutesByDate(ds); }
+  return tot;
+}
+function fmtMinutes(min){ if(min<60) return min+"′"; const h=Math.floor(min/60), m=min%60; return m>0 ? `${h}h${String(m).padStart(2,"0")}` : `${h}h`; }
+
+let crescitaSelectedActivity = null;
+function selectCrescitaActivity(activityId){ crescitaSelectedActivity = activityId; renderCrescita(); setTimeout(()=>{ const inp=document.getElementById("crescitaMinInput"); if(inp) inp.focus(); }, 50); }
+function cancelCrescitaInput(){ crescitaSelectedActivity = null; renderCrescita(); }
+function confirmCrescitaInput(){
+  const min = document.getElementById("crescitaMinInput").value;
+  const desc = document.getElementById("crescitaDescInput").value;
+  if(!min || parseInt(min)<=0){ showToast("⚠️ Inserisci i minuti","warn"); return; }
+  addCrescitaSession(crescitaSelectedActivity, min, desc);
+  crescitaSelectedActivity = null;
+  showToast("✅ +"+min+" min registrati","ok");
+  renderCrescita();
+}
+
+function renderCrescita(){
+  const el = document.getElementById("crescitaDashboard");
+  if(!el) return;
+  const viewDate = currentDate;
+  const todaySessions = crescitaSessionsByDate(viewDate);
+  const todayTotal = crescitaMinutesByDate(viewDate);
+  const byCat = crescitaByCategoryForDate(viewDate);
+  const weekTotal = crescitaWeekMinutes(viewDate);
+  let html = "";
+
+  html += `<div style="background:linear-gradient(135deg,rgba(59,130,246,.15),rgba(168,85,247,.12));border:1px solid rgba(99,102,241,.3);border-radius:16px;padding:18px;margin-bottom:16px;">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;">
+      <div>
+        <div style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:700;">Minuti deliberati · ${fmtDate(viewDate)}</div>
+        <div style="font-size:42px;font-weight:800;font-family:'Barlow Condensed',sans-serif;line-height:1;margin-top:4px;color:#fff;">${fmtMinutes(todayTotal)}</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:700;">Ultimi 7 giorni</div>
+        <div style="font-size:28px;font-weight:800;font-family:'Barlow Condensed',sans-serif;line-height:1;margin-top:4px;color:#a5b4fc;">${fmtMinutes(weekTotal)}</div>
+      </div>
+    </div>`;
+  if(todayTotal>0){
+    html += `<div style="margin-top:14px;display:flex;flex-direction:column;gap:6px;">`;
+    Object.keys(CRESCITA_CATEGORIES).forEach(catKey=>{
+      const mins = byCat[catKey]||0;
+      if(mins>0){
+        const cat = CRESCITA_CATEGORIES[catKey];
+        const pct = Math.round((mins/todayTotal)*100);
+        html += `<div style="display:flex;align-items:center;gap:8px;">
+          <div style="width:90px;font-size:12px;color:var(--muted);font-weight:600;">${cat.icon} ${cat.name}</div>
+          <div style="flex:1;background:rgba(255,255,255,.06);border-radius:6px;height:18px;overflow:hidden;">
+            <div style="width:${pct}%;height:100%;background:${cat.color};border-radius:6px;transition:width .3s;"></div>
+          </div>
+          <div style="width:54px;text-align:right;font-size:12px;font-weight:700;color:#fff;">${fmtMinutes(mins)}</div>
+        </div>`;
+      }
+    });
+    html += `</div>`;
+  }
+  html += `</div>`;
+
+  if(crescitaSelectedActivity){
+    const act = CRESCITA_ACTIVITIES.find(a=>a.id===crescitaSelectedActivity);
+    html += `<div style="background:var(--card);border:2px solid ${CRESCITA_CATEGORIES[act.cat].color};border-radius:14px;padding:16px;margin-bottom:16px;">
+      <div style="font-size:18px;font-weight:800;margin-bottom:4px;">${act.icon} ${act.name}</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:14px;">${act.desc}</div>
+      <div style="display:flex;gap:10px;align-items:center;margin-bottom:12px;">
+        <input id="crescitaMinInput" type="text" inputmode="numeric" placeholder="min" style="width:90px;padding:12px;border-radius:10px;border:1px solid var(--border);background:var(--bg);color:var(--fg);font-size:18px;font-weight:700;text-align:center;">
+        <span style="color:var(--muted);font-size:14px;">minuti netti</span>
+      </div>
+      <input id="crescitaDescInput" type="text" placeholder="Cosa hai fatto? (opzionale)" style="width:100%;padding:12px;border-radius:10px;border:1px solid var(--border);background:var(--bg);color:var(--fg);font-size:14px;margin-bottom:14px;box-sizing:border-box;">
+      <div style="display:flex;gap:10px;">
+        <button onclick="confirmCrescitaInput()" style="flex:1;background:linear-gradient(90deg,var(--green),#059669);color:#fff;padding:13px;border-radius:10px;border:none;cursor:pointer;font-weight:800;font-size:15px;">✅ Registra</button>
+        <button onclick="cancelCrescitaInput()" style="background:rgba(255,255,255,.08);color:var(--muted);padding:13px 18px;border-radius:10px;border:none;cursor:pointer;font-weight:700;">Annulla</button>
+      </div>
+    </div>`;
+  } else {
+    Object.keys(CRESCITA_CATEGORIES).forEach(catKey=>{
+      const cat = CRESCITA_CATEGORIES[catKey];
+      const acts = CRESCITA_ACTIVITIES.filter(a=>a.cat===catKey);
+      html += `<div style="margin-bottom:14px;">
+        <div style="font-size:13px;font-weight:700;color:${cat.color};text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">${cat.icon} ${cat.name}</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;">`;
+      acts.forEach(a=>{
+        const todayMin = todaySessions.filter(s=>s.activity_id===a.id).reduce((sum,s)=>sum+s.minutes,0);
+        html += `<button onclick="selectCrescitaActivity('${a.id}')" style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 10px;cursor:pointer;text-align:left;transition:all .15s;position:relative;">
+          <div style="font-size:20px;margin-bottom:3px;">${a.icon}</div>
+          <div style="font-size:13px;font-weight:700;color:var(--fg);line-height:1.2;">${a.name}</div>
+          ${todayMin>0 ? `<div style="position:absolute;top:8px;right:8px;background:${cat.color};color:#fff;font-size:11px;font-weight:800;padding:2px 7px;border-radius:10px;">${fmtMinutes(todayMin)}</div>` : ""}
+        </button>`;
+      });
+      html += `</div></div>`;
+    });
+  }
+
+  if(todaySessions.length>0){
+    html += `<div style="margin-top:18px;"><div style="font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">📋 Sessioni di ${fmtDate(viewDate)}</div>`;
+    todaySessions.forEach(s=>{
+      const act = CRESCITA_ACTIVITIES.find(a=>a.id===s.activity_id) || {name:s.activity_id, icon:"•"};
+      const cat = CRESCITA_CATEGORIES[s.category] || {color:"#888"};
+      html += `<div style="display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--border);border-left:3px solid ${cat.color};border-radius:10px;padding:10px 12px;margin-bottom:6px;">
+        <div style="font-size:18px;">${act.icon}</div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:14px;font-weight:700;">${act.name} · <span style="color:${cat.color};">${fmtMinutes(s.minutes)}</span></div>
+          ${s.description ? `<div style="font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${s.description}</div>` : ""}
+        </div>
+        <div style="font-size:11px;color:var(--muted);">${s.timestamp}</div>
+        <button onclick="deleteCrescitaSession('${s.id}')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:2px 6px;">×</button>
+      </div>`;
+    });
+    html += `</div>`;
+  } else {
+    html += `<div style="text-align:center;padding:30px;color:var(--muted);"><div style="font-size:36px;margin-bottom:8px;">🎯</div><div style="font-size:14px;">Nessuna sessione oggi.<br>Tappa un'attività per registrare i minuti.</div></div>`;
+  }
+  el.innerHTML = html;
+}
+
 function showTab(name) {
-  ["diario","abitudini","piano","readiness","vo2","storico","forza","settings"].forEach(t=>document.getElementById("tab-"+t).style.display=t===name?"block":"none");
+  ["diario","abitudini","crescita","piano","readiness","vo2","storico","forza","settings"].forEach(t=>document.getElementById("tab-"+t).style.display=t===name?"block":"none");
   document.querySelectorAll(".tab").forEach(b=>b.classList.remove("active"));
-  const map={diario:0,abitudini:1,piano:2,readiness:3,vo2:4,storico:5,forza:6,settings:7};
+  const map={diario:0,abitudini:1,crescita:2,piano:3,readiness:4,vo2:5,storico:6,forza:7,settings:8};
   document.querySelectorAll(".tab")[map[name]]?.classList.add("active");
   if(name==="storico") renderHistory();
   if(name==="forza") renderWorkout();
@@ -2852,6 +3089,7 @@ function showTab(name) {
   if(name==="piano") renderPiano();
   if(name==="vo2") renderVO2();
   if(name==="abitudini") renderAbitudini();
+  if(name==="crescita") renderCrescita();
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -2962,7 +3200,19 @@ function renderPasti(){
 function renderPills(){document.getElementById("pillsContainer").innerHTML=ACTIVITY_TYPES.map(a=>`<button class="pill" id="pill-${a.key}" onclick="toggleActivity('${a.key}')">${a.label}</button>`).join("");}
 function refreshPills(){ACTIVITY_TYPES.forEach(a=>{const el=document.getElementById("pill-"+a.key);if(!el)return;const sel=currentActivity.includes(a.key);el.className="pill"+(sel?" active":"");el.style.borderColor=sel?a.color:"rgba(255,255,255,.1)";el.style.background=sel?a.color+"28":"transparent";el.style.color=sel?a.color:"var(--muted)";});}
 function toggleActivity(key){currentActivity=currentActivity.includes(key)?currentActivity.filter(k=>k!==key):[...currentActivity,key];refreshPills();}
-function renderMetricsGroup(cid,metrics){document.getElementById(cid).innerHTML=metrics.map(m=>{if(m.type==="range"){const isPain=m.colorFn==="pain";return`<div class="metric card"><div class="metric-label">${m.icon} ${m.label}</div><div class="range-val" id="rv-${m.key}">—${m.unit}</div><input type="range" min="0" max="10" id="inp-${m.key}" oninput="onMetric('${m.key}',this.value,true,${isPain})"></div>`;}return`<div class="metric card"><div class="metric-label">${m.icon} ${m.label}</div><input type="${m.type}" step="${m.step||''}" placeholder="${m.placeholder||'—'}" id="inp-${m.key}" oninput="onMetric('${m.key}',this.value)"><div class="metric-unit">${m.unit}</div></div>`;}).join("");}
+function renderMetricsGroup(cid,metrics){document.getElementById(cid).innerHTML=metrics.map(m=>{if(m.type==="range"){const isPain=m.colorFn==="pain";return`<div class="metric card"><div class="metric-label">${m.icon} ${m.label}</div><div class="range-val" id="rv-${m.key}">—${m.unit}</div><input type="range" min="0" max="10" id="inp-${m.key}" oninput="onMetric('${m.key}',this.value,true,${isPain})"></div>`;}
+// v14: per i campi numerici uso type="text" + inputmode per evitare il bug iOS Safari
+// in cui il validatore di step causa loss-of-focus durante la digitazione
+let inputType=m.type,inputMode="",inputPattern="";
+if(m.type==="number"){
+  inputType="text";
+  // decimal per step decimali (peso 0.1, sonno 0.5, acqua 0.1, km 0.01), numeric per interi
+  const stepStr=String(m.step||"1");
+  inputMode=stepStr.includes(".")?"decimal":"numeric";
+  inputPattern=stepStr.includes(".")?`pattern="[0-9]*[.,]?[0-9]*"`:`pattern="[0-9]*"`;
+}
+const inputModeAttr=inputMode?`inputmode="${inputMode}"`:"";
+return`<div class="metric card"><div class="metric-label">${m.icon} ${m.label}</div><input type="${inputType}" ${inputModeAttr} ${inputPattern} placeholder="${m.placeholder||'—'}" id="inp-${m.key}" oninput="onMetric('${m.key}',this.value)" autocomplete="off"><div class="metric-unit">${m.unit}</div></div>`;}).join("");}
 function refreshAllMetricValues(){ALL_METRICS.forEach(m=>{const el=document.getElementById("inp-"+m.key);if(!el)return;const v=currentMetrics[m.key];el.value=v!==undefined?v:(m.type==="range"?(m.colorFn==="pain"?0:5):"");if(m.type==="range")updateRangeDisplay(m.key,el.value,m.colorFn==="pain");});}
 function onMetric(key,val,isRange,isPain){currentMetrics[key]=isRange?parseInt(val):val;if(isRange)updateRangeDisplay(key,val,isPain);}
 function updateRangeDisplay(key,val,isPain){const el=document.getElementById("rv-"+key);if(!el)return;const n=parseInt(val);const color=isPain?(n<=2?"#10b981":n<=5?"#f59e0b":"#ef4444"):(n>=8?"#10b981":n>=5?"#f59e0b":"#ef4444");el.style.color=color;el.textContent=n+"/10";}
