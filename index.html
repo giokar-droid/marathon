@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>🏅 Marathon Tracker v16.1</title>
+<title>🏅 Marathon Tracker v16.2</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -279,7 +279,7 @@ code{background:rgba(255,255,255,.1);padding:2px 7px;border-radius:5px;font-size
   <div class="topbar-inner">
     <div class="topbar-row1">
       <div>
-        <div class="topbar-sub">Marathon Tracker <span class="v-badge">v16.1</span></div>
+        <div class="topbar-sub">Marathon Tracker <span class="v-badge">v16.2</span></div>
         <div class="topbar-title">🏅 25.10.2026 — 5h00'</div>
       </div>
       <!-- SYNC STATUS STRIP -->
@@ -2834,7 +2834,7 @@ window.onload = function() {
   currentDate = todayStr();
 
   // Log startup info
-  logInfo("Marathon Tracker v16.1 avviato");
+  logInfo("Marathon Tracker v16.2 avviato");
 
   // Auto-seed baseline VO2max test if empty
   const vo2Tests = loadVO2Tests();
@@ -3573,6 +3573,15 @@ function mergePasteDayIntoLog(existing, incoming) {
     }
   }
 
+  // CRESCITA (minuti deliberati) - preview only, applicate in confirmPasteDay
+  if (Array.isArray(incoming.crescita) && incoming.crescita.length > 0) {
+    incoming.crescita.forEach(cs => {
+      const act = (typeof CRESCITA_ACTIVITIES !== "undefined") ? CRESCITA_ACTIVITIES.find(a=>a.id===cs.activity_id) : null;
+      const nm = act ? act.name : cs.activity_id;
+      changes.push({field: `crescita.${nm}`, from: "-", to: `${cs.minutes||0} min`});
+    });
+  }
+
   return { merged, changes };
 }
 
@@ -3653,6 +3662,7 @@ function confirmPasteDay() {
   const updatedDates = [];
   const nutritionByDate = {}; // date -> [pasti]
   const habitsByDate = {};    // date -> {habitId: data}
+  const crescitaToImport = []; // sessioni crescita da applicare
 
   for (const p of parsedPasteDay) {
     if (p.changes.length === 0) continue;
@@ -3680,10 +3690,18 @@ function confirmPasteDay() {
       nutritionByDate[date] = p.item.pasti;
     }
 
+    // Capture crescita sessions (minuti deliberati)
+    if (Array.isArray(p.item.crescita) && p.item.crescita.length > 0) {
+      for (const cs of p.item.crescita) {
+        crescitaToImport.push({ ...cs, date });
+      }
+    }
+
     // Apply main log merge (excluding the habits sub-object)
     const mergedLog = { ...p.merged };
     delete mergedLog.abitudini;
     delete mergedLog.session;
+    delete mergedLog.crescita;
     mergedLog.savedAt = new Date().toISOString();
     mergedLog.device = (typeof deviceId !== "undefined" ? deviceId : "claude_paste");
 
@@ -3693,6 +3711,31 @@ function confirmPasteDay() {
     }
     totalChanges += p.changes.length;
     updatedDates.push(date);
+  }
+
+  // Apply crescita sessions to localStorage (with dedupe by date+activity+minutes+timestamp)
+  let crescitaAdded = 0;
+  if (crescitaToImport.length > 0) {
+    for (const cs of crescitaToImport) {
+      const act = CRESCITA_ACTIVITIES.find(a => a.id === cs.activity_id);
+      if (!act) { logWarn("Crescita: attività sconosciuta", cs.activity_id); continue; }
+      // Dedupe: stessa data+attività+minuti+timestamp = non duplicare
+      const dup = crescitaSessions.find(s =>
+        s.date === cs.date && s.activity_id === cs.activity_id &&
+        s.minutes === (parseInt(cs.minutes)||0) && s.timestamp === (cs.timestamp||""));
+      if (dup) continue;
+      crescitaSessions.push({
+        id: "cs_" + Date.now() + "_" + Math.floor(Math.random()*10000),
+        date: cs.date,
+        activity_id: cs.activity_id,
+        category: act.cat,
+        minutes: parseInt(cs.minutes) || 0,
+        description: (cs.description || "").trim(),
+        timestamp: cs.timestamp || ""
+      });
+      crescitaAdded++;
+    }
+    if (crescitaAdded > 0) { saveCrescita(crescitaSessions); try { renderCrescita(); } catch(e){} }
   }
 
   try { saveLocal(); } catch(e) { logError("saveLocal failed", e.message); }
@@ -3735,8 +3778,16 @@ function confirmPasteDay() {
           logError(`Push habits ${date} fallito`, e.message);
         }
       }
-      if (nutritionOk > 0 || habitsOk > 0) {
-        showToast(`📤 Sheets: ${nutritionOk} pasti, ${habitsOk} abitudini pushate${(nutritionErr+habitsErr)>0?` (${nutritionErr+habitsErr} err)`:""}`, (nutritionErr+habitsErr) > 0 ? "warn" : "ok");
+      let crescitaOk = 0, crescitaErr = 0;
+      if (crescitaAdded > 0) {
+        const toPush = crescitaSessions.slice(-crescitaAdded);
+        for (const cs of toPush) {
+          try { await pushCrescitaToSheets(cs); crescitaOk++; }
+          catch(e) { crescitaErr++; logError("Push crescita fallito", e.message); }
+        }
+      }
+      if (nutritionOk > 0 || habitsOk > 0 || crescitaOk > 0) {
+        showToast(`📤 Sheets: ${nutritionOk} pasti, ${habitsOk} abitudini, ${crescitaOk} crescita${(nutritionErr+habitsErr+crescitaErr)>0?` (${nutritionErr+habitsErr+crescitaErr} err)`:""}`, (nutritionErr+habitsErr+crescitaErr) > 0 ? "warn" : "ok");
       }
     }, 1500);
   } else if (Object.keys(nutritionByDate).length > 0 || Object.keys(habitsByDate).length > 0) {
