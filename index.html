@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>🏅 Marathon Tracker v16.3</title>
+<title>🏅 Marathon Tracker v16.4</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -279,7 +279,7 @@ code{background:rgba(255,255,255,.1);padding:2px 7px;border-radius:5px;font-size
   <div class="topbar-inner">
     <div class="topbar-row1">
       <div>
-        <div class="topbar-sub">Marathon Tracker <span class="v-badge">v16.3</span></div>
+        <div class="topbar-sub">Marathon Tracker <span class="v-badge">v16.4</span></div>
         <div class="topbar-title">🏅 25.10.2026 — 5h00'</div>
       </div>
       <!-- SYNC STATUS STRIP -->
@@ -2856,7 +2856,7 @@ window.onload = function() {
   currentDate = todayStr();
 
   // Log startup info
-  logInfo("Marathon Tracker v16.3 avviato");
+  logInfo("Marathon Tracker v16.4 avviato");
 
   // Auto-seed baseline VO2max test if empty
   const vo2Tests = loadVO2Tests();
@@ -2938,7 +2938,8 @@ const CRESCITA_ACTIVITIES = [
   { id:"gym",               name:"Palestra/Forza",    cat:"training", icon:"🏋️", desc:"Pesi, kettlebell, corpo libero" },
   { id:"walking",           name:"Camminata",         cat:"training", icon:"🚶", desc:"Camminata fitness" },
   { id:"running",           name:"Corsa",             cat:"training", icon:"🏃", desc:"Running" },
-  { id:"mobility",          name:"Mobilità",          cat:"training", icon:"🧘", desc:"Stretching, mobilità" }
+  { id:"mobility",          name:"Mobilità",          cat:"training", icon:"🧘", desc:"Stretching, mobilità" },
+  { id:"faccende",          name:"Faccende",          cat:"faccende", icon:"🏠", desc:"Commissioni e gestioni personali deliberate" }
 ];
 
 const CRESCITA_CATEGORIES = {
@@ -2947,7 +2948,8 @@ const CRESCITA_CATEGORIES = {
   legal:    { name:"Legal/Urgent",  icon:"⚖️", color:"#ef4444" },
   brand:    { name:"Brand",         icon:"🎯", color:"#f59e0b" },
   mental:   { name:"Mental",        icon:"🧠", color:"#10b981" },
-  training: { name:"Training",      icon:"💪", color:"#ec4899" }
+  training: { name:"Training",      icon:"💪", color:"#ec4899" },
+  faccende: { name:"Faccende",      icon:"🏠", color:"#94a3b8" }
 };
 
 const KEY_CRESCITA = "marathonCrescitaSessions_v1";
