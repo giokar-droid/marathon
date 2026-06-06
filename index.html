@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>🏅 Marathon Tracker v16.4</title>
+<title>🏅 Marathon Tracker v16.5</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -279,7 +279,7 @@ code{background:rgba(255,255,255,.1);padding:2px 7px;border-radius:5px;font-size
   <div class="topbar-inner">
     <div class="topbar-row1">
       <div>
-        <div class="topbar-sub">Marathon Tracker <span class="v-badge">v16.4</span></div>
+        <div class="topbar-sub">Marathon Tracker <span class="v-badge">v16.5</span></div>
         <div class="topbar-title">🏅 25.10.2026 — 5h00'</div>
       </div>
       <!-- SYNC STATUS STRIP -->
@@ -455,6 +455,7 @@ code{background:rgba(255,255,255,.1);padding:2px 7px;border-radius:5px;font-size
     <button class="btn" style="background:var(--green);color:white;" onclick="manualSync()">↻ Sync completo ora</button>
     <button class="btn" style="background:var(--purple);color:white;" onclick="forcePushAll()">⬆️ Push tutto a Sheets</button>
     <button class="btn" style="background:#ec4899;color:white;" onclick="testWriteAPI()">🧪 Test Write API (pasti/abitudini)</button>
+    <button class="btn" style="background:#8b5cf6;color:white;" onclick="testSecretKey()">🔑 Test Chiave Segreta</button>
     <button class="btn" style="background:rgba(255,255,255,.1);color:white;border:1px solid rgba(255,255,255,.2);" onclick="pushAllNutritionAndHabits()">📤 Push tutti pasti & abitudini</button>
   </div>
   <div class="card">
@@ -1326,6 +1327,57 @@ async function pushCrescitaToSheets(session) {
       timestamp: session.timestamp
     });
   } catch(e) { logError("Push crescita fallita", e.message); }
+}
+
+async function testSecretKey() {
+  if (!sheetUrl) { showToast("⚠️ Configura URL Sheets prima", "warn"); return; }
+  if (!secretKey) { showToast("⚠️ Nessuna chiave segreta impostata", "warn"); logWarn("Test chiave: nessuna chiave impostata"); return; }
+  logInfo("Test chiave segreta avviato...");
+  showToast("⏳ Verifico la chiave segreta...", "info");
+  // Scrittura innocua: una sessione crescita di test che poi NON lascia traccia significativa.
+  // Usiamo un session_id riconoscibile così è facile da identificare/rimuovere.
+  const testPayload = {
+    session_id: "keytest_" + Date.now(),
+    date: todayStr(),
+    activity_id: "__keytest__",
+    category: "__test__",
+    minutes: 0,
+    description: "Test chiave segreta (riga ignorabile)",
+    timestamp: new Date().toTimeString().slice(0,5)
+  };
+  const dataStr = encodeURIComponent(JSON.stringify(testPayload));
+  const url = `${sheetUrl}?action=write&key=${encodeURIComponent(secretKey)}&type=crescita&data=${dataStr}&t=${Date.now()}`;
+  try {
+    let result;
+    try {
+      const r = await Promise.race([
+        fetch(url),
+        new Promise((_,rej)=>setTimeout(()=>rej(new Error("Timeout")),15000))
+      ]);
+      result = await r.json();
+    } catch(fetchErr) {
+      // fallback JSONP se CORS/fetch fallisce
+      result = await jsonpFetch(url, 15000);
+    }
+    if (result && result.error) {
+      if (String(result.error).toLowerCase().includes("invalid key")) {
+        showToast("❌ CHIAVE SBAGLIATA — non corrisponde a quella del backend", "err");
+        logError("Test chiave FALLITO", "La chiave nell'app NON corrisponde al SECRET_KEY dell'Apps Script");
+      } else {
+        showToast("⚠️ Errore backend: " + result.error, "warn");
+        logWarn("Test chiave: errore backend", result.error);
+      }
+    } else if (result && result.status === "saved") {
+      showToast("✅ CHIAVE CORRETTA — scrittura autorizzata dal backend", "ok");
+      logOk("Test chiave RIUSCITO", "La chiave è giusta. Riga test '__keytest__' creata nel foglio Crescita_v1 (ignorabile/cancellabile).");
+    } else {
+      showToast("⚠️ Risposta inattesa dal backend", "warn");
+      logWarn("Test chiave: risposta inattesa", JSON.stringify(result).slice(0,120));
+    }
+  } catch(e) {
+    showToast("❌ Test fallito (connessione?): " + e.message, "err");
+    logError("Test chiave: errore", e.message);
+  }
 }
 
 async function testWriteAPI() {
@@ -2856,7 +2908,7 @@ window.onload = function() {
   currentDate = todayStr();
 
   // Log startup info
-  logInfo("Marathon Tracker v16.4 avviato");
+  logInfo("Marathon Tracker v16.5 avviato");
 
   // Auto-seed baseline VO2max test if empty
   const vo2Tests = loadVO2Tests();
