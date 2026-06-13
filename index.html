@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>🏅 Marathon Tracker v16.5</title>
+<title>🏅 Marathon Tracker v16.6</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -279,7 +279,7 @@ code{background:rgba(255,255,255,.1);padding:2px 7px;border-radius:5px;font-size
   <div class="topbar-inner">
     <div class="topbar-row1">
       <div>
-        <div class="topbar-sub">Marathon Tracker <span class="v-badge">v16.5</span></div>
+        <div class="topbar-sub">Marathon Tracker <span class="v-badge">v16.6</span></div>
         <div class="topbar-title">🏅 25.10.2026 — 5h00'</div>
       </div>
       <!-- SYNC STATUS STRIP -->
@@ -2908,7 +2908,7 @@ window.onload = function() {
   currentDate = todayStr();
 
   // Log startup info
-  logInfo("Marathon Tracker v16.5 avviato");
+  logInfo("Marathon Tracker v16.6 avviato");
 
   // Auto-seed baseline VO2max test if empty
   const vo2Tests = loadVO2Tests();
@@ -3044,6 +3044,84 @@ function crescitaWeekMinutes(refDate){
 }
 function fmtMinutes(min){ if(min<60) return min+"′"; const h=Math.floor(min/60), m=min%60; return m>0 ? `${h}h${String(m).padStart(2,"0")}` : `${h}h`; }
 
+// ─── CRESCITA v16.6: selettore periodo (Oggi / 7gg / WTD / MTD / YTD / personalizzato) ───
+function dateToStr(d){ return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+function strToDate(s){ return new Date(s+"T12:00:00"); }
+
+// Stato del periodo selezionato per il tab Crescita
+let crescitaPeriod = { mode: "today", from: null, to: null };
+
+// Calcola [from, to] (stringhe ISO) in base al mode, ancorato a currentDate
+function crescitaResolveRange(){
+  const ref = strToDate(currentDate);
+  const refStr = currentDate;
+  let from, to;
+  switch(crescitaPeriod.mode){
+    case "today":
+      from = to = refStr; break;
+    case "7d": {
+      const d = new Date(ref); d.setDate(ref.getDate()-6);
+      from = dateToStr(d); to = refStr; break;
+    }
+    case "wtd": {
+      // settimana corrente: da lunedì a currentDate
+      const dow = (ref.getDay()+6)%7; // 0=lunedì
+      const d = new Date(ref); d.setDate(ref.getDate()-dow);
+      from = dateToStr(d); to = refStr; break;
+    }
+    case "mtd": {
+      from = dateToStr(new Date(ref.getFullYear(), ref.getMonth(), 1)); to = refStr; break;
+    }
+    case "ytd": {
+      from = dateToStr(new Date(ref.getFullYear(), 0, 1)); to = refStr; break;
+    }
+    case "custom":
+      from = crescitaPeriod.from || refStr;
+      to = crescitaPeriod.to || refStr;
+      if(from > to){ const t=from; from=to; to=t; } // swap se invertiti
+      break;
+    default:
+      from = to = refStr;
+  }
+  return { from, to };
+}
+
+function crescitaSessionsInRange(from, to){
+  return crescitaSessions.filter(s=> s.date>=from && s.date<=to)
+    .sort((a,b)=> (a.date+a.timestamp).localeCompare(b.date+b.timestamp));
+}
+function crescitaMinutesInRange(from, to){
+  return crescitaSessions.filter(s=> s.date>=from && s.date<=to).reduce((sum,s)=>sum+s.minutes,0);
+}
+function crescitaByCategoryInRange(from, to){
+  const out={};
+  crescitaSessions.filter(s=> s.date>=from && s.date<=to).forEach(s=>{ out[s.category]=(out[s.category]||0)+s.minutes; });
+  return out;
+}
+function crescitaByActivityInRange(from, to){
+  const out={};
+  crescitaSessions.filter(s=> s.date>=from && s.date<=to).forEach(s=>{ out[s.activity_id]=(out[s.activity_id]||0)+s.minutes; });
+  return out;
+}
+function crescitaDaysSpanned(from, to){
+  return Math.round((strToDate(to)-strToDate(from))/86400000)+1;
+}
+
+function setCrescitaPeriod(mode){
+  crescitaPeriod.mode = mode;
+  renderCrescita();
+}
+function setCrescitaCustomFrom(v){ crescitaPeriod.mode="custom"; crescitaPeriod.from=v; if(!crescitaPeriod.to) crescitaPeriod.to=v; renderCrescita(); }
+function setCrescitaCustomTo(v){ crescitaPeriod.mode="custom"; crescitaPeriod.to=v; if(!crescitaPeriod.from) crescitaPeriod.from=v; renderCrescita(); }
+
+const CRESCITA_PERIOD_LABELS = {
+  today:"Oggi", "7d":"Ultimi 7 giorni", wtd:"Settimana (WTD)", mtd:"Mese (MTD)", ytd:"Anno (YTD)", custom:"Personalizzato"
+};
+function crescitaPeriodLabel(from, to){
+  if(from===to) return fmtDate(from);
+  return fmtDate(from)+" → "+fmtDate(to);
+}
+
 let crescitaSelectedActivity = null;
 function selectCrescitaActivity(activityId){ crescitaSelectedActivity = activityId; renderCrescita(); setTimeout(()=>{ const inp=document.getElementById("crescitaMinInput"); if(inp) inp.focus(); }, 50); }
 function cancelCrescitaInput(){ crescitaSelectedActivity = null; renderCrescita(); }
@@ -3061,36 +3139,76 @@ function renderCrescita(){
   const el = document.getElementById("crescitaDashboard");
   if(!el) return;
   const viewDate = currentDate;
+  // statistiche sul periodo selezionato
+  const range = crescitaResolveRange();
+  const rangeSessions = crescitaSessionsInRange(range.from, range.to);
+  const rangeTotal = crescitaMinutesInRange(range.from, range.to);
+  const byCat = crescitaByCategoryInRange(range.from, range.to);
+  const byAct = crescitaByActivityInRange(range.from, range.to);
+  const nDays = crescitaDaysSpanned(range.from, range.to);
+  const avgPerDay = nDays>1 ? Math.round(rangeTotal/nDays) : null;
+  // sessioni di oggi (per i badge sulle attività, la registrazione è sempre su currentDate)
   const todaySessions = crescitaSessionsByDate(viewDate);
-  const todayTotal = crescitaMinutesByDate(viewDate);
-  const byCat = crescitaByCategoryForDate(viewDate);
-  const weekTotal = crescitaWeekMinutes(viewDate);
   let html = "";
 
+  // ─── SELETTORE PERIODO ───
+  const presets = [["today","Oggi"],["7d","7gg"],["wtd","WTD"],["mtd","MTD"],["ytd","YTD"],["custom","Personalizzato"]];
+  html += `<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;">`;
+  presets.forEach(([mode,label])=>{
+    const active = crescitaPeriod.mode===mode;
+    html += `<button onclick="setCrescitaPeriod('${mode}')" style="padding:8px 14px;border-radius:10px;border:1px solid ${active?'#6366f1':'var(--border)'};background:${active?'linear-gradient(90deg,#3b82f6,#6366f1)':'var(--card)'};color:${active?'#fff':'var(--muted)'};font-weight:700;font-size:14px;cursor:pointer;">${label}</button>`;
+  });
+  html += `</div>`;
+
+  // ─── DATE PICKER ───
+  if(crescitaPeriod.mode==="custom"){
+    html += `<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px;">
+      <div style="display:flex;flex-direction:column;gap:3px;">
+        <label style="font-size:11px;color:var(--muted);text-transform:uppercase;font-weight:700;">Da</label>
+        <input type="date" value="${range.from}" onchange="setCrescitaCustomFrom(this.value)" style="padding:9px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--fg);font-size:14px;">
+      </div>
+      <div style="display:flex;flex-direction:column;gap:3px;">
+        <label style="font-size:11px;color:var(--muted);text-transform:uppercase;font-weight:700;">A</label>
+        <input type="date" value="${range.to}" onchange="setCrescitaCustomTo(this.value)" style="padding:9px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--fg);font-size:14px;">
+      </div>
+    </div>`;
+  } else {
+    // anche fuori da custom, permetto di cambiare la data di riferimento con un date picker
+    html += `<div style="display:flex;gap:8px;align-items:center;margin-bottom:14px;">
+      <span style="font-size:13px;color:var(--muted);">Riferimento:</span>
+      <input type="date" value="${currentDate}" onchange="document.getElementById('logDate').value=this.value; onDateChange(); showTab('crescita');" style="padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--fg);font-size:14px;">
+    </div>`;
+  }
+
+  // ─── HEADER STATISTICHE PERIODO ───
   html += `<div style="background:linear-gradient(135deg,rgba(59,130,246,.15),rgba(168,85,247,.12));border:1px solid rgba(99,102,241,.3);border-radius:16px;padding:18px;margin-bottom:16px;">
     <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;">
       <div>
-        <div style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:700;">Minuti deliberati · ${fmtDate(viewDate)}</div>
-        <div style="font-size:42px;font-weight:800;font-family:'Barlow Condensed',sans-serif;line-height:1;margin-top:4px;color:#fff;">${fmtMinutes(todayTotal)}</div>
+        <div style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:700;">Minuti deliberati · ${CRESCITA_PERIOD_LABELS[crescitaPeriod.mode]}</div>
+        <div style="font-size:13px;color:#a5b4fc;margin-top:2px;">${crescitaPeriodLabel(range.from, range.to)}</div>
+        <div style="font-size:42px;font-weight:800;font-family:'Barlow Condensed',sans-serif;line-height:1;margin-top:6px;color:#fff;">${fmtMinutes(rangeTotal)}</div>
       </div>
       <div style="text-align:right;">
-        <div style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:700;">Ultimi 7 giorni</div>
-        <div style="font-size:28px;font-weight:800;font-family:'Barlow Condensed',sans-serif;line-height:1;margin-top:4px;color:#a5b4fc;">${fmtMinutes(weekTotal)}</div>
+        ${avgPerDay!==null ? `<div style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:700;">Media / giorno</div>
+        <div style="font-size:28px;font-weight:800;font-family:'Barlow Condensed',sans-serif;line-height:1;margin-top:4px;color:#a5b4fc;">${fmtMinutes(avgPerDay)}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">${nDays} giorni</div>` : ``}
       </div>
     </div>`;
-  if(todayTotal>0){
+  // barre per categoria sul periodo
+  if(rangeTotal>0){
     html += `<div style="margin-top:14px;display:flex;flex-direction:column;gap:6px;">`;
     Object.keys(CRESCITA_CATEGORIES).forEach(catKey=>{
       const mins = byCat[catKey]||0;
       if(mins>0){
         const cat = CRESCITA_CATEGORIES[catKey];
-        const pct = Math.round((mins/todayTotal)*100);
+        const pct = Math.round((mins/rangeTotal)*100);
         html += `<div style="display:flex;align-items:center;gap:8px;">
           <div style="width:100px;font-size:14px;color:var(--muted);font-weight:600;">${cat.icon} ${cat.name}</div>
           <div style="flex:1;background:rgba(255,255,255,.06);border-radius:6px;height:18px;overflow:hidden;">
             <div style="width:${pct}%;height:100%;background:${cat.color};border-radius:6px;transition:width .3s;"></div>
           </div>
-          <div style="width:54px;text-align:right;font-size:12px;font-weight:700;color:#fff;">${fmtMinutes(mins)}</div>
+          <div style="width:64px;text-align:right;font-size:12px;font-weight:700;color:#fff;">${fmtMinutes(mins)}</div>
+          <div style="width:38px;text-align:right;font-size:11px;color:var(--muted);">${pct}%</div>
         </div>`;
       }
     });
@@ -3135,9 +3253,10 @@ function renderCrescita(){
     });
   }
 
-  if(todaySessions.length>0){
-    html += `<div style="margin-top:18px;"><div style="font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">📋 Sessioni di ${fmtDate(viewDate)}</div>`;
-    todaySessions.forEach(s=>{
+  const multiDay = range.from !== range.to;
+  if(rangeSessions.length>0){
+    html += `<div style="margin-top:18px;"><div style="font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">📋 Sessioni · ${crescitaPeriodLabel(range.from, range.to)} (${rangeSessions.length})</div>`;
+    rangeSessions.forEach(s=>{
       const act = CRESCITA_ACTIVITIES.find(a=>a.id===s.activity_id) || {name:s.activity_id, icon:"•"};
       const cat = CRESCITA_CATEGORIES[s.category] || {color:"#888"};
       html += `<div style="display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--border);border-left:3px solid ${cat.color};border-radius:10px;padding:12px 14px;margin-bottom:6px;">
@@ -3146,16 +3265,18 @@ function renderCrescita(){
           <div style="font-size:16px;font-weight:700;">${act.name} · <span style="color:${cat.color};">${fmtMinutes(s.minutes)}</span></div>
           ${s.description ? `<div style="font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${s.description}</div>` : ""}
         </div>
-        <div style="font-size:13px;color:var(--muted);">${s.timestamp}</div>
+        <div style="font-size:11px;color:var(--muted);text-align:right;">${multiDay ? fmtDateShort(s.date)+"<br>" : ""}${s.timestamp}</div>
         <button onclick="deleteCrescitaSession('${s.id}')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;padding:2px 6px;">×</button>
       </div>`;
     });
     html += `</div>`;
   } else {
-    html += `<div style="text-align:center;padding:30px;color:var(--muted);"><div style="font-size:36px;margin-bottom:8px;">🎯</div><div style="font-size:14px;">Nessuna sessione oggi.<br>Tappa un'attività per registrare i minuti.</div></div>`;
+    html += `<div style="text-align:center;padding:30px;color:var(--muted);"><div style="font-size:36px;margin-bottom:8px;">🎯</div><div style="font-size:14px;">Nessuna sessione nel periodo selezionato.<br>Tappa un'attività per registrare i minuti (su ${fmtDate(viewDate)}).</div></div>`;
   }
   el.innerHTML = html;
 }
+
+function fmtDateShort(s){ const d=strToDate(s); return String(d.getDate()).padStart(2,"0")+"/"+String(d.getMonth()+1).padStart(2,"0"); }
 
 function showTab(name) {
   ["diario","abitudini","crescita","piano","readiness","vo2","storico","forza","settings"].forEach(t=>document.getElementById("tab-"+t).style.display=t===name?"block":"none");
