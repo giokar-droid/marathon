@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>🏅 Marathon Tracker v17.11</title>
+<title>🏅 Marathon Tracker v17.12</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -291,7 +291,7 @@ code{background:rgba(255,255,255,.1);padding:2px 7px;border-radius:5px;font-size
   <div class="topbar-inner">
     <div class="topbar-row1">
       <div>
-        <div class="topbar-sub">Marathon Tracker <span class="v-badge">v17.11</span></div>
+        <div class="topbar-sub">Marathon Tracker <span class="v-badge">v17.12</span></div>
         <div class="topbar-title">🏅 25.10.2026 — <span id="topbarReadiness" title="Proiezione Readiness aggiornata">…</span></div>
       </div>
       <!-- SYNC STATUS STRIP -->
@@ -3029,7 +3029,7 @@ window.onload = function() {
   currentDate = todayStr();
 
   // Log startup info
-  logInfo("Marathon Tracker v17.11 avviato");
+  logInfo("Marathon Tracker v17.12 avviato");
   try{ updateTopbarReadiness(); }catch(e){}
 
   // Auto-seed baseline VO2max test if empty
@@ -3491,15 +3491,16 @@ function v17WeeklyReportData(){
   const series=v17WeightSeries(365);
   const inWin=series.filter(p=>p.d>=cut);
   const dw=inWin.length>=2?(inWin[inWin.length-1].w-inWin[0].w):null;
+  const wN=inWin.length; const wLast=wN?inWin[wN-1].w:null;
   const habits=loadHabits(); let full=0, tot=0;
   for(let i=0;i<7;i++){ const ds=v17DateOffset(i); habits.forEach(h=>{ tot++; if(isHabitDoneToday(h,ds)==="full") full++; }); }
   const pct=tot?Math.round(full/tot*100):0;
   let best={name:"—",s:0}; habits.forEach(h=>{const s=calcHabitStreak(h); if(s>best.s) best={name:h.name,s:s};});
-  return {km:km.toFixed(1),passi:passi,sessions:sessions,dw:dw,pct:pct,best:best};
+  return {km:km.toFixed(1),passi:passi,sessions:sessions,dw:dw,wN:wN,wLast:wLast,pct:pct,best:best};
 }
 function v17WeeklyReportCard(){
   const r=v17WeeklyReportData();
-  const dwTxt=r.dw===null?"—":(r.dw>0?"+":"")+r.dw.toFixed(1)+" kg";
+  const dwTxt=r.dw!==null?((r.dw>0?"+":"")+r.dw.toFixed(1)+" kg"):(r.wN===1?r.wLast.toFixed(1)+" (unica)":"—");
   return '<div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px;">'
     +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">'
     +'<div style="font-weight:800;font-size:16px;">📋 Report ultimi 7 giorni</div>'
@@ -3515,7 +3516,7 @@ function v17WeeklyReportCard(){
 }
 function v17CopyWeeklyReport(){
   const r=v17WeeklyReportData();
-  const dwTxt=r.dw===null?"n.d.":(r.dw>0?"+":"")+r.dw.toFixed(1)+" kg";
+  const dwTxt=r.dw!==null?((r.dw>0?"+":"")+r.dw.toFixed(1)+" kg"):(r.wN===1?r.wLast.toFixed(1)+" kg (unica pesata in 7g, delta da domani)":"n.d.");
   const txt="📋 Report settimana (ultimi 7g)\n⚖️ Peso: "+dwTxt+"\n🔥 Abitudini full: "+r.pct+"%\n🏃 "+r.km+" km · "+r.sessions+" sessioni\n🚶 "+r.passi.toLocaleString("it-IT")+" passi\n🏆 Streak top: "+r.best.name+" ("+r.best.s+"g)";
   (navigator.clipboard?navigator.clipboard.writeText(txt):Promise.reject()).then(()=>showToast("📋 Report copiato","ok")).catch(()=>prompt("Copia il report:",txt));
 }
