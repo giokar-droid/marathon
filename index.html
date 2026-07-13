@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>🏅 Marathon Tracker v17.23</title>
+<title>🏅 Marathon Tracker v17.26</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -291,7 +291,7 @@ code{background:rgba(255,255,255,.1);padding:2px 7px;border-radius:5px;font-size
   <div class="topbar-inner">
     <div class="topbar-row1">
       <div>
-        <div class="topbar-sub">Marathon Tracker <span class="v-badge">v17.23</span></div>
+        <div class="topbar-sub">Marathon Tracker <span class="v-badge">v17.26</span></div>
         <div class="topbar-title">🏅 25.10.2026 — <span id="topbarReadiness" title="Proiezione Readiness aggiornata">…</span></div>
       </div>
       <!-- SYNC STATUS STRIP -->
@@ -2064,6 +2064,12 @@ function quickToggleHabit(habitId) {
   renderAbitudini();
 }
 
+function updateHabitDetailSilent(habitId, field, val) {
+  const date = currentAbitudineDate || todayStr();
+  const existing = getHabitDayLog(date, habitId) || {};
+  existing[field] = parseFloat(val) || 0;
+  setHabitDayLog(date, habitId, existing); // niente re-render mentre digiti → focus mantenuto
+}
 function updateHabitDetail(habitId, field, val) {
   const date = currentAbitudineDate || todayStr();
   const existing = getHabitDayLog(date, habitId) || {};
@@ -2272,7 +2278,7 @@ function renderAbitudini() {
         <div class="habit-detail-row" style="grid-template-columns:1fr 1fr;">
           <div>
             <div class="habit-detail-label">${h.unit || "Valore"}</div>
-            <input type="number" step="0.1" class="habit-detail-input" value="${value || ""}" placeholder="${h.targetValue}" oninput="updateHabitDetail('${h.id}', 'value', this.value)">
+            <input type="number" step="${h.blockSize || 1}" min="0" class="habit-detail-input" value="${value || ""}" placeholder="${h.targetValue}" oninput="updateHabitDetailSilent('${h.id}', 'value', this.value)" onchange="updateHabitDetail('${h.id}', 'value', this.value)">
           </div>
           <div>
             <div class="habit-detail-label">Target</div>
@@ -3064,7 +3070,7 @@ window.onload = function() {
   currentDate = todayStr();
 
   // Log startup info
-  logInfo("Marathon Tracker v17.23 avviato");
+  logInfo("Marathon Tracker v17.26 avviato");
   try{ updateTopbarReadiness(); }catch(e){}
 
   // Auto-seed baseline VO2max test if empty
@@ -3713,7 +3719,17 @@ const V17_GESTO_MICRO = {
 };
 function v17GestoCandidates(date) {
   const habits = loadHabits().filter(h => h.frequency === "daily");
-  const undone = habits.filter(h => !v17StreakDone(h, date));
+  const undone = habits.filter(h => {
+    // Abitudini a blocchi: restano candidate finché non raggiungono il TARGET PIENO,
+    // non lo streak minimo (altrimenti la lettura sparirebbe già a 5' invece che a 30').
+    if (h.blockSize && h.type === "value" && h.targetValue) {
+      // Abitudine a blocchi: resta nella card ORA finché l'utente non tocca "Ho finito"
+      // (gestoDone) — così può aggiungere blocchi anche OLTRE il target senza che sparisca.
+      const log = getHabitDayLog(date, h.id) || {};
+      return !log.gestoDone;
+    }
+    return !v17StreakDone(h, date);
+  });
   const hr = new Date().getHours();
   let order;
   if (hr < 12) order = ["circuito_am","vitamina_d_am","multivitaminico_am","creatina_am","omega3_am","lettura_libri","water2l","walk7k"];
@@ -3727,6 +3743,13 @@ function v17GestoCandidates(date) {
 function v17NextGesto() {
   const c = v17GestoCandidates(currentAbitudineDate || todayStr());
   if (c.length) v17GestoIdx = (v17GestoIdx + 1) % c.length;
+  renderAbitudini();
+}
+function v17GestoFinish(id, date){
+  const log = getHabitDayLog(date, id) || {};
+  log.gestoDone = true;              // non tocca il valore: 45' restano 45'
+  setHabitDayLog(date, id, log);
+  v17GestoIdx = 0;
   renderAbitudini();
 }
 function v17MarkDone(id) {
@@ -3764,13 +3787,14 @@ function v17GestoCard(date, viewingToday) {
   let progressHtml = "", btnRow = "";
   if (isBlock) {
     const bN=v17BlockCount(h), bDone=v17BlocksDone(h,gv);
+    const reached = gv >= h.targetValue;
     let pips=""; for(let i=0;i<bN;i++){ pips+='<div style="flex:1;height:12px;border-radius:5px;background:'+(i<bDone?"#fff":"rgba(255,255,255,.18)")+';"></div>'; }
     progressHtml = '<div style="display:flex;gap:5px;margin-bottom:8px;">'+pips+'</div>'
-      + '<div style="font-size:14px;color:rgba(255,255,255,.85);margin-bottom:16px;">'+bDone+'/'+bN+' blocchi · '+gv+'/'+h.targetValue+(h.unit?" "+h.unit:"")+'</div>';
+      + '<div style="font-size:14px;color:rgba(255,255,255,.85);margin-bottom:16px;">'+bDone+'/'+bN+' blocchi · '+gv+'/'+h.targetValue+(h.unit?" "+h.unit:"")+(reached?' ✅ target raggiunto — continua se vuoi':'')+'</div>';
     btnRow = '<div style="display:flex;gap:10px;">'
-      + '<button onclick="v17AddBlock(\''+id+'\',\''+date+'\')" style="flex:1;background:#fff;color:#9a3412;border:none;border-radius:12px;padding:15px;cursor:pointer;font-size:16px;font-weight:900;">＋ 1 blocco (+'+h.blockSize+(h.unit?" "+h.unit:"")+')</button>'
+      + '<button onclick="v17AddBlock(\''+id+'\',\''+date+'\')" style="flex:1;background:#fff;color:#9a3412;border:none;border-radius:12px;padding:15px;cursor:pointer;font-size:16px;font-weight:900;">＋ '+h.blockSize+(h.unit?" "+h.unit:"")+(reached?" extra":"")+'</button>'
       + more + '</div>'
-      + '<button onclick="v17MarkDone(\''+id+'\')" style="width:100%;margin-top:8px;background:transparent;border:none;color:rgba(255,255,255,.6);padding:8px;cursor:pointer;font-size:14px;font-weight:700;text-decoration:underline;">✓ segna tutto fatto</button>';
+      + '<button onclick="v17GestoFinish(\''+id+'\',\''+date+'\')" style="width:100%;margin-top:8px;background:transparent;border:none;color:rgba(255,255,255,.75);padding:10px;cursor:pointer;font-size:14px;font-weight:800;text-decoration:underline;">✓ Ho finito → avanti</button>';
   } else {
     btnRow = '<div style="display:flex;gap:10px;">'
       + '<button onclick="v17MarkDone(\''+id+'\')" style="flex:1;background:#fff;color:#9a3412;border:none;border-radius:12px;padding:15px;cursor:pointer;font-size:16px;font-weight:900;">✓ Fatto</button>'
