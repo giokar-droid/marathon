@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>🏅 Marathon Tracker v17.14</title>
+<title>🏅 Marathon Tracker v17.16</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -12,14 +12,14 @@
   --red:#ef4444;--purple:#8b5cf6;--orange:#f97316;--cyan:#06b6d4;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:15px;}
+body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:16px;}
 h1,h2,h3{font-family:'Barlow Condensed',sans-serif;letter-spacing:.02em;}
 .topbar{background:linear-gradient(135deg,#080e1a,#0d1f3c);border-bottom:1px solid var(--border);padding:12px 20px;position:sticky;top:0;z-index:100;}
 .topbar-inner{max-width:920px;margin:0 auto;}
 .topbar-row1{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px;}
 .topbar-title{font-family:'Barlow Condensed',sans-serif;font-size:21px;font-weight:800;color:var(--accent);}
-.topbar-sub{font-size:13px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;}
-.v-badge{background:rgba(59,130,246,.2);border:1px solid rgba(59,130,246,.4);color:#93c5fd;border-radius:6px;padding:2px 7px;font-size:13px;font-weight:700;margin-left:6px;}
+.topbar-sub{font-size:14px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;}
+.v-badge{background:rgba(59,130,246,.2);border:1px solid rgba(59,130,246,.4);color:#93c5fd;border-radius:6px;padding:2px 7px;font-size:14px;font-weight:700;margin-left:6px;}
 /* SYNC STATUS */
 .sync-strip{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
 .sync-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
@@ -29,22 +29,22 @@ h1,h2,h3{font-family:'Barlow Condensed',sans-serif;letter-spacing:.02em;}
 .sync-dot.syncing{background:var(--blue);animation:pulse 1s infinite;}
 .sync-dot.offline{background:var(--muted);}
 @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
-.sync-label{font-size:12px;font-weight:600;}
+.sync-label{font-size:13px;font-weight:600;}
 .sync-label.ok{color:#6ee7b7;}
 .sync-label.pending{color:var(--accent);}
 .sync-label.error{color:#fca5a5;}
 .sync-label.syncing{color:#93c5fd;}
 .sync-label.offline{color:var(--muted);}
-.sync-btn{padding:4px 12px;border-radius:20px;border:1px solid rgba(255,255,255,.15);background:transparent;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;}
+.sync-btn{padding:4px 12px;border-radius:20px;border:1px solid rgba(255,255,255,.15);background:transparent;color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;}
 .sync-btn:hover{border-color:var(--blue);color:var(--blue);}
 .sync-btn:disabled{opacity:.4;cursor:not-allowed;}
-.pending-badge{background:rgba(245,158,11,.2);border:1px solid rgba(245,158,11,.4);color:var(--accent);border-radius:12px;padding:2px 8px;font-size:13px;font-weight:700;}
+.pending-badge{background:rgba(245,158,11,.2);border:1px solid rgba(245,158,11,.4);color:var(--accent);border-radius:12px;padding:2px 8px;font-size:14px;font-weight:700;}
 .tabs{display:flex;gap:6px;flex-wrap:wrap;}
-.tab{padding:7px 14px;border-radius:8px;border:none;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;transition:all .2s;background:rgba(255,255,255,0.06);color:var(--muted);}
+.tab{padding:7px 14px;border-radius:8px;border:none;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px;transition:all .2s;background:rgba(255,255,255,0.06);color:var(--muted);}
 .tab.active{background:var(--blue);color:white;}
 .main{max-width:920px;margin:0 auto;padding:18px 16px;}
 .card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:14px;}
-.card-label{font-size:13px;color:var(--blue);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;font-weight:600;}
+.card-label{font-size:14px;color:var(--blue);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;font-weight:600;}
 .section-title{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:800;color:var(--accent);margin:18px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--border);}
 .week-strip{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:14px;}
 .week-day{background:var(--surface2);border-radius:10px;padding:8px 4px;text-align:center;cursor:pointer;transition:all .15s;border:1px solid transparent;}
@@ -52,34 +52,34 @@ h1,h2,h3{font-family:'Barlow Condensed',sans-serif;letter-spacing:.02em;}
 .week-day.has-data{border-color:rgba(59,130,246,.35);}
 .week-day.today{border-color:var(--accent)!important;}
 .week-day.pending-sync{border-color:rgba(245,158,11,.5)!important;}
-.wd-name{font-size:12px;color:var(--muted);}
+.wd-name{font-size:13px;color:var(--muted);}
 .week-day.active .wd-name{color:rgba(255,255,255,.7);}
 .wd-num{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:800;}
-.wd-km{font-size:12px;color:var(--blue);}
+.wd-km{font-size:13px;color:var(--blue);}
 .week-day.active .wd-km{color:rgba(255,255,255,.8);}
 .pills{display:flex;gap:8px;flex-wrap:wrap;}
-.pill{padding:7px 14px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500;transition:all .15s;border:1px solid rgba(255,255,255,.1);background:transparent;color:var(--muted);}
+.pill{padding:7px 14px;border-radius:8px;cursor:pointer;font-size:14px;font-weight:500;transition:all .15s;border:1px solid rgba(255,255,255,.1);background:transparent;color:var(--muted);}
 .pill.active{font-weight:700;}
 .metrics{display:grid;grid-template-columns:repeat(auto-fill,minmax(138px,1fr));gap:10px;margin-bottom:8px;}
 .metric{background:var(--surface2);border-radius:11px;padding:14px;}
-.metric-label{font-size:13px;color:var(--muted);margin-bottom:6px;}
+.metric-label{font-size:14px;color:var(--muted);margin-bottom:6px;}
 .metric input[type=number],.metric input[type=text]{width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:8px 10px;color:white;font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;outline:none;}
 .metric input:focus{border-color:var(--blue);}
-.metric-unit{font-size:13px;color:var(--muted);margin-top:4px;}
+.metric-unit{font-size:14px;color:var(--muted);margin-top:4px;}
 .range-val{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:900;}
 input[type=range]{width:100%;margin-top:6px;accent-color:var(--green);}
-textarea{width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:12px 14px;color:var(--text);font-family:'Barlow',sans-serif;font-size:14px;resize:vertical;min-height:70px;outline:none;}
+textarea{width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:12px 14px;color:var(--text);font-family:'Barlow',sans-serif;font-size:15px;resize:vertical;min-height:70px;outline:none;}
 textarea:focus{border-color:var(--blue);}
-.splits-table{width:100%;border-collapse:collapse;font-size:13px;}
-.splits-table th{color:var(--muted);font-weight:600;font-size:13px;letter-spacing:1px;padding:6px 8px;text-align:left;border-bottom:1px solid var(--border);}
+.splits-table{width:100%;border-collapse:collapse;font-size:14px;}
+.splits-table th{color:var(--muted);font-weight:600;font-size:14px;letter-spacing:1px;padding:6px 8px;text-align:left;border-bottom:1px solid var(--border);}
 .splits-table td{padding:7px 8px;border-bottom:1px solid rgba(255,255,255,.04);}
 .split-best{color:var(--green);font-weight:700;}
 .split-worst{color:var(--red);}
 .split-excluded{color:var(--muted);font-style:italic;}
 .split-input-row{display:grid;grid-template-columns:52px 1fr 1fr 80px auto;gap:6px;align-items:center;margin-bottom:6px;}
-.split-input-row input{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:6px 8px;color:white;font-size:13px;outline:none;width:100%;}
+.split-input-row input{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:6px 8px;color:white;font-size:14px;outline:none;width:100%;}
 .split-input-row input:focus{border-color:var(--blue);}
-.btn-sm{padding:5px 10px;border-radius:6px;border:none;cursor:pointer;font-size:12px;font-weight:700;background:rgba(239,68,68,.2);color:var(--red);}
+.btn-sm{padding:5px 10px;border-radius:6px;border:none;cursor:pointer;font-size:13px;font-weight:700;background:rgba(239,68,68,.2);color:var(--red);}
 .btn{padding:14px 20px;border-radius:10px;border:none;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:17px;letter-spacing:.5px;transition:all .25s;width:100%;}
 .btn-save{background:linear-gradient(90deg,var(--blue),#1d4ed8);color:white;box-shadow:0 4px 20px rgba(59,130,246,.25);}
 .btn-save.saved{background:linear-gradient(90deg,var(--green),#059669);}
@@ -91,7 +91,7 @@ textarea:focus{border-color:var(--blue);}
 .stats-row{display:flex;gap:10px;flex-wrap:wrap;}
 .stat-box{background:rgba(255,255,255,.05);border-radius:10px;padding:10px 14px;text-align:center;flex:1;min-width:65px;}
 .stat-val{font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:900;color:var(--accent);}
-.stat-lbl{font-size:12px;color:var(--muted);margin-top:2px;}
+.stat-lbl{font-size:13px;color:var(--muted);margin-top:2px;}
 input[type=date]{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:9px;padding:10px 14px;color:white;font-size:16px;font-family:'Barlow',sans-serif;outline:none;width:100%;box-sizing:border-box;display:block;}
 input[type=date]::-webkit-calendar-picker-indicator{filter:invert(1);}
 /* READINESS */
@@ -111,64 +111,64 @@ input[type=date]::-webkit-calendar-picker-indicator{filter:invert(1);}
 .hist-head{padding:14px 18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;}
 .hist-body{padding:0 18px 16px;border-top:1px solid var(--border);display:none;}
 .hist-body.open{display:block;padding-top:14px;}
-.hist-chip{border-radius:6px;padding:2px 9px;font-size:12px;font-weight:600;}
+.hist-chip{border-radius:6px;padding:2px 9px;font-size:13px;font-weight:600;}
 .hist-metrics{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
 .hist-met{background:rgba(255,255,255,.05);border-radius:8px;padding:8px 12px;text-align:center;}
 .hist-met-val{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;}
-.hist-met-lbl{font-size:12px;color:var(--muted);}
+.hist-met-lbl{font-size:13px;color:var(--muted);}
 /* FORZA */
-.wo-btn{flex:1;padding:12px 8px;border-radius:12px;border:2px solid rgba(255,255,255,.1);background:var(--surface2);color:var(--muted);cursor:pointer;text-align:center;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px;transition:all .2s;}
+.wo-btn{flex:1;padding:12px 8px;border-radius:12px;border:2px solid rgba(255,255,255,.1);background:var(--surface2);color:var(--muted);cursor:pointer;text-align:center;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:16px;transition:all .2s;}
 .wo-emoji{font-size:24px;display:block;margin-bottom:4px;}
-.wo-day{font-size:13px;font-weight:400;color:var(--muted);display:block;margin-top:2px;}
+.wo-day{font-size:14px;font-weight:400;color:var(--muted);display:block;margin-top:2px;}
 .ex-item{background:var(--surface2);border-radius:12px;margin-bottom:10px;overflow:hidden;border:1px solid transparent;transition:border .2s;}
 .ex-head{padding:14px 18px;cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;}
 .ex-body{display:none;padding:0 18px 18px;border-top:1px solid var(--border);}
 .ex-body.open{display:block;padding-top:14px;}
-.ex-tag{border-radius:6px;padding:3px 9px;font-size:12px;font-weight:700;display:inline-block;margin:2px;}
+.ex-tag{border-radius:6px;padding:3px 9px;font-size:13px;font-weight:700;display:inline-block;margin:2px;}
 .ex-section{border-radius:10px;padding:12px;margin-bottom:10px;}
-.ex-section-title{font-size:13px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;}
-.ex-cue{display:flex;gap:8px;margin-bottom:6px;font-size:13px;}
+.ex-section-title{font-size:14px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;}
+.ex-cue{display:flex;gap:8px;margin-bottom:6px;font-size:14px;}
 .ex-cue-num{font-family:'Barlow Condensed',sans-serif;font-weight:700;min-width:18px;}
 /* SETTINGS */
 .setup-banner{background:linear-gradient(135deg,rgba(245,158,11,.15),rgba(239,68,68,.1));border:1px solid rgba(245,158,11,.3);border-radius:14px;padding:16px 18px;margin-bottom:18px;}
-.setup-step{display:flex;gap:12px;margin-bottom:8px;font-size:14px;align-items:flex-start;}
-.step-num{background:var(--accent);color:#000;font-family:'Barlow Condensed',sans-serif;font-weight:900;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;min-width:24px;}
-.settings-input{width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);border-radius:9px;padding:12px 14px;color:white;font-size:14px;font-family:'Barlow',sans-serif;outline:none;margin-top:8px;}
+.setup-step{display:flex;gap:12px;margin-bottom:8px;font-size:15px;align-items:flex-start;}
+.step-num{background:var(--accent);color:#000;font-family:'Barlow Condensed',sans-serif;font-weight:900;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;min-width:24px;}
+.settings-input{width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);border-radius:9px;padding:12px 14px;color:white;font-size:15px;font-family:'Barlow',sans-serif;outline:none;margin-top:8px;}
 .settings-input:focus{border-color:var(--blue);}
-code{background:rgba(255,255,255,.1);padding:2px 7px;border-radius:5px;font-size:12px;font-family:monospace;color:#93c5fd;}
+code{background:rgba(255,255,255,.1);padding:2px 7px;border-radius:5px;font-size:13px;font-family:monospace;color:#93c5fd;}
 /* IMPORT MODAL */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;display:flex;align-items:flex-end;justify-content:center;padding:0;}
 .modal-overlay.hidden{display:none;}
 .modal-sheet{background:#0f1a2e;border-radius:20px 20px 0 0;width:100%;max-width:860px;max-height:90vh;overflow-y:auto;padding:24px 20px;border-top:1px solid rgba(255,255,255,.1);}
 .modal-title{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;margin-bottom:4px;}
-.modal-sub{font-size:13px;color:var(--muted);margin-bottom:16px;}
-.import-textarea{width:100%;background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:12px 14px;color:#93c5fd;font-family:monospace;font-size:12px;min-height:140px;outline:none;resize:vertical;line-height:1.6;}
+.modal-sub{font-size:14px;color:var(--muted);margin-bottom:16px;}
+.import-textarea{width:100%;background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:12px 14px;color:#93c5fd;font-family:monospace;font-size:13px;min-height:140px;outline:none;resize:vertical;line-height:1.6;}
 .import-textarea:focus{border-color:var(--blue);}
 .preview-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;margin:14px 0;}
 .preview-item{background:rgba(255,255,255,.04);border-radius:9px;padding:10px 12px;border-left:3px solid var(--blue);}
 .preview-item.highlight{border-left-color:var(--green);}
-.preview-label{font-size:12px;color:var(--muted);margin-bottom:3px;text-transform:uppercase;letter-spacing:.5px;}
+.preview-label{font-size:13px;color:var(--muted);margin-bottom:3px;text-transform:uppercase;letter-spacing:.5px;}
 .preview-val{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;color:var(--text);}
 /* SECTION BANNERS */
-.section-banner{border-radius:12px;padding:10px 14px;margin:16px 0 10px;display:flex;align-items:center;gap:10px;font-size:13px;}
+.section-banner{border-radius:12px;padding:10px 14px;margin:16px 0 10px;display:flex;align-items:center;gap:10px;font-size:14px;}
 .section-banner.run{background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.2);}
 .section-banner.day{background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.2);}
 .section-banner-icon{font-size:22px;}
 .section-banner-title{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:800;}
-.section-banner-sub{font-size:12px;color:var(--muted);}
+.section-banner-sub{font-size:13px;color:var(--muted);}
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);padding:12px 20px 12px 24px;border-radius:30px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:16px;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none;box-shadow:0 8px 30px rgba(0,0,0,.4);white-space:nowrap;display:flex;align-items:center;gap:12px;}
 .toast.show{opacity:1;pointer-events:all;}
 .toast.ok{background:var(--green);color:white;}
 .toast.warn{background:var(--accent);color:#000;}
 .toast.err{background:var(--red);color:white;}
-.toast-close{background:rgba(0,0,0,.2);border:none;color:inherit;width:22px;height:22px;border-radius:50%;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;padding:0;flex-shrink:0;}
-.chev{color:var(--muted);font-size:14px;transition:transform .2s;}
+.toast-close{background:rgba(0,0,0,.2);border:none;color:inherit;width:22px;height:22px;border-radius:50%;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;padding:0;flex-shrink:0;}
+.chev{color:var(--muted);font-size:15px;transition:transform .2s;}
 .chev.open{transform:rotate(180deg);}
 ::-webkit-scrollbar{width:6px;}
 ::-webkit-scrollbar-track{background:var(--bg);}
 ::-webkit-scrollbar-thumb{background:#2a3a55;border-radius:3px;}
 /* ABITUDINI */
-.habit-alert{margin-top:6px;font-size:12px;font-weight:800;padding:4px 10px;border-radius:8px;display:inline-block;}
+.habit-alert{margin-top:6px;font-size:13px;font-weight:800;padding:4px 10px;border-radius:8px;display:inline-block;}
 .habit-alert.warn{background:rgba(252,211,77,.15);color:#fcd34d;border:1px solid rgba(252,211,77,.4);}
 .habit-alert.broken{background:rgba(239,68,68,.12);color:#f87171;border:1px solid rgba(239,68,68,.35);}
 .hstrip{display:flex;align-items:center;gap:3px;margin-top:8px;flex-wrap:wrap;}
@@ -176,15 +176,15 @@ code{background:rgba(255,255,255,.1);padding:2px 7px;border-radius:5px;font-size
 .hstrip-dot.on{background:var(--green);}
 .hstrip-dot.half{background:var(--accent);}
 .hstrip-dot.today{box-shadow:0 0 0 2px rgba(255,255,255,.35);}
-.hstrip-week{font-size:13px;color:var(--muted);font-weight:700;margin-left:6px;}
-.habit-note{margin-top:6px;font-size:12px;color:#cbd5e1;background:rgba(255,255,255,.05);border-radius:8px;padding:5px 9px;display:inline-block;}
+.hstrip-week{font-size:14px;color:var(--muted);font-weight:700;margin-left:6px;}
+.habit-note{margin-top:6px;font-size:13px;color:#cbd5e1;background:rgba(255,255,255,.05);border-radius:8px;padding:5px 9px;display:inline-block;}
 .habit-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin-bottom:10px;border-left:4px solid;}
 .habit-card.hfull{background:rgba(16,185,129,.13);border-color:rgba(16,185,129,.55);box-shadow:inset 0 0 0 1px rgba(16,185,129,.25);}
 .habit-card.hpartial{background:rgba(245,158,11,.07);}
 .habit-row{display:grid;grid-template-columns:38px 1fr auto;gap:12px;align-items:center;}
 .habit-icon{font-size:24px;}
 .habit-name{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:800;}
-.habit-meta{font-size:13px;color:var(--muted);margin-top:2px;}
+.habit-meta{font-size:14px;color:var(--muted);margin-top:2px;}
 .habit-status{display:flex;align-items:center;gap:8px;}
 .habit-checkbtn{width:36px;height:36px;border-radius:50%;border:2px solid rgba(255,255,255,.15);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:20px;color:transparent;transition:all .2s;flex-shrink:0;}
 .habit-checkbtn.done{background:var(--green);border-color:var(--green);color:white;}
@@ -192,23 +192,23 @@ code{background:rgba(255,255,255,.1);padding:2px 7px;border-radius:5px;font-size
 .habit-detail-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,.05);}
 .habit-detail-input{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:8px 10px;color:white;font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;outline:none;text-align:center;width:100%;box-sizing:border-box;}
 .habit-detail-input:focus{border-color:var(--blue);}
-.habit-detail-label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;text-align:center;margin-bottom:3px;}
-.habit-streak{display:flex;align-items:center;gap:4px;font-size:12px;color:var(--accent);justify-content:flex-end;margin-top:4px;}
+.habit-detail-label{font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;text-align:center;margin-bottom:3px;}
+.habit-streak{display:flex;align-items:center;gap:4px;font-size:13px;color:var(--accent);justify-content:flex-end;margin-top:4px;}
 .habit-streak-num{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:900;}
 .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-top:8px;}
-.cal-cell{aspect-ratio:1;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--muted);position:relative;}
+.cal-cell{aspect-ratio:1;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--muted);position:relative;}
 .cal-cell.empty{background:rgba(255,255,255,.04);}
 .cal-cell.partial{background:rgba(245,158,11,.4);color:white;}
 .cal-cell.full{background:var(--green);color:white;font-weight:700;}
 .cal-cell.future{background:rgba(255,255,255,.02);color:#374151;}
 .cal-cell.today{box-shadow:0 0 0 2px var(--accent);}
 .habit-add-form{background:rgba(255,255,255,.03);border:1px dashed rgba(255,255,255,.15);border-radius:12px;padding:14px;margin-top:14px;}
-.habit-add-form input,.habit-add-form select{width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:9px 10px;color:white;font-size:14px;outline:none;margin-bottom:8px;box-sizing:border-box;}
+.habit-add-form input,.habit-add-form select{width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:9px 10px;color:white;font-size:15px;outline:none;margin-bottom:8px;box-sizing:border-box;}
 .totals-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:16px;}
 .total-card{background:linear-gradient(135deg,rgba(59,130,246,.1),rgba(16,185,129,.05));border:1px solid rgba(59,130,246,.2);border-radius:12px;padding:14px;text-align:center;}
 .total-val{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:900;color:var(--accent);}
-.total-lbl{font-size:13px;color:var(--muted);margin-top:2px;}
-.habit-edit-btn{background:rgba(255,255,255,.05);border:none;color:var(--muted);width:28px;height:28px;border-radius:6px;cursor:pointer;font-size:13px;}
+.total-lbl{font-size:14px;color:var(--muted);margin-top:2px;}
+.habit-edit-btn{background:rgba(255,255,255,.05);border:none;color:var(--muted);width:28px;height:28px;border-radius:6px;cursor:pointer;font-size:14px;}
 .habit-edit-btn:hover{color:var(--text);background:rgba(255,255,255,.1);}
 /* PIANO TAB */
 .piano-week{background:var(--surface);border:1px solid var(--border);border-radius:14px;margin-bottom:14px;overflow:hidden;}
@@ -222,31 +222,31 @@ code{background:rgba(255,255,255,.1);padding:2px 7px;border-radius:5px;font-size
 .piano-day:last-child{border-bottom:none;}
 .piano-day.today{background:rgba(59,130,246,.05);}
 .piano-day.future{opacity:.6;}
-.piano-day-name{font-size:13px;font-weight:700;color:var(--muted);}
+.piano-day-name{font-size:14px;font-weight:700;color:var(--muted);}
 .piano-day.today .piano-day-name{color:var(--accent);}
 .piano-sessions{display:flex;flex-direction:column;gap:4px;}
-.piano-session{display:flex;align-items:center;gap:8px;font-size:13px;}
+.piano-session{display:flex;align-items:center;gap:8px;font-size:14px;}
 .session-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
 .session-label{flex:1;}
 .session-status{font-size:16px;}
-.piano-rest{font-size:13px;color:var(--muted);font-style:italic;}
+.piano-rest{font-size:14px;color:var(--muted);font-style:italic;}
 .compliance-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;}
 .compliance-card{flex:1;min-width:100px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;text-align:center;}
 .compliance-val{font-family:'Barlow Condensed',sans-serif;font-size:32px;font-weight:900;}
-.compliance-lbl{font-size:13px;color:var(--muted);margin-top:2px;}
+.compliance-lbl{font-size:14px;color:var(--muted);margin-top:2px;}
 .streak-bar{display:flex;gap:4px;flex-wrap:wrap;margin-top:8px;}
 .streak-dot{width:14px;height:14px;border-radius:4px;}
 .phase-banner{border-radius:12px;padding:12px 16px;margin-bottom:16px;border-left:4px solid;}
 
 .debug-panel{background:#050d1a;border:1px solid rgba(59,130,246,.2);border-radius:12px;overflow:hidden;margin-top:14px;}
 .debug-toolbar{display:flex;gap:8px;align-items:center;padding:10px 14px;background:rgba(0,0,0,.3);border-bottom:1px solid rgba(255,255,255,.06);flex-wrap:wrap;}
-.debug-title{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:15px;color:#93c5fd;flex:1;}
-.dbtn{padding:5px 12px;border-radius:6px;border:none;cursor:pointer;font-size:12px;font-weight:700;transition:all .15s;}
+.debug-title{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:16px;color:#93c5fd;flex:1;}
+.dbtn{padding:5px 12px;border-radius:6px;border:none;cursor:pointer;font-size:13px;font-weight:700;transition:all .15s;}
 .dbtn.copy{background:rgba(59,130,246,.25);color:#93c5fd;border:1px solid rgba(59,130,246,.4);}
 .dbtn.dl{background:rgba(16,185,129,.2);color:#6ee7b7;border:1px solid rgba(16,185,129,.3);}
 .dbtn.clr{background:rgba(239,68,68,.15);color:#fca5a5;border:1px solid rgba(239,68,68,.25);}
 .dbtn.run{background:rgba(245,158,11,.2);color:#fcd34d;border:1px solid rgba(245,158,11,.3);}
-.debug-log{padding:10px 14px;max-height:320px;overflow-y:auto;font-family:'Courier New',monospace;font-size:13px;line-height:1.75;}
+.debug-log{padding:10px 14px;max-height:320px;overflow-y:auto;font-family:'Courier New',monospace;font-size:14px;line-height:1.75;}
 .le{display:grid;grid-template-columns:80px 46px 1fr;gap:6px;padding:2px 0;border-bottom:1px solid rgba(255,255,255,.03);}
 .le:last-child{border-bottom:none;}
 .le-ts{color:#374151;}
@@ -257,8 +257,8 @@ code{background:rgba(255,255,255,.1);padding:2px 7px;border-radius:5px;font-size
 .le-lv.OK{color:#6ee7b7;background:rgba(16,185,129,.1);}
 .le-lv.DEBUG{color:#d8b4fe;background:rgba(139,92,246,.1);}
 .le-msg{color:#cbd5e1;word-break:break-all;}
-.le-msg .payload{display:block;color:#4b5563;font-size:12px;margin-top:1px;word-break:break-all;}
-.debug-stats{display:flex;gap:14px;padding:7px 14px;background:rgba(0,0,0,.2);border-top:1px solid rgba(255,255,255,.04);font-size:13px;color:var(--muted);flex-wrap:wrap;}
+.le-msg .payload{display:block;color:#4b5563;font-size:13px;margin-top:1px;word-break:break-all;}
+.debug-stats{display:flex;gap:14px;padding:7px 14px;background:rgba(0,0,0,.2);border-top:1px solid rgba(255,255,255,.04);font-size:14px;color:var(--muted);flex-wrap:wrap;}
 .debug-stats b{color:var(--text);}
 @media(max-width:600px){
   body{font-size:17px;}
@@ -266,21 +266,21 @@ code{background:rgba(255,255,255,.1);padding:2px 7px;border-radius:5px;font-size
   .projected-time{font-size:44px;}
   .readiness-grid{grid-template-columns:repeat(2,1fr);}
   .split-input-row{grid-template-columns:44px 1fr 1fr auto;}
-  .card-label{font-size:13px;}
+  .card-label{font-size:14px;}
   .tab{font-size:16px;padding:9px 14px;}
   .topbar-title{font-size:19px;}
   .section-title{font-size:19px;}
   .stat-val{font-size:26px;}
-  .stat-lbl{font-size:13px;}
+  .stat-lbl{font-size:14px;}
   .metric input[type=number],.metric input[type=text]{font-size:22px;}
   .range-val{font-size:30px;}
   .btn{font-size:19px;}
-  .piano-day-name{font-size:15px;}
-  .piano-session{font-size:15px;}
+  .piano-day-name{font-size:16px;}
+  .piano-session{font-size:16px;}
   .hist-met-val{font-size:20px;}
-  .hist-met-lbl{font-size:12px;}
+  .hist-met-lbl{font-size:13px;}
   /* Fix date input overflow */
-  input[type=date]{font-size:15px;padding:8px 10px;}
+  input[type=date]{font-size:16px;padding:8px 10px;}
   .week-day .wd-num{font-size:16px;}
 }
 </style>
@@ -291,12 +291,12 @@ code{background:rgba(255,255,255,.1);padding:2px 7px;border-radius:5px;font-size
   <div class="topbar-inner">
     <div class="topbar-row1">
       <div>
-        <div class="topbar-sub">Marathon Tracker <span class="v-badge">v17.14</span></div>
+        <div class="topbar-sub">Marathon Tracker <span class="v-badge">v17.16</span></div>
         <div class="topbar-title">🏅 25.10.2026 — <span id="topbarReadiness" title="Proiezione Readiness aggiornata">…</span></div>
       </div>
       <!-- SYNC STATUS STRIP -->
       <div class="sync-strip">
-        <button onclick="openPasteDayModal()" style="background:linear-gradient(90deg,var(--purple),#7c3aed);border:none;color:white;padding:6px 14px;border-radius:20px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:13px;box-shadow:0 4px 12px rgba(139,92,246,.3);">📋 Incolla giornata</button>
+        <button onclick="openPasteDayModal()" style="background:linear-gradient(90deg,var(--purple),#7c3aed);border:none;color:white;padding:6px 14px;border-radius:20px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:14px;box-shadow:0 4px 12px rgba(139,92,246,.3);">📋 Incolla giornata</button>
         <div class="sync-dot offline" id="syncDot"></div>
         <span class="sync-label offline" id="syncLabel">Caricamento...</span>
         <span class="pending-badge" id="pendingBadge" style="display:none;"></span>
@@ -329,7 +329,7 @@ code{background:rgba(255,255,255,.1);padding:2px 7px;border-radius:5px;font-size
         <div class="card-label">Data</div>
         <input type="date" id="logDate" onchange="onDateChange()"
           style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:9px;padding:9px 12px;color:white;font-size:16px;font-family:'Barlow',sans-serif;outline:none;width:100%;box-sizing:border-box;display:block;">
-        <div id="dayName" style="font-size:12px;color:var(--muted);margin-top:5px;"></div>
+        <div id="dayName" style="font-size:13px;color:var(--muted);margin-top:5px;"></div>
       </div>
       <div style="display:flex;gap:10px;">
         <div class="stat-box" style="min-width:56px;"><div class="stat-val" id="wkKm">0</div><div class="stat-lbl">km</div></div>
@@ -348,7 +348,7 @@ code{background:rgba(255,255,255,.1);padding:2px 7px;border-radius:5px;font-size
       <div class="section-banner-title" style="color:#93c5fd;">Dati Allenamento</div>
       <div class="section-banner-sub">Compilati automaticamente dall'import NRC · puoi modificarli prima di salvare</div>
     </div>
-    <button onclick="openImportModal()" style="margin-left:auto;background:rgba(59,130,246,.25);border:1px solid rgba(59,130,246,.5);color:#93c5fd;padding:8px 16px;border-radius:9px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;white-space:nowrap;">📥 Importa NRC</button>
+    <button onclick="openImportModal()" style="margin-left:auto;background:rgba(59,130,246,.25);border:1px solid rgba(59,130,246,.5);color:#93c5fd;padding:8px 16px;border-radius:9px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px;white-space:nowrap;">📥 Importa NRC</button>
   </div>
   <div class="metrics" id="metricsRun"></div>
   <div class="metrics" id="metricsNRC"></div>
@@ -357,13 +357,13 @@ code{background:rgba(255,255,255,.1);padding:2px 7px;border-radius:5px;font-size
   <div style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:800;color:var(--accent);margin:14px 0 8px;padding-bottom:5px;border-bottom:1px solid var(--border);">📊 Parziali km</div>
   <div class="card" style="padding:14px;">
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
-      <button onclick="addSplit()" style="background:rgba(59,130,246,.2);border:1px solid rgba(59,130,246,.4);color:#93c5fd;padding:6px 14px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:700;">+ Parziale</button>
-      <button onclick="clearSplits()" style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:var(--red);padding:6px 14px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:700;">✕ Svuota</button>
-      <div id="splitsStatsBadge" style="font-size:12px;padding:6px 12px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.2);border-radius:8px;color:#6ee7b7;"></div>
+      <button onclick="addSplit()" style="background:rgba(59,130,246,.2);border:1px solid rgba(59,130,246,.4);color:#93c5fd;padding:6px 14px;border-radius:8px;cursor:pointer;font-size:14px;font-weight:700;">+ Parziale</button>
+      <button onclick="clearSplits()" style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:var(--red);padding:6px 14px;border-radius:8px;cursor:pointer;font-size:14px;font-weight:700;">✕ Svuota</button>
+      <div id="splitsStatsBadge" style="font-size:13px;padding:6px 12px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.2);border-radius:8px;color:#6ee7b7;"></div>
     </div>
     <div id="splitsInputContainer"></div>
     <div id="splitsPreview" style="margin-top:10px;"></div>
-    <div id="splitsNote" style="font-size:13px;color:var(--muted);margin-top:6px;"></div>
+    <div id="splitsNote" style="font-size:14px;color:var(--muted);margin-top:6px;"></div>
   </div>
 
   <!-- ── SEZIONE PASTI (v13) ── -->
@@ -393,8 +393,8 @@ code{background:rgba(255,255,255,.1);padding:2px 7px;border-radius:5px;font-size
   <div style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:800;color:var(--accent);margin:14px 0 8px;padding-bottom:5px;border-bottom:1px solid var(--border);">📝 Note</div>
   <div class="card" style="padding:14px;margin-bottom:14px;">
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
-      <div><div class="metric-label">👟 Scarpe</div><input type="text" id="logScarpe" placeholder="es. Hoka Clifton" style="width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:8px 10px;color:white;font-size:14px;outline:none;" oninput="currentMetrics.scarpe=this.value"></div>
-      <div><div class="metric-label">🌡️ Meteo</div><input type="text" id="logMeteo" placeholder="es. 15°C nuvoloso" style="width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:8px 10px;color:white;font-size:14px;outline:none;" oninput="currentMetrics.meteo=this.value"></div>
+      <div><div class="metric-label">👟 Scarpe</div><input type="text" id="logScarpe" placeholder="es. Hoka Clifton" style="width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:8px 10px;color:white;font-size:15px;outline:none;" oninput="currentMetrics.scarpe=this.value"></div>
+      <div><div class="metric-label">🌡️ Meteo</div><input type="text" id="logMeteo" placeholder="es. 15°C nuvoloso" style="width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:8px 10px;color:white;font-size:15px;outline:none;" oninput="currentMetrics.meteo=this.value"></div>
     </div>
     <textarea id="logNote" placeholder="Sensazioni, alimentazione, motivazione..."></textarea>
   </div>
@@ -429,8 +429,8 @@ code{background:rgba(255,255,255,.1);padding:2px 7px;border-radius:5px;font-size
       <div class="stat-box"><div class="stat-val" id="totWeight">—</div><div class="stat-lbl">kg ora</div></div>
     </div>
     <div class="btn-row" style="margin-top:14px;">
-      <button class="btn btn-export" style="font-size:15px;" onclick="exportCSV()">⬇️ CSV</button>
-      <button class="btn btn-copy" style="font-size:15px;" id="copyBtn" onclick="copySheets()">📋 Sheets</button>
+      <button class="btn btn-export" style="font-size:16px;" onclick="exportCSV()">⬇️ CSV</button>
+      <button class="btn btn-copy" style="font-size:16px;" id="copyBtn" onclick="copySheets()">📋 Sheets</button>
     </div>
   </div>
   <div id="historyList"></div>
@@ -439,7 +439,7 @@ code{background:rgba(255,255,255,.1);padding:2px 7px;border-radius:5px;font-size
 
 <!-- ═══ FORZA ═══ -->
 <div id="tab-forza" style="display:none;">
-  <div class="card" style="border-left:4px solid var(--accent);padding:14px;margin-bottom:14px;"><div style="font-size:14px;color:#94a3b8;line-height:1.7;"><strong style="color:var(--orange)">A (gambe)</strong> martedì · <strong style="color:var(--purple)">B (core)</strong> giovedì · <strong style="color:var(--cyan)">C (bonus)</strong> domenica</div></div>
+  <div class="card" style="border-left:4px solid var(--accent);padding:14px;margin-bottom:14px;"><div style="font-size:15px;color:#94a3b8;line-height:1.7;"><strong style="color:var(--orange)">A (gambe)</strong> martedì · <strong style="color:var(--purple)">B (core)</strong> giovedì · <strong style="color:var(--cyan)">C (bonus)</strong> domenica</div></div>
   <div style="display:flex;gap:8px;margin-bottom:16px;" id="woSelector"></div>
   <div class="card" id="woBanner" style="padding:14px;margin-bottom:14px;"></div>
   <div id="exerciseList"></div>
@@ -450,7 +450,7 @@ code{background:rgba(255,255,255,.1);padding:2px 7px;border-radius:5px;font-size
 <div id="tab-settings" style="display:none;">
   <div class="setup-banner">
     <div style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;margin-bottom:10px;color:var(--accent);">⚙️ Setup Google Sheets — v4</div>
-    <div style="font-size:13px;color:#d1a854;margin-bottom:12px;">Se hai già la v3, fai un <strong>nuovo deployment</strong> con lo script v4 aggiornato.</div>
+    <div style="font-size:14px;color:#d1a854;margin-bottom:12px;">Se hai già la v3, fai un <strong>nuovo deployment</strong> con lo script v4 aggiornato.</div>
     <div class="setup-step"><div class="step-num">1</div><div>Apri lo script su <strong>script.google.com</strong> → incolla il codice v4 → Salva</div></div>
     <div class="setup-step"><div class="step-num">2</div><div>Distribuisci → Nuovo deployment → App web → Chiunque → Distribuisci</div></div>
     <div class="setup-step"><div class="step-num">3</div><div>Copia il nuovo URL → incollalo qui sotto → Testa connessione</div></div>
@@ -458,12 +458,12 @@ code{background:rgba(255,255,255,.1);padding:2px 7px;border-radius:5px;font-size
   <div class="card">
     <div class="card-label">URL Google Apps Script</div>
     <input type="text" id="sheetUrl" class="settings-input" placeholder="https://script.google.com/macros/s/..." oninput="saveSettings()">
-    <div id="urlStatus" style="font-size:12px;margin-top:8px;color:var(--muted);">Nessun URL</div>
+    <div id="urlStatus" style="font-size:13px;margin-top:8px;color:var(--muted);">Nessun URL</div>
   </div>
   <div class="card">
     <div class="card-label">🔑 Chiave segreta script (per scritture estese)</div>
     <input type="text" id="secretKey" class="settings-input" placeholder="es. marathon_giorgio_2026" oninput="saveSettings()">
-    <div style="font-size:13px;color:var(--muted);margin-top:6px;">Deve corrispondere alla SECRET_KEY nel tuo script Apps Script v7. Serve per push di pasti e abitudini su Sheets.</div>
+    <div style="font-size:14px;color:var(--muted);margin-top:6px;">Deve corrispondere alla SECRET_KEY nel tuo script Apps Script v7. Serve per push di pasti e abitudini su Sheets.</div>
   </div>
   <div style="margin-bottom:12px;display:grid;gap:8px;">
     <button class="btn" style="background:var(--blue);color:white;" onclick="testConnection()">🔗 Testa connessione</button>
@@ -476,8 +476,8 @@ code{background:rgba(255,255,255,.1);padding:2px 7px;border-radius:5px;font-size
   <div class="card">
     <div class="card-label">Script Apps Script v4</div>
     <div style="position:relative;">
-      <button onclick="copyScript()" style="position:absolute;top:8px;right:8px;background:rgba(255,255,255,.1);border:none;color:white;padding:5px 12px;border-radius:6px;cursor:pointer;font-size:12px;z-index:1;">📋 Copia</button>
-      <pre id="scriptCode" style="background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:16px;font-size:13px;color:#93c5fd;overflow-x:auto;line-height:1.6;white-space:pre-wrap;word-break:break-all;max-height:360px;overflow-y:auto;"></pre>
+      <button onclick="copyScript()" style="position:absolute;top:8px;right:8px;background:rgba(255,255,255,.1);border:none;color:white;padding:5px 12px;border-radius:6px;cursor:pointer;font-size:13px;z-index:1;">📋 Copia</button>
+      <pre id="scriptCode" style="background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:16px;font-size:14px;color:#93c5fd;overflow-x:auto;line-height:1.6;white-space:pre-wrap;word-break:break-all;max-height:360px;overflow-y:auto;"></pre>
     </div>
   </div>
   <!-- DEBUG PANEL -->
@@ -532,14 +532,14 @@ code{background:rgba(255,255,255,.1);padding:2px 7px;border-radius:5px;font-size
   }
 }' oninput="previewPasteDay()"></textarea>
 
-    <div id="pasteDayError" style="color:var(--red);font-size:13px;margin-top:6px;display:none;"></div>
+    <div id="pasteDayError" style="color:var(--red);font-size:14px;margin-top:6px;display:none;"></div>
 
     <!-- PREVIEW -->
     <div id="pasteDayPreview" style="display:none;">
       <div style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:800;margin:14px 0 8px;color:var(--accent);">📋 Anteprima merge — solo le modifiche</div>
       <div id="pasteDayPreviewContent"></div>
 
-      <div style="background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);border-radius:10px;padding:12px 14px;font-size:13px;color:#6ee7b7;margin:14px 0;">
+      <div style="background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);border-radius:10px;padding:12px 14px;font-size:14px;color:#6ee7b7;margin:14px 0;">
         ℹ️ <strong>Merge intelligente:</strong> Solo i campi qui sopra verranno aggiornati. Tutto il resto del/i giorno/i resta intatto. Array vuoti (<code>[]</code>) cancellano esplicitamente.
       </div>
 
@@ -572,7 +572,7 @@ code{background:rgba(255,255,255,.1);padding:2px 7px;border-radius:5px;font-size
   ...
 }' oninput="previewImport()"></textarea>
 
-    <div id="importError" style="color:var(--red);font-size:13px;margin-top:6px;display:none;"></div>
+    <div id="importError" style="color:var(--red);font-size:14px;margin-top:6px;display:none;"></div>
 
     <!-- PREVIEW -->
     <div id="importPreview" style="display:none;">
@@ -584,22 +584,22 @@ code{background:rgba(255,255,255,.1);padding:2px 7px;border-radius:5px;font-size
 
       <!-- Campi editabili prima dell'import -->
       <div style="background:rgba(255,255,255,.04);border-radius:12px;padding:14px;margin-bottom:14px;">
-        <div style="font-size:12px;color:var(--muted);margin-bottom:10px;letter-spacing:1px;">✏️ MODIFICA PRIMA DI IMPORTARE</div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:10px;letter-spacing:1px;">✏️ MODIFICA PRIMA DI IMPORTARE</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
           <div>
             <div class="metric-label">📝 Note aggiuntive</div>
-            <textarea id="importNote" style="width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:8px 10px;color:white;font-size:13px;min-height:60px;outline:none;font-family:'Barlow',sans-serif;" placeholder="Aggiungi note..."></textarea>
+            <textarea id="importNote" style="width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:8px 10px;color:white;font-size:14px;min-height:60px;outline:none;font-family:'Barlow',sans-serif;" placeholder="Aggiungi note..."></textarea>
           </div>
           <div>
             <div class="metric-label">👟 Scarpe</div>
-            <input type="text" id="importScarpe" style="width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:8px 10px;color:white;font-size:14px;outline:none;margin-bottom:8px;">
+            <input type="text" id="importScarpe" style="width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:8px 10px;color:white;font-size:15px;outline:none;margin-bottom:8px;">
             <div class="metric-label">🌡️ Meteo</div>
-            <input type="text" id="importMeteo" style="width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:8px 10px;color:white;font-size:14px;outline:none;">
+            <input type="text" id="importMeteo" style="width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:8px 10px;color:white;font-size:15px;outline:none;">
           </div>
         </div>
       </div>
 
-      <div style="background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);border-radius:10px;padding:12px 14px;font-size:13px;color:#6ee7b7;margin-bottom:14px;">
+      <div style="background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);border-radius:10px;padding:12px 14px;font-size:14px;color:#6ee7b7;margin-bottom:14px;">
         ℹ️ <strong>I dati giornata non vengono toccati</strong> — peso, passi totali, acqua, sonno li compili tu a fine giornata nel Diario.
       </div>
 
@@ -1704,6 +1704,9 @@ const KEY_HABIT_LOGS = "mt_habit_logs_v10"; // log giornaliero { date: { habitId
 
 // Abitudini default — pre-configurate per Giorgio
 const DEFAULT_HABITS = [
+  // — SALES / PRODUTTIVITÀ (v17.16) — priorità n°1, sempre in cima
+  { id: "prep_call_30", icon: "📝", name: "Prep/review call script (30')", color: "#3b82f6", type: "value", targetValue: 30, unit: "min", frequency: "daily", category: "sales" },
+  { id: "chiamate",     icon: "📞", name: "Chiamate outreach",             color: "#2563eb", type: "value", targetValue: 1,  unit: "chiamate", frequency: "daily", category: "sales" },
   // — Allenamento base (giornaliero, 4 sessioni AM/PM)
   { id: "pushup_am", icon: "💪", name: "Push-up mattina (3×8)", color: "#f97316", type: "sets", targetTotal: 24, variants: [{key:"full",label:"Completi",icon:"💯"},{key:"knee",label:"Ginocchia",icon:"🦵"}], frequency: "daily", category: "workout" },
   { id: "squat_am",  icon: "🦵", name: "Squat mattina (3×10)", color: "#10b981", type: "sets", targetTotal: 30, variants: [{key:"full",label:"Completi",icon:"💯"},{key:"assisted",label:"Assistiti",icon:"🤝"}], frequency: "daily", category: "workout" },
@@ -1932,7 +1935,7 @@ function updateHabitTotalDisplay(habitId) {
   const target = habit.targetTotal;
   const totalEl = document.getElementById("habit-total-" + habitId);
   if (totalEl) {
-    totalEl.innerHTML = `${total}<span style="font-size:13px;color:var(--muted);font-weight:600;"> / ${target}</span>`;
+    totalEl.innerHTML = `${total}<span style="font-size:14px;color:var(--muted);font-weight:600;"> / ${target}</span>`;
     totalEl.style.color = total >= target ? "var(--green)" : total > 0 ? "var(--accent)" : "var(--muted)";
   }
   // Also update breakdown if exists
@@ -1942,7 +1945,7 @@ function updateHabitTotalDisplay(habitId) {
     breakEl.innerHTML = (habit.variants || []).map(v => {
       const count = breakdown[v.key] || 0;
       return count > 0 ? `<span style="margin-right:10px;"><span style="opacity:.7;">${v.icon}</span> <strong style="color:${count>0?"var(--text)":"var(--muted)"};">${count}</strong></span>` : "";
-    }).filter(Boolean).join("") || `<span style="color:var(--muted);font-size:13px;">Nessuna serie ancora</span>`;
+    }).filter(Boolean).join("") || `<span style="color:var(--muted);font-size:14px;">Nessuna serie ancora</span>`;
   }
 }
 
@@ -2173,7 +2176,7 @@ function renderAbitudini() {
     return `<div class="cal-cell ${cls} ${isToday?"today":""}" style="cursor:${isFuture?"default":"pointer"};${extraStyle}" ${isFuture?"":`onclick="selectAbitudineDate('${ds}')"`} title="${ds}: ${dayDone}/${totalToday}">${d}</div>`;
   }).join("");
 
-  const habitsHtml = habits.map(h => {
+  const habitCards = habits.map(h => {
     const status = isHabitDoneToday(h, viewingDate);
     const log = getHabitDayLog(viewingDate, h.id) || {};
     const streak = calcHabitStreak(h);
@@ -2192,36 +2195,36 @@ function renderAbitudini() {
       const variants = h.variants || [{key:"full",label:"Completi",icon:"💯"}];
 
       const setsHtml = sets.length === 0
-        ? `<div style="color:var(--muted);font-size:12px;padding:8px 0;text-align:center;font-style:italic;">Nessuna serie ancora — clicca + per aggiungere</div>`
+        ? `<div style="color:var(--muted);font-size:13px;padding:8px 0;text-align:center;font-style:italic;">Nessuna serie ancora — clicca + per aggiungere</div>`
         : sets.map((s, i) => {
             const variantOpts = variants.map(v => `<option value="${v.key}" ${s.variant===v.key?"selected":""}>${v.icon} ${v.label}</option>`).join("");
             return `<div style="display:grid;grid-template-columns:32px 1fr 90px 32px;gap:6px;align-items:center;margin-bottom:6px;">
-              <div style="text-align:center;font-family:'Barlow Condensed',sans-serif;font-weight:800;color:var(--muted);font-size:14px;">#${i+1}</div>
-              <select onchange="updateHabitSetVariant('${h.id}', ${i}, this.value)" style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:6px 8px;color:white;font-size:13px;outline:none;">${variantOpts}</select>
+              <div style="text-align:center;font-family:'Barlow Condensed',sans-serif;font-weight:800;color:var(--muted);font-size:15px;">#${i+1}</div>
+              <select onchange="updateHabitSetVariant('${h.id}', ${i}, this.value)" style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:6px 8px;color:white;font-size:14px;outline:none;">${variantOpts}</select>
               <input type="number" inputmode="numeric" data-habit="${h.id}" data-set="${i}" value="${s.reps || ""}" placeholder="reps" oninput="updateHabitSetReps('${h.id}', ${i}, this.value)" style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:6px 10px;color:white;font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;outline:none;text-align:center;width:100%;box-sizing:border-box;">
-              <button onclick="removeHabitSet('${h.id}', ${i})" style="background:rgba(239,68,68,.15);border:none;color:#fca5a5;width:30px;height:30px;border-radius:6px;cursor:pointer;font-size:14px;">✕</button>
+              <button onclick="removeHabitSet('${h.id}', ${i})" style="background:rgba(239,68,68,.15);border:none;color:#fca5a5;width:30px;height:30px;border-radius:6px;cursor:pointer;font-size:15px;">✕</button>
             </div>`;
         }).join("");
 
       // Add buttons - one per variant
       const addButtonsHtml = variants.map(v =>
-        `<button onclick="addHabitSet('${h.id}', '${v.key}')" style="background:rgba(59,130,246,.2);border:1px solid rgba(59,130,246,.4);color:#93c5fd;padding:7px 12px;border-radius:7px;cursor:pointer;font-size:12px;font-weight:700;flex:1;">+ ${v.icon} ${v.label}</button>`
+        `<button onclick="addHabitSet('${h.id}', '${v.key}')" style="background:rgba(59,130,246,.2);border:1px solid rgba(59,130,246,.4);color:#93c5fd;padding:7px 12px;border-radius:7px;cursor:pointer;font-size:13px;font-weight:700;flex:1;">+ ${v.icon} ${v.label}</button>`
       ).join("");
 
       // Breakdown summary
       const breakdownHtml = (h.variants || []).map(v => {
         const count = breakdown[v.key] || 0;
         return count > 0 ? `<span style="margin-right:10px;"><span style="opacity:.7;">${v.icon}</span> <strong style="color:var(--text);">${count}</strong></span>` : "";
-      }).filter(Boolean).join("") || `<span style="color:var(--muted);font-size:13px;">Nessuna serie ancora</span>`;
+      }).filter(Boolean).join("") || `<span style="color:var(--muted);font-size:14px;">Nessuna serie ancora</span>`;
 
       detailHtml = `
         <div class="habit-detail-row" style="grid-template-columns:1fr;gap:0;">
           <div>
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-              <div style="font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;">Serie di oggi</div>
-              <div id="habit-total-${h.id}" style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;color:${total>=h.targetTotal?"var(--green)":total>0?"var(--accent)":"var(--muted)"};">${total}<span style="font-size:13px;color:var(--muted);font-weight:600;"> / ${h.targetTotal}</span></div>
+              <div style="font-size:14px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;">Serie di oggi</div>
+              <div id="habit-total-${h.id}" style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;color:${total>=h.targetTotal?"var(--green)":total>0?"var(--accent)":"var(--muted)"};">${total}<span style="font-size:14px;color:var(--muted);font-weight:600;"> / ${h.targetTotal}</span></div>
             </div>
-            <div id="habit-break-${h.id}" style="font-size:13px;margin-bottom:10px;">${breakdownHtml}</div>
+            <div id="habit-break-${h.id}" style="font-size:14px;margin-bottom:10px;">${breakdownHtml}</div>
             ${setsHtml}
             <div style="display:flex;gap:6px;margin-top:8px;">
               ${addButtonsHtml}
@@ -2246,7 +2249,7 @@ function renderAbitudini() {
           </div>
           <div>
             <div class="habit-detail-label">Totale / Target</div>
-            <div style="text-align:center;font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:900;color:${total>=target?"var(--green)":total>0?"var(--accent)":"var(--muted)"};padding-top:6px;">${total}<span style="font-size:13px;color:var(--muted);font-weight:600;"> / ${target}</span></div>
+            <div style="text-align:center;font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:900;color:${total>=target?"var(--green)":total>0?"var(--accent)":"var(--muted)"};padding-top:6px;">${total}<span style="font-size:14px;color:var(--muted);font-weight:600;"> / ${target}</span></div>
           </div>
         </div>`;
     } else if (h.type === "value") {
@@ -2259,12 +2262,12 @@ function renderAbitudini() {
           </div>
           <div>
             <div class="habit-detail-label">Target</div>
-            <div style="text-align:center;font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:900;color:${value>=h.targetValue?"var(--green)":value>0?"var(--accent)":"var(--muted)"};padding-top:6px;">${value}${h.unit?" "+h.unit:""}<span style="font-size:13px;color:var(--muted);font-weight:600;"> / ${h.targetValue}${h.unit?" "+h.unit:""}</span></div>
+            <div style="text-align:center;font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:900;color:${value>=h.targetValue?"var(--green)":value>0?"var(--accent)":"var(--muted)"};padding-top:6px;">${value}${h.unit?" "+h.unit:""}<span style="font-size:14px;color:var(--muted);font-weight:600;"> / ${h.targetValue}${h.unit?" "+h.unit:""}</span></div>
           </div>
         </div>`;
     }
 
-    return `<div class="habit-card ${status==="full"?"hfull":status==="partial"?"hpartial":""}" style="border-left-color:${status==="full"?"var(--green)":h.color};">
+    return {cat:(h.category||"altro"), html:`<div class="habit-card ${status==="full"?"hfull":status==="partial"?"hpartial":""}" style="border-left-color:${status==="full"?"var(--green)":h.color};">
       <div class="habit-row">
         <div class="habit-icon">${h.icon}</div>
         <div>
@@ -2281,17 +2284,35 @@ function renderAbitudini() {
           <button class="${btnClass}" onclick="quickToggleHabit('${h.id}')" title="Toggle">${btnIcon}</button>
         </div>
       </div>
-      ${detailHtml}
+      ${h.id==="chiamate" ? "" : detailHtml}
       ${(h.id==="circuito_am"||h.id==="circuito_pm") ? v17RenderCircuitPanel(h.id) : ""}
-    </div>`;
-  }).join("");
+      ${h.id==="chiamate" ? v17CallPanel(viewingDate) : ""}
+    </div>`};
+  });
+  // v17.16: raggruppo le card per categoria, SALES in cima
+  const CAT_SECTIONS = [
+    {key:"sales",     label:"💼 SALES / PRODUTTIVITÀ", color:"#3b82f6"},
+    {key:"workout",   label:"💪 ALLENAMENTO",          color:"#f97316"},
+    {key:"supplement",label:"💊 INTEGRATORI",          color:"#a855f7"},
+    {key:"lifestyle", label:"🌿 STILE DI VITA",        color:"#10b981"}
+  ];
+  let habitsHtml = ""; const seenCats = new Set();
+  CAT_SECTIONS.forEach(sec=>{
+    const cards = habitCards.filter(c=>c.cat===sec.key);
+    if(!cards.length) return;
+    seenCats.add(sec.key);
+    habitsHtml += `<div style="display:flex;align-items:center;gap:8px;margin:20px 0 10px;"><span style="font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:800;letter-spacing:1px;color:${sec.color};">${sec.label}</span><span style="flex:1;height:1px;background:var(--border);"></span></div>` + cards.map(c=>c.html).join("");
+  });
+  const restCards = habitCards.filter(c=>!seenCats.has(c.cat));
+  if(restCards.length) habitsHtml += `<div style="font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:800;color:#94a3b8;margin:20px 0 10px;">📌 ALTRO</div>` + restCards.map(c=>c.html).join("");
 
   c.innerHTML = `
+    ${v17GestoCard(viewingDate, viewingToday)}
     <!-- HERO -->
     <div style="background:linear-gradient(135deg,#0a1628,#0f2a4a);border:1px solid rgba(59,130,246,.2);border-radius:18px;padding:22px;margin-bottom:16px;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-        <div style="font-size:13px;color:${viewingToday?"var(--muted)":"#fcd34d"};letter-spacing:2px;">${viewingToday?"OGGI":"📅 STAI VEDENDO"} · ${viewDateObj.toLocaleDateString("it-IT",{weekday:"long",day:"numeric",month:"long"})}</div>
-        ${!viewingToday ? `<button onclick="goAbitudiniToday()" style="background:rgba(252,211,77,.15);border:1px solid rgba(252,211,77,.4);color:#fcd34d;padding:5px 12px;border-radius:14px;cursor:pointer;font-size:13px;font-weight:700;">← Torna a oggi</button>` : ""}
+        <div style="font-size:14px;color:${viewingToday?"var(--muted)":"#fcd34d"};letter-spacing:2px;">${viewingToday?"OGGI":"📅 STAI VEDENDO"} · ${viewDateObj.toLocaleDateString("it-IT",{weekday:"long",day:"numeric",month:"long"})}</div>
+        ${!viewingToday ? `<button onclick="goAbitudiniToday()" style="background:rgba(252,211,77,.15);border:1px solid rgba(252,211,77,.4);color:#fcd34d;padding:5px 12px;border-radius:14px;cursor:pointer;font-size:14px;font-weight:700;">← Torna a oggi</button>` : ""}
       </div>
       <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:14px;">
         <div style="font-family:'Barlow Condensed',sans-serif;font-size:54px;font-weight:900;color:${compliancePct>=80?"var(--green)":compliancePct>=50?"var(--accent)":"var(--red)"};line-height:1;">${doneToday}/${totalToday}</div>
@@ -2324,15 +2345,15 @@ function renderAbitudini() {
     <!-- CALENDARIO MENSILE -->
     <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:18px;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-        <button onclick="changeAbitudineMonth(-1)" style="background:rgba(255,255,255,.06);border:none;color:var(--text);width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:15px;">‹</button>
+        <button onclick="changeAbitudineMonth(-1)" style="background:rgba(255,255,255,.06);border:none;color:var(--text);width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:16px;">‹</button>
         <div style="font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:800;text-transform:capitalize;">📅 ${monthName}</div>
-        <button onclick="changeAbitudineMonth(1)" style="background:rgba(255,255,255,.06);border:none;color:var(--text);width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:15px;">›</button>
+        <button onclick="changeAbitudineMonth(1)" style="background:rgba(255,255,255,.06);border:none;color:var(--text);width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:16px;">›</button>
       </div>
-      <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;font-size:12px;color:var(--muted);text-align:center;font-weight:700;">
+      <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;font-size:13px;color:var(--muted);text-align:center;font-weight:700;">
         <div>L</div><div>M</div><div>M</div><div>G</div><div>V</div><div>S</div><div>D</div>
       </div>
       <div class="cal-grid">${calCellsHtml}</div>
-      <div style="display:flex;gap:14px;margin-top:10px;font-size:13px;color:var(--muted);justify-content:center;flex-wrap:wrap;">
+      <div style="display:flex;gap:14px;margin-top:10px;font-size:14px;color:var(--muted);justify-content:center;flex-wrap:wrap;">
         <span><span style="display:inline-block;width:10px;height:10px;background:var(--green);border-radius:2px;vertical-align:middle;"></span> ≥80% completate</span>
         <span><span style="display:inline-block;width:10px;height:10px;background:rgba(245,158,11,.4);border-radius:2px;vertical-align:middle;"></span> Parziale</span>
         <span><span style="display:inline-block;width:10px;height:10px;background:rgba(255,255,255,.04);border-radius:2px;vertical-align:middle;"></span> Niente</span>
@@ -2346,7 +2367,7 @@ function renderAbitudini() {
 
     <!-- ADD NEW HABIT -->
     <div class="habit-add-form">
-      <div style="font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:800;margin-bottom:10px;color:var(--accent);">➕ Aggiungi nuova abitudine</div>
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:800;margin-bottom:10px;color:var(--accent);">➕ Aggiungi nuova abitudine</div>
       <div style="display:grid;grid-template-columns:60px 1fr;gap:8px;">
         <input type="text" id="newHabitIcon" placeholder="🎯" maxlength="2" style="text-align:center;font-size:20px;">
         <input type="text" id="newHabitName" placeholder="Nome abitudine (es. Lettura 30 min)">
@@ -2367,7 +2388,7 @@ function renderAbitudini() {
 
     <!-- INFO -->
     <div style="background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:12px;padding:14px;margin-top:16px;">
-      <div style="font-size:12px;color:var(--muted);line-height:1.7;">
+      <div style="font-size:13px;color:var(--muted);line-height:1.7;">
         <strong style="color:var(--accent);">Come usare:</strong> tap sul ✓ verde per segnare completata l'intera abitudine. Oppure inserisci manualmente serie e ripetizioni per tracking dettagliato.<br><br>
         <strong style="color:var(--accent);">Perché funziona:</strong> volume basso ma costante. Push-up e squat sotto le 50 ripetizioni totali si possono fare ogni giorno senza sovraccaricare. La <em>routine</em> conta più dell'<em>intensità</em>.<br><br>
         <strong style="color:var(--accent);">Suggerimento:</strong> aggancia ogni abitudine a un trigger esistente. Es: push-up subito dopo aver lavato i denti, squat mentre aspetti il caffè. Si chiama <em>habit stacking</em>.
@@ -2505,9 +2526,9 @@ function renderVO2() {
           const h = Math.max(20, ((t.value - minV) / (maxV - minV)) * 100);
           const tcat = categoryForVO2(t.value);
           return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;">
-            <div style="font-size:14px;font-weight:700;color:${tcat.color};">${t.value}</div>
+            <div style="font-size:15px;font-weight:700;color:${tcat.color};">${t.value}</div>
             <div style="width:100%;background:${tcat.color};border-radius:5px 5px 0 0;height:${h}px;" title="${t.date}: ${t.value}"></div>
-            <div style="font-size:12px;color:var(--muted);">${t.date.slice(5)}</div>
+            <div style="font-size:13px;color:var(--muted);">${t.date.slice(5)}</div>
           </div>`;
         }).join("")}
       </div>
@@ -2525,11 +2546,11 @@ function renderVO2() {
     return `<div style="display:grid;grid-template-columns:32px 1fr auto auto;gap:12px;align-items:center;padding:10px 14px;background:rgba(255,255,255,.03);border-radius:10px;margin-bottom:6px;border-left:3px solid ${statusColor};">
       <span style="font-size:18px;">${status}</span>
       <div>
-        <div style="font-weight:700;font-size:14px;">${t.label}</div>
-        <div style="font-size:13px;color:var(--muted);">${t.date} · ${t.note}</div>
+        <div style="font-weight:700;font-size:15px;">${t.label}</div>
+        <div style="font-size:14px;color:var(--muted);">${t.date} · ${t.note}</div>
       </div>
       <div style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:900;color:${statusColor};">${t.value}</div>
-      <div style="font-size:12px;color:var(--muted);">VO₂</div>
+      <div style="font-size:13px;color:var(--muted);">VO₂</div>
     </div>`;
   }).join("");
 
@@ -2542,14 +2563,14 @@ function renderVO2() {
     const tcat = categoryForVO2(t.value);
     return `<div style="display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;padding:10px 14px;background:var(--surface2);border-radius:10px;margin-bottom:6px;">
       <div>
-        <div style="font-weight:700;font-size:14px;">${fmtDate(t.date)}</div>
-        <div style="font-size:13px;color:var(--muted);">${t.source||"—"}${t.note?" · "+t.note:""}</div>
+        <div style="font-weight:700;font-size:15px;">${fmtDate(t.date)}</div>
+        <div style="font-size:14px;color:var(--muted);">${t.source||"—"}${t.note?" · "+t.note:""}</div>
       </div>
       <div style="text-align:right;">
         <div style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;color:${tcat.color};">${t.value}</div>
-        <div style="font-size:12px;color:${tcat.color};">${tcat.label}</div>
+        <div style="font-size:13px;color:${tcat.color};">${tcat.label}</div>
       </div>
-      <button onclick="deleteVO2Test('${t.date}')" style="background:rgba(239,68,68,.15);border:none;color:#fca5a5;width:28px;height:28px;border-radius:6px;cursor:pointer;font-size:14px;">✕</button>
+      <button onclick="deleteVO2Test('${t.date}')" style="background:rgba(239,68,68,.15);border:none;color:#fca5a5;width:28px;height:28px;border-radius:6px;cursor:pointer;font-size:15px;">✕</button>
     </div>`;
   }).join("");
 
@@ -2558,21 +2579,21 @@ function renderVO2() {
     <div style="background:linear-gradient(135deg,#0a1628,#0f2a4a);border:1px solid rgba(59,130,246,.2);border-radius:18px;padding:22px;margin-bottom:16px;">
       <div style="display:grid;grid-template-columns:1fr auto;gap:16px;align-items:center;">
         <div>
-          <div style="font-size:13px;color:var(--muted);letter-spacing:2px;margin-bottom:6px;">VO₂MAX ATTUALE</div>
+          <div style="font-size:14px;color:var(--muted);letter-spacing:2px;margin-bottom:6px;">VO₂MAX ATTUALE</div>
           <div style="font-family:'Barlow Condensed',sans-serif;font-size:64px;font-weight:900;color:${cat.color};line-height:1;">${latestVal}</div>
-          <div style="font-size:13px;color:${cat.color};margin-top:4px;font-weight:700;">${cat.label}</div>
-          <div style="font-size:13px;color:var(--muted);margin-top:2px;">ml/kg/min · età 50-59 M</div>
+          <div style="font-size:14px;color:${cat.color};margin-top:4px;font-weight:700;">${cat.label}</div>
+          <div style="font-size:14px;color:var(--muted);margin-top:2px;">ml/kg/min · età 50-59 M</div>
         </div>
         <div style="text-align:center;background:rgba(255,255,255,.05);border-radius:12px;padding:14px 18px;">
-          <div style="font-size:13px;color:var(--muted);letter-spacing:1.5px;">TARGET GARA</div>
+          <div style="font-size:14px;color:var(--muted);letter-spacing:1.5px;">TARGET GARA</div>
           <div style="font-family:'Barlow Condensed',sans-serif;font-size:38px;font-weight:900;color:var(--accent);line-height:1;">${RACE_VO2_TARGET}</div>
-          <div style="font-size:13px;color:var(--muted);">+${RACE_VO2_TARGET - latestVal} punti</div>
+          <div style="font-size:14px;color:var(--muted);">+${RACE_VO2_TARGET - latestVal} punti</div>
         </div>
       </div>
 
       <!-- Progress bar to race goal -->
       <div style="margin-top:16px;">
-        <div style="display:flex;justify-content:space-between;font-size:13px;color:var(--muted);margin-bottom:5px;">
+        <div style="display:flex;justify-content:space-between;font-size:14px;color:var(--muted);margin-bottom:5px;">
           <span>Baseline (29)</span>
           <span style="color:${cat.color};font-weight:700;">${Math.round(vo2Progress)}%</span>
           <span style="color:var(--accent);">🎯 Target ${RACE_VO2_TARGET}</span>
@@ -2585,14 +2606,14 @@ function renderVO2() {
       <!-- Marathon time estimates -->
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px;">
         <div style="background:rgba(255,255,255,.05);border-radius:10px;padding:12px;">
-          <div style="font-size:12px;color:var(--muted);letter-spacing:1px;">TEMPO MARATONA OGGI</div>
+          <div style="font-size:13px;color:var(--muted);letter-spacing:1px;">TEMPO MARATONA OGGI</div>
           <div style="font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:900;color:${cat.color};">${fmtTime(currentSec)}</div>
-          <div style="font-size:12px;color:var(--muted);">VO₂ ${latestVal} @ ${latestWeight}kg</div>
+          <div style="font-size:13px;color:var(--muted);">VO₂ ${latestVal} @ ${latestWeight}kg</div>
         </div>
         <div style="background:rgba(255,255,255,.05);border-radius:10px;padding:12px;">
-          <div style="font-size:12px;color:var(--muted);letter-spacing:1px;">TEMPO SE ARRIVI 85KG</div>
+          <div style="font-size:13px;color:var(--muted);letter-spacing:1px;">TEMPO SE ARRIVI 85KG</div>
           <div style="font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:900;color:#10b981;">${fmtTime(projectedSec)}</div>
-          <div style="font-size:12px;color:var(--muted);">-${latestWeight - GOAL_WEIGHT}kg da perdere</div>
+          <div style="font-size:13px;color:var(--muted);">-${latestWeight - GOAL_WEIGHT}kg da perdere</div>
         </div>
       </div>
     </div>
@@ -2611,7 +2632,7 @@ function renderVO2() {
         </div>
       </div>
       <div class="metric-label">🔍 Fonte del test</div>
-      <input type="text" id="vo2Source" placeholder="es. Polar H10, Garmin, laboratorio..." value="Polar" style="width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:8px 10px;color:white;font-size:14px;outline:none;box-sizing:border-box;margin-bottom:10px;">
+      <input type="text" id="vo2Source" placeholder="es. Polar H10, Garmin, laboratorio..." value="Polar" style="width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:8px 10px;color:white;font-size:15px;outline:none;box-sizing:border-box;margin-bottom:10px;">
       <div class="metric-label">📝 Note</div>
       <textarea id="vo2Note" placeholder="Come ti sentivi, condizioni del test..." style="margin-bottom:12px;"></textarea>
       <button class="btn btn-save" onclick="addVO2Test()">💾 Salva test</button>
@@ -2631,7 +2652,7 @@ function renderVO2() {
 
     <!-- INFO -->
     <div style="background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:12px;padding:14px;margin-top:16px;">
-      <div style="font-size:12px;color:var(--muted);line-height:1.7;">
+      <div style="font-size:13px;color:var(--muted);line-height:1.7;">
         <strong style="color:var(--accent);">Cos'è il VO₂max:</strong> è la capacità massima del tuo corpo di usare ossigeno durante lo sforzo. È il miglior predittore di performance endurance.<br><br>
         <strong style="color:var(--accent);">Come migliorarlo:</strong> uscite lunghe aerobiche (Long Run), ripetute brevi intense (da W13), Tempo Run (da W13). Si allena sia con volume che con intensità.<br><br>
         <strong style="color:var(--accent);">Quando ritestare:</strong> ogni 4-6 settimane con Polar o simile. Variazioni giornaliere sono normali — conta il trend.<br><br>
@@ -2690,7 +2711,7 @@ function renderPiano() {
   c.innerHTML = `
     <!-- HEADER -->
     <div style="background:linear-gradient(135deg,#0a1628,#0f2a4a);border:1px solid rgba(59,130,246,.2);border-radius:18px;padding:22px;margin-bottom:18px;">
-      <div style="font-size:13px;color:var(--muted);letter-spacing:2px;margin-bottom:6px;">PIANO DI ALLENAMENTO — 30 SETTIMANE</div>
+      <div style="font-size:14px;color:var(--muted);letter-spacing:2px;margin-bottom:6px;">PIANO DI ALLENAMENTO — 30 SETTIMANE</div>
       <div style="font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:900;margin-bottom:4px;">
         Settimana <span style="color:var(--accent);">${currentWeekNum}</span> di 30
         <span style="font-size:16px;font-weight:600;color:${currentPlan.color};margin-left:10px;">${currentPlan.phase}</span>
@@ -2713,15 +2734,15 @@ function renderPiano() {
 
       ${dotWeeks.length > 0 ? `
       <div style="margin-top:14px;">
-        <div style="font-size:13px;color:var(--muted);margin-bottom:6px;">ULTIME ${dotWeeks.length} SETTIMANE</div>
+        <div style="font-size:14px;color:var(--muted);margin-bottom:6px;">ULTIME ${dotWeeks.length} SETTIMANE</div>
         <div style="display:flex;gap:5px;align-items:flex-end;">
           ${dotWeeks.map(({w,pct}) => {
             const col = pct>=80?"#10b981":pct>=60?"#f59e0b":pct>0?"#ef4444":"#1e293b";
             const h = Math.max(8, Math.round(pct*0.3)+4);
             return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;">
-              <div style="font-size:13px;color:var(--muted);">${pct>0?pct+"%":""}</div>
+              <div style="font-size:14px;color:var(--muted);">${pct>0?pct+"%":""}</div>
               <div style="width:100%;height:${h}px;background:${col};border-radius:3px 3px 0 0;" title="W${w}: ${pct}%"></div>
-              <div style="font-size:13px;color:var(--muted);">W${w}</div>
+              <div style="font-size:14px;color:var(--muted);">W${w}</div>
             </div>`;
           }).join("")}
         </div>
@@ -2762,7 +2783,7 @@ function renderPiano() {
 
             return `<div class="piano-session">
               <div class="session-dot" style="background:${s.color};"></div>
-              <span class="session-label" style="color:${done?'var(--green)':isPastDay&&s.required&&!done?'var(--muted)':'var(--text)'};">${s.label}${!s.required?' <span style="font-size:12px;color:var(--muted);">(bonus)</span>':''}</span>
+              <span class="session-label" style="color:${done?'var(--green)':isPastDay&&s.required&&!done?'var(--muted)':'var(--text)'};">${s.label}${!s.required?' <span style="font-size:13px;color:var(--muted);">(bonus)</span>':''}</span>
               <span class="session-status">${icon}</span>
             </div>`;
           }).join("");
@@ -2774,17 +2795,17 @@ function renderPiano() {
           const extraActs = dayLog.activities.filter(a => !daySessions.some(s => s.type === a));
           if (extraActs.length > 0) {
             const labels = extraActs.map(a => ACTIVITY_TYPES.find(x=>x.key===a)?.label||a).join(", ");
-            loggedExtra = `<div style="font-size:13px;color:var(--muted);margin-top:4px;">+ Loggato: ${labels}</div>`;
+            loggedExtra = `<div style="font-size:14px;color:var(--muted);margin-top:4px;">+ Loggato: ${labels}</div>`;
           }
           if (dayLog.km > 0) {
-            loggedExtra += `<div style="font-size:13px;color:var(--blue);margin-top:2px;">📏 ${dayLog.km}km${dayLog.passo_calcolato?" • "+dayLog.passo_calcolato+"/km":dayLog.passo?" • "+dayLog.passo+"/km":""}</div>`;
+            loggedExtra += `<div style="font-size:14px;color:var(--blue);margin-top:2px;">📏 ${dayLog.km}km${dayLog.passo_calcolato?" • "+dayLog.passo_calcolato+"/km":dayLog.passo?" • "+dayLog.passo+"/km":""}</div>`;
           }
         }
 
         return `<div class="piano-day ${isToday?'today':''} ${isFuture?'future':''}">
           <div>
             <div class="piano-day-name">${isToday?'🔵 ':''} ${DAY_NAMES[di]} ${dateStr.slice(8)}</div>
-            ${isToday?'<div style="font-size:12px;color:var(--accent);">OGGI</div>':""}
+            ${isToday?'<div style="font-size:13px;color:var(--accent);">OGGI</div>':""}
           </div>
           <div class="piano-sessions">
             ${statusHtml}
@@ -2796,7 +2817,7 @@ function renderPiano() {
     </div>
 
     <!-- LEGENDA -->
-    <div style="display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-bottom:20px;padding:10px 14px;background:var(--surface);border-radius:10px;border:1px solid var(--border);">
+    <div style="display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin-bottom:20px;padding:10px 14px;background:var(--surface);border-radius:10px;border:1px solid var(--border);">
       <span>✅ Completato</span>
       <span>❌ Mancato (obbligatorio)</span>
       <span>⏭️ Saltato (bonus)</span>
@@ -2821,12 +2842,12 @@ function renderPiano() {
           const dateStr = wDates[s.day];
           const done = dayActivityDone(logs[dateStr], s.type);
           const log = logs[dateStr];
-          const kmInfo = log?.km > 0 ? ` <span style="color:var(--blue);font-size:13px;">${log.km}km</span>` : "";
+          const kmInfo = log?.km > 0 ? ` <span style="color:var(--blue);font-size:14px;">${log.km}km</span>` : "";
           return `<div class="piano-day">
             <div class="piano-day-name">${DAY_NAMES[s.day]} ${dateStr?.slice(8)||""}</div>
             <div class="piano-session">
               <div class="session-dot" style="background:${s.color};"></div>
-              <span style="font-size:13px;color:${done?'var(--green)':'var(--muted)'};">${s.label}${!s.required?' (bonus)':''}</span>
+              <span style="font-size:14px;color:${done?'var(--green)':'var(--muted)'};">${s.label}${!s.required?' (bonus)':''}</span>
               ${kmInfo}
             </div>
             <span style="font-size:16px;">${done?'✅':s.required?'❌':'⏭️'}</span>
@@ -2840,16 +2861,16 @@ function renderPiano() {
     <div class="piano-week" style="opacity:.75;">
       <div class="piano-week-header">
         <div class="piano-week-title" style="color:${getPhasePlan(currentWeekNum+1).color};">${getPhasePlan(currentWeekNum+1).phase}</div>
-        <div style="font-size:12px;color:var(--muted);">in arrivo</div>
+        <div style="font-size:13px;color:var(--muted);">in arrivo</div>
       </div>
       ${getPhasePlan(currentWeekNum+1).sessions.map(s => `
         <div class="piano-day future">
           <div class="piano-day-name">${DAY_NAMES[s.day]}</div>
           <div class="piano-session">
             <div class="session-dot" style="background:${s.color};"></div>
-            <span style="font-size:13px;">${s.label}${!s.required?' (bonus)':''}</span>
+            <span style="font-size:14px;">${s.label}${!s.required?' (bonus)':''}</span>
           </div>
-          <span style="font-size:14px;color:var(--muted);">${s.required?'⏳':'💡'}</span>
+          <span style="font-size:15px;color:var(--muted);">${s.required?'⏳':'💡'}</span>
         </div>`).join("")}
     </div>
   `;
@@ -2972,41 +2993,41 @@ function renderReadiness() {
     <div class="readiness-hero">
       <div style="display:grid;grid-template-columns:1fr auto;gap:16px;align-items:flex-start;margin-bottom:16px;">
         <div>
-          <div style="font-size:13px;color:var(--muted);letter-spacing:2px;margin-bottom:4px;">SE CORRI LA MARATONA OGGI</div>
+          <div style="font-size:14px;color:var(--muted);letter-spacing:2px;margin-bottom:4px;">SE CORRI LA MARATONA OGGI</div>
           <div class="projected-time" style="color:${projColor}">${fmtProj(R.projectedSec)}</div>
-          <div style="font-size:14px;margin-top:6px;color:${diffSec<=0?"var(--green)":"var(--muted)"}">
+          <div style="font-size:15px;margin-top:6px;color:${diffSec<=0?"var(--green)":"var(--muted)"}">
             ${diffSec<=0?"🎯 Obiettivo raggiunto!":"⏳ "+diffMin+" min sopra il target 4h30'"}</div>
         </div>
         <div style="text-align:center;background:rgba(255,255,255,.05);border-radius:12px;padding:14px 18px;">
-          <div style="font-size:13px;color:var(--muted);letter-spacing:1.5px;">READINESS</div>
+          <div style="font-size:14px;color:var(--muted);letter-spacing:1.5px;">READINESS</div>
           <div style="font-family:'Barlow Condensed',sans-serif;font-size:44px;font-weight:900;color:${scoreColor};line-height:1;">${R.score}</div>
-          <div style="font-size:13px;color:var(--muted);">/100</div>
-          <div style="font-size:13px;color:${scoreColor};margin-top:4px;">${R.score<20?"🌱 Inizio":R.score<40?"🔥 Costruzione":R.score<60?"📈 Sviluppo":R.score<80?"🚀 Avanzato":"🏆 Peak"}</div>
+          <div style="font-size:14px;color:var(--muted);">/100</div>
+          <div style="font-size:14px;color:${scoreColor};margin-top:4px;">${R.score<20?"🌱 Inizio":R.score<40?"🔥 Costruzione":R.score<60?"📈 Sviluppo":R.score<80?"🚀 Avanzato":"🏆 Peak"}</div>
         </div>
       </div>
       <div style="margin-bottom:16px;">
-        <div style="display:flex;justify-content:space-between;font-size:13px;color:var(--muted);margin-bottom:5px;"><span>6h30' (start)</span><span style="color:var(--accent);">🎯 4h30'</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:14px;color:var(--muted);margin-bottom:5px;"><span>6h30' (start)</span><span style="color:var(--accent);">🎯 4h30'</span></div>
         <div class="gauge-track"><div class="gauge-fill" style="width:${Math.max(2,R.score)}%;background:linear-gradient(90deg,${projColor},${scoreColor});"></div></div>
-        <div style="display:flex;justify-content:space-between;font-size:13px;margin-top:4px;"><span style="color:var(--muted);">0%</span><span style="color:${scoreColor};font-weight:700;">${R.score}% del percorso</span><span style="color:var(--muted);">100%</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:14px;margin-top:4px;"><span style="color:var(--muted);">0%</span><span style="color:${scoreColor};font-weight:700;">${R.score}% del percorso</span><span style="color:var(--muted);">100%</span></div>
       </div>
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">
-        ${[["📅",R.daysLeft,"giorni alla gara"],["🗓️",weeksLeft,"settimane"],["📊",Math.round(R.progressPct)+"%","piano"],["⚖️",(R.currentWeight-GOAL_WEIGHT).toFixed(1)+"kg","da perdere"]].map(([e,v,l])=>`<div style="background:rgba(255,255,255,.06);border-radius:9px;padding:10px;text-align:center;"><div style="font-size:16px;">${e}</div><div style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:900;color:var(--accent);">${v}</div><div style="font-size:12px;color:var(--muted);">${l}</div></div>`).join("")}
+        ${[["📅",R.daysLeft,"giorni alla gara"],["🗓️",weeksLeft,"settimane"],["📊",Math.round(R.progressPct)+"%","piano"],["⚖️",(R.currentWeight-GOAL_WEIGHT).toFixed(1)+"kg","da perdere"]].map(([e,v,l])=>`<div style="background:rgba(255,255,255,.06);border-radius:9px;padding:10px;text-align:center;"><div style="font-size:16px;">${e}</div><div style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:900;color:var(--accent);">${v}</div><div style="font-size:13px;color:var(--muted);">${l}</div></div>`).join("")}
       </div>
     </div>
     <div style="font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:800;margin-bottom:10px;">📊 Indicatori</div>
     <div class="readiness-grid">
-      ${R.indicators.map(ind=>`<div class="r-card"><div style="font-size:20px;margin-bottom:5px;">${ind.icon}</div><div style="font-size:13px;color:var(--muted);margin-bottom:3px;">${ind.label}</div><div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:800;color:${ind.color};">${ind.desc}</div><div style="font-size:12px;color:var(--muted);margin-top:2px;">${ind.target}</div><div class="r-progress"><div class="r-progress-fill" style="width:${ind.score}%;background:${ind.color};"></div></div><div style="display:flex;justify-content:space-between;font-size:12px;margin-top:3px;"><span style="color:var(--muted);">${ind.note}</span><span style="color:${ind.color};font-weight:700;">${Math.round(ind.score)}%</span></div></div>`).join("")}
+      ${R.indicators.map(ind=>`<div class="r-card"><div style="font-size:20px;margin-bottom:5px;">${ind.icon}</div><div style="font-size:14px;color:var(--muted);margin-bottom:3px;">${ind.label}</div><div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:800;color:${ind.color};">${ind.desc}</div><div style="font-size:13px;color:var(--muted);margin-top:2px;">${ind.target}</div><div class="r-progress"><div class="r-progress-fill" style="width:${ind.score}%;background:${ind.color};"></div></div><div style="display:flex;justify-content:space-between;font-size:13px;margin-top:3px;"><span style="color:var(--muted);">${ind.note}</span><span style="color:${ind.color};font-weight:700;">${Math.round(ind.score)}%</span></div></div>`).join("")}
     </div>
     ${R.last5.length>0?`
     <div style="font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:800;margin:18px 0 10px;">📈 Trend passo (uscite ≥5km)</div>
     <div class="card" style="padding:14px;">
       <div style="display:flex;align-items:flex-end;gap:6px;height:80px;">
-        ${R.last5.slice().reverse().map((p,i,arr)=>{const maxS=Math.max(...arr.map(x=>x.sec));const minS=Math.min(...arr.map(x=>x.sec));const range=maxS-minS||1;const h=18+((maxS-p.sec)/range)*57;const best=p.sec===minS;return`<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;"><div style="font-size:12px;color:${best?"var(--green)":"var(--muted)"};">${secToPace(p.sec)}</div><div style="width:100%;background:${best?"var(--green)":"rgba(59,130,246,.5)"};border-radius:4px 4px 0 0;height:${h}px;"></div><div style="font-size:13px;color:var(--muted);">${p.d.slice(5)}</div></div>`;}).join("")}
+        ${R.last5.slice().reverse().map((p,i,arr)=>{const maxS=Math.max(...arr.map(x=>x.sec));const minS=Math.min(...arr.map(x=>x.sec));const range=maxS-minS||1;const h=18+((maxS-p.sec)/range)*57;const best=p.sec===minS;return`<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;"><div style="font-size:13px;color:${best?"var(--green)":"var(--muted)"};">${secToPace(p.sec)}</div><div style="width:100%;background:${best?"var(--green)":"rgba(59,130,246,.5)"};border-radius:4px 4px 0 0;height:${h}px;"></div><div style="font-size:14px;color:var(--muted);">${p.d.slice(5)}</div></div>`;}).join("")}
       </div>
-      <div style="font-size:13px;color:var(--muted);margin-top:6px;">* Passo calcolato da parziali ≥0.5km</div>
+      <div style="font-size:14px;color:var(--muted);margin-top:6px;">* Passo calcolato da parziali ≥0.5km</div>
     </div>`:""}
     <div style="background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:12px;padding:14px;margin-top:10px;">
-      <div style="font-size:12px;color:var(--muted);line-height:1.7;"><strong style="color:var(--accent);">Come funziona la stima:</strong> Miglior passo su ≥5km (da parziali filtrati ≥0.5km) × fattore fatica (×1.42 ora, scende con volume e uscite lunghe) × fattore peso (+0.5%/kg sopra 85kg). Si aggiorna automaticamente ad ogni salvataggio.</div>
+      <div style="font-size:13px;color:var(--muted);line-height:1.7;"><strong style="color:var(--accent);">Come funziona la stima:</strong> Miglior passo su ≥5km (da parziali filtrati ≥0.5km) × fattore fatica (×1.42 ora, scende con volume e uscite lunghe) × fattore peso (+0.5%/kg sopra 85kg). Si aggiorna automaticamente ad ogni salvataggio.</div>
     </div>`;
   } catch(err) {
     logError("Errore renderReadiness", err.message);
@@ -3014,8 +3035,8 @@ function renderReadiness() {
     if(el) el.innerHTML = `<div style="padding:40px;text-align:center;color:var(--red);">
       <div style="font-size:32px;margin-bottom:12px;">⚠️</div>
       <div style="font-weight:700;margin-bottom:8px;">Errore nel calcolo Readiness</div>
-      <div style="font-size:13px;color:var(--muted);">${err.message}</div>
-      <div style="font-size:12px;color:var(--muted);margin-top:8px;">Vai in ⚙️ → copia il log → invialo a Claude</div>
+      <div style="font-size:14px;color:var(--muted);">${err.message}</div>
+      <div style="font-size:13px;color:var(--muted);margin-top:8px;">Vai in ⚙️ → copia il log → invialo a Claude</div>
     </div>`;
   }
 }
@@ -3029,7 +3050,7 @@ window.onload = function() {
   currentDate = todayStr();
 
   // Log startup info
-  logInfo("Marathon Tracker v17.14 avviato");
+  logInfo("Marathon Tracker v17.16 avviato");
   try{ updateTopbarReadiness(); }catch(e){}
 
   // Auto-seed baseline VO2max test if empty
@@ -3278,7 +3299,7 @@ function renderCrescita(){
   html += `<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;">`;
   presets.forEach(([mode,label])=>{
     const active = crescitaPeriod.mode===mode;
-    html += `<button onclick="setCrescitaPeriod('${mode}')" style="padding:8px 14px;border-radius:10px;border:1px solid ${active?'#6366f1':'var(--border)'};background:${active?'linear-gradient(90deg,#3b82f6,#6366f1)':'var(--surface)'};color:${active?'#fff':'var(--muted)'};font-weight:700;font-size:14px;cursor:pointer;">${label}</button>`;
+    html += `<button onclick="setCrescitaPeriod('${mode}')" style="padding:8px 14px;border-radius:10px;border:1px solid ${active?'#6366f1':'var(--border)'};background:${active?'linear-gradient(90deg,#3b82f6,#6366f1)':'var(--surface)'};color:${active?'#fff':'var(--muted)'};font-weight:700;font-size:15px;cursor:pointer;">${label}</button>`;
   });
   html += `</div>`;
 
@@ -3286,19 +3307,19 @@ function renderCrescita(){
   if(crescitaPeriod.mode==="custom"){
     html += `<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px;">
       <div style="display:flex;flex-direction:column;gap:3px;">
-        <label style="font-size:13px;color:var(--muted);text-transform:uppercase;font-weight:700;">Da</label>
-        <input type="date" value="${range.from}" onchange="setCrescitaCustomFrom(this.value)" style="padding:9px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:14px;">
+        <label style="font-size:14px;color:var(--muted);text-transform:uppercase;font-weight:700;">Da</label>
+        <input type="date" value="${range.from}" onchange="setCrescitaCustomFrom(this.value)" style="padding:9px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:15px;">
       </div>
       <div style="display:flex;flex-direction:column;gap:3px;">
-        <label style="font-size:13px;color:var(--muted);text-transform:uppercase;font-weight:700;">A</label>
-        <input type="date" value="${range.to}" onchange="setCrescitaCustomTo(this.value)" style="padding:9px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:14px;">
+        <label style="font-size:14px;color:var(--muted);text-transform:uppercase;font-weight:700;">A</label>
+        <input type="date" value="${range.to}" onchange="setCrescitaCustomTo(this.value)" style="padding:9px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:15px;">
       </div>
     </div>`;
   } else {
     // anche fuori da custom, permetto di cambiare la data di riferimento con un date picker
     html += `<div style="display:flex;gap:8px;align-items:center;margin-bottom:14px;">
-      <span style="font-size:13px;color:var(--muted);">Riferimento:</span>
-      <input type="date" value="${currentDate}" onchange="document.getElementById('logDate').value=this.value; onDateChange(); showTab('crescita');" style="padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:14px;">
+      <span style="font-size:14px;color:var(--muted);">Riferimento:</span>
+      <input type="date" value="${currentDate}" onchange="document.getElementById('logDate').value=this.value; onDateChange(); showTab('crescita');" style="padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:15px;">
     </div>`;
   }
 
@@ -3306,14 +3327,14 @@ function renderCrescita(){
   html += `<div style="background:linear-gradient(135deg,rgba(59,130,246,.15),rgba(168,85,247,.12));border:1px solid rgba(99,102,241,.3);border-radius:16px;padding:18px;margin-bottom:16px;">
     <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;">
       <div>
-        <div style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:700;">Minuti deliberati · ${CRESCITA_PERIOD_LABELS[crescitaPeriod.mode]}</div>
-        <div style="font-size:13px;color:#a5b4fc;margin-top:2px;">${crescitaPeriodLabel(range.from, range.to)}</div>
+        <div style="font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:700;">Minuti deliberati · ${CRESCITA_PERIOD_LABELS[crescitaPeriod.mode]}</div>
+        <div style="font-size:14px;color:#a5b4fc;margin-top:2px;">${crescitaPeriodLabel(range.from, range.to)}</div>
         <div style="font-size:42px;font-weight:800;font-family:'Barlow Condensed',sans-serif;line-height:1;margin-top:6px;color:#fff;">${fmtMinutes(rangeTotal)}</div>
       </div>
       <div style="text-align:right;">
-        ${avgPerDay!==null ? `<div style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:700;">Media / giorno</div>
+        ${avgPerDay!==null ? `<div style="font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:700;">Media / giorno</div>
         <div style="font-size:28px;font-weight:800;font-family:'Barlow Condensed',sans-serif;line-height:1;margin-top:4px;color:#a5b4fc;">${fmtMinutes(avgPerDay)}</div>
-        <div style="font-size:13px;color:var(--muted);margin-top:2px;">${nDays} giorni</div>` : ``}
+        <div style="font-size:14px;color:var(--muted);margin-top:2px;">${nDays} giorni</div>` : ``}
       </div>
     </div>`;
   // barre per categoria sul periodo
@@ -3325,12 +3346,12 @@ function renderCrescita(){
         const cat = CRESCITA_CATEGORIES[catKey];
         const pct = Math.round((mins/rangeTotal)*100);
         html += `<div style="display:flex;align-items:center;gap:8px;">
-          <div style="width:100px;font-size:14px;color:var(--muted);font-weight:600;">${cat.icon} ${cat.name}</div>
+          <div style="width:100px;font-size:15px;color:var(--muted);font-weight:600;">${cat.icon} ${cat.name}</div>
           <div style="flex:1;background:rgba(255,255,255,.06);border-radius:6px;height:18px;overflow:hidden;">
             <div style="width:${pct}%;height:100%;background:${cat.color};border-radius:6px;transition:width .3s;"></div>
           </div>
-          <div style="width:64px;text-align:right;font-size:12px;font-weight:700;color:#fff;">${fmtMinutes(mins)}</div>
-          <div style="width:38px;text-align:right;font-size:13px;color:var(--muted);">${pct}%</div>
+          <div style="width:64px;text-align:right;font-size:13px;font-weight:700;color:#fff;">${fmtMinutes(mins)}</div>
+          <div style="width:38px;text-align:right;font-size:14px;color:var(--muted);">${pct}%</div>
         </div>`;
       }
     });
@@ -3342,14 +3363,14 @@ function renderCrescita(){
     const act = CRESCITA_ACTIVITIES.find(a=>a.id===crescitaSelectedActivity);
     html += `<div style="background:var(--surface);border:2px solid ${CRESCITA_CATEGORIES[act.cat].color};border-radius:14px;padding:16px;margin-bottom:16px;">
       <div style="font-size:18px;font-weight:800;margin-bottom:4px;">${act.icon} ${act.name}</div>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:14px;">${act.desc}</div>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:14px;">${act.desc}</div>
       <div style="display:flex;gap:10px;align-items:center;margin-bottom:12px;">
         <input id="crescitaMinInput" type="text" inputmode="numeric" placeholder="min" style="width:90px;padding:12px;border-radius:10px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:18px;font-weight:700;text-align:center;">
-        <span style="color:var(--muted);font-size:14px;">minuti netti</span>
+        <span style="color:var(--muted);font-size:15px;">minuti netti</span>
       </div>
-      <input id="crescitaDescInput" type="text" placeholder="Cosa hai fatto? (opzionale)" style="width:100%;padding:12px;border-radius:10px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:14px;margin-bottom:14px;box-sizing:border-box;">
+      <input id="crescitaDescInput" type="text" placeholder="Cosa hai fatto? (opzionale)" style="width:100%;padding:12px;border-radius:10px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:15px;margin-bottom:14px;box-sizing:border-box;">
       <div style="display:flex;gap:10px;">
-        <button onclick="confirmCrescitaInput()" style="flex:1;background:linear-gradient(90deg,var(--green),#059669);color:#fff;padding:13px;border-radius:10px;border:none;cursor:pointer;font-weight:800;font-size:15px;">✅ Registra</button>
+        <button onclick="confirmCrescitaInput()" style="flex:1;background:linear-gradient(90deg,var(--green),#059669);color:#fff;padding:13px;border-radius:10px;border:none;cursor:pointer;font-weight:800;font-size:16px;">✅ Registra</button>
         <button onclick="cancelCrescitaInput()" style="background:rgba(255,255,255,.08);color:var(--muted);padding:13px 18px;border-radius:10px;border:none;cursor:pointer;font-weight:700;">Annulla</button>
       </div>
     </div>`;
@@ -3367,8 +3388,8 @@ function renderCrescita(){
             <span style="font-size:26px;line-height:1;">${a.icon}</span>
             <span style="font-size:18px;font-weight:800;color:var(--text);line-height:1.15;">${a.name}</span>
           </div>
-          <div style="font-size:13px;color:var(--muted);line-height:1.3;">${a.desc}</div>
-          ${todayMin>0 ? `<div style="position:absolute;top:12px;right:12px;background:${cat.color};color:#fff;font-size:13px;font-weight:800;padding:3px 9px;border-radius:12px;">${fmtMinutes(todayMin)}</div>` : ""}
+          <div style="font-size:14px;color:var(--muted);line-height:1.3;">${a.desc}</div>
+          ${todayMin>0 ? `<div style="position:absolute;top:12px;right:12px;background:${cat.color};color:#fff;font-size:14px;font-weight:800;padding:3px 9px;border-radius:12px;">${fmtMinutes(todayMin)}</div>` : ""}
         </button>`;
       });
       html += `</div></div>`;
@@ -3377,7 +3398,7 @@ function renderCrescita(){
 
   const multiDay = range.from !== range.to;
   if(rangeSessions.length>0){
-    html += `<div style="margin-top:18px;"><div style="font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">📋 Sessioni · ${crescitaPeriodLabel(range.from, range.to)} (${rangeSessions.length})</div>`;
+    html += `<div style="margin-top:18px;"><div style="font-size:14px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">📋 Sessioni · ${crescitaPeriodLabel(range.from, range.to)} (${rangeSessions.length})</div>`;
     rangeSessions.forEach(s=>{
       const act = CRESCITA_ACTIVITIES.find(a=>a.id===s.activity_id) || {name:s.activity_id, icon:"•"};
       const cat = CRESCITA_CATEGORIES[s.category] || {color:"#888"};
@@ -3385,15 +3406,15 @@ function renderCrescita(){
         <div style="font-size:22px;">${act.icon}</div>
         <div style="flex:1;min-width:0;">
           <div style="font-size:16px;font-weight:700;">${act.name} · <span style="color:${cat.color};">${fmtMinutes(s.minutes)}</span></div>
-          ${s.description ? `<div style="font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${s.description}</div>` : ""}
+          ${s.description ? `<div style="font-size:14px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${s.description}</div>` : ""}
         </div>
-        <div style="font-size:13px;color:var(--muted);text-align:right;">${multiDay ? fmtDateShort(s.date)+"<br>" : ""}${s.timestamp}</div>
+        <div style="font-size:14px;color:var(--muted);text-align:right;">${multiDay ? fmtDateShort(s.date)+"<br>" : ""}${s.timestamp}</div>
         <button onclick="deleteCrescitaSession('${s.id}')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;padding:2px 6px;">×</button>
       </div>`;
     });
     html += `</div>`;
   } else {
-    html += `<div style="text-align:center;padding:30px;color:var(--muted);"><div style="font-size:36px;margin-bottom:8px;">🎯</div><div style="font-size:14px;">Nessuna sessione nel periodo selezionato.<br>Tappa un'attività per registrare i minuti (su ${fmtDate(viewDate)}).</div></div>`;
+    html += `<div style="text-align:center;padding:30px;color:var(--muted);"><div style="font-size:36px;margin-bottom:8px;">🎯</div><div style="font-size:15px;">Nessuna sessione nel periodo selezionato.<br>Tappa un'attività per registrare i minuti (su ${fmtDate(viewDate)}).</div></div>`;
   }
   el.innerHTML = html;
 }
@@ -3496,13 +3517,13 @@ function renderPeso(){
     +'<polyline points="'+maline+'" fill="none" stroke="rgba(59,130,246,.55)" stroke-width="2.5"/>'
     +'<polyline points="'+line+'" fill="none" stroke="var(--accent)" stroke-width="1.5" opacity="0.8"/>'
     +dots+idots+'</svg>'
-    +'<div id="pesoTip" style="position:absolute;display:none;pointer-events:none;background:#0a1628;border:1px solid rgba(59,130,246,.5);color:#e8edf5;font-size:12px;font-weight:700;padding:5px 9px;border-radius:8px;white-space:nowrap;transform:translate(-50%,-140%);z-index:5;"></div></div>'
-    +'<div style="display:flex;gap:14px;font-size:13px;color:var(--muted);margin-top:4px;"><span>● peso</span><span style="color:#93c5fd;">— media 7g</span><span style="color:var(--green);">- - target</span></div>';
+    +'<div id="pesoTip" style="position:absolute;display:none;pointer-events:none;background:#0a1628;border:1px solid rgba(59,130,246,.5);color:#e8edf5;font-size:13px;font-weight:700;padding:5px 9px;border-radius:8px;white-space:nowrap;transform:translate(-50%,-140%);z-index:5;"></div></div>'
+    +'<div style="display:flex;gap:14px;font-size:14px;color:var(--muted);margin-top:4px;"><span>● peso</span><span style="color:#93c5fd;">— media 7g</span><span style="color:var(--green);">- - target</span></div>';
   const stat=(v,l,color)=>'<div class="total-card"><div class="total-val"'+(color?' style="color:'+color+';"':'')+'>'+v+'</div><div class="total-lbl">'+l+'</div></div>';
   const fmtDelta=x=>x===null?"—":(x>0?"+":"")+x.toFixed(1)+" kg";
   const colDelta=x=>x===null?"":(x<0?"var(--green)":x>0?"var(--red)":"");
   c.innerHTML='<div style="background:linear-gradient(135deg,#0a1628,#0f2a4a);border:1px solid rgba(59,130,246,.2);border-radius:18px;padding:22px;margin-bottom:16px;">'
-    +'<div style="font-size:13px;color:var(--muted);letter-spacing:2px;margin-bottom:6px;">⚖️ PESO · ultimi 90 giorni</div>'
+    +'<div style="font-size:14px;color:var(--muted);letter-spacing:2px;margin-bottom:6px;">⚖️ PESO · ultimi 90 giorni</div>'
     +'<div style="display:flex;align-items:baseline;gap:10px;margin-bottom:8px;">'
     +'<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:54px;font-weight:900;color:var(--accent);line-height:1;">'+cur.w.toFixed(1)+'</div>'
     +'<div style="font-size:16px;color:var(--muted);">kg · '+fmtDate(cur.d)+'</div></div>'
@@ -3512,7 +3533,7 @@ function renderPeso(){
     +stat(fmtDelta(d30),"vs 30 giorni fa",colDelta(d30))
     +stat(slopeWk===null?"—":((slopeWk>0?"+":"")+slopeWk.toFixed(2)),"kg/sett (21g)",colDelta(slopeWk))
     +'</div>'
-    +'<div style="margin-top:14px;font-size:14px;color:#cbd5e1;background:rgba(255,255,255,.04);border-radius:10px;padding:12px;">'+projHtml+'</div>'
+    +'<div style="margin-top:14px;font-size:15px;color:#cbd5e1;background:rgba(255,255,255,.04);border-radius:10px;padding:12px;">'+projHtml+'</div>'
     +'</div>'
     +v17WeeklyReportCard();
 }
@@ -3537,7 +3558,7 @@ function v17WeeklyReportCard(){
   return '<div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px;">'
     +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">'
     +'<div style="font-weight:800;font-size:16px;">📋 Report ultimi 7 giorni</div>'
-    +'<button onclick="v17CopyWeeklyReport()" style="background:rgba(59,130,246,.15);border:1px solid rgba(59,130,246,.4);color:#93c5fd;padding:6px 12px;border-radius:10px;cursor:pointer;font-size:12px;font-weight:700;">Copia</button></div>'
+    +'<button onclick="v17CopyWeeklyReport()" style="background:rgba(59,130,246,.15);border:1px solid rgba(59,130,246,.4);color:#93c5fd;padding:6px 12px;border-radius:10px;cursor:pointer;font-size:13px;font-weight:700;">Copia</button></div>'
     +'<div class="totals-grid">'
     +'<div class="total-card"><div class="total-val">'+dwTxt+'</div><div class="total-lbl">Peso 7g</div></div>'
     +'<div class="total-card"><div class="total-val">'+r.pct+'%</div><div class="total-lbl">Abitudini full</div></div>'
@@ -3614,17 +3635,17 @@ function v17RenderCircuitPanel(cid){
     if(!h) return "";
     const shortName=h.name.split(" (")[0];
     return `<div style="display:grid;grid-template-columns:1fr 54px 16px 54px;gap:6px;align-items:center;margin-bottom:5px;">
-      <div style="font-size:13px;color:var(--text);">${h.icon} ${shortName}</div>
+      <div style="font-size:14px;color:var(--text);">${h.icon} ${shortName}</div>
       <input type="text" inputmode="numeric" class="habit-detail-input" style="padding:6px;text-align:center;" value="${it.sets}" oninput="v17UpdateCircuitPlanItem('${cid}',${idx},'sets',this.value)">
       <div style="text-align:center;color:var(--muted);">×</div>
       <input type="text" inputmode="numeric" class="habit-detail-input" style="padding:6px;text-align:center;" value="${it.reps}" oninput="v17UpdateCircuitPlanItem('${cid}',${idx},'reps',this.value)">
     </div>`;
   }).join("");
   return `<div style="margin-top:10px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:12px;">
-    <div style="font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Piano circuito · serie × reps (prossima volta, modificabile)</div>
+    <div style="font-size:14px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Piano circuito · serie × reps (prossima volta, modificabile)</div>
     ${rows}
-    <div style="font-size:12px;color:var(--muted);margin:8px 0;">${v17LastCircuitLine(cid, currentAbitudineDate||todayStr())}</div>
-    <button onclick="v17CompleteCircuit('${cid}')" style="width:100%;background:linear-gradient(90deg,var(--green),#059669);color:#fff;border:none;border-radius:10px;padding:12px;font-weight:800;font-size:15px;cursor:pointer;">✅ Circuito fatto → logga tutti gli esercizi</button>
+    <div style="font-size:13px;color:var(--muted);margin:8px 0;">${v17LastCircuitLine(cid, currentAbitudineDate||todayStr())}</div>
+    <button onclick="v17CompleteCircuit('${cid}')" style="width:100%;background:linear-gradient(90deg,var(--green),#059669);color:#fff;border:none;border-radius:10px;padding:12px;font-weight:800;font-size:16px;cursor:pointer;">✅ Circuito fatto → logga tutti gli esercizi</button>
   </div>`;
 }
 function v17CompleteCircuit(cid){
@@ -3647,6 +3668,116 @@ function v17CompleteCircuit(cid){
   }
   showToast("✅ Circuito loggato: "+n+" esercizi aggiornati","ok");
   renderAbitudini();
+}
+
+// ─── v17.15: "UN GESTO ORA" — un solo gesto minimo, zero pensieri ───
+let v17GestoIdx = 0;
+const V17_GESTO_MICRO = {
+  circuito_am: "15 minuti e la mattina è vinta. Non pensare al resto.",
+  circuito_pm: "15 minuti, poi hai chiuso la giornata in positivo.",
+  walk7k: "Esci. Anche solo un giro dell'isolato conta.",
+  lettura_libri: "Apri il libro. 5 minuti bastano per tenere lo streak.",
+  water2l: "Riempi la borraccia e bevi. Fatto.",
+  sleep7h: "Stasera a letto prima. Segnalo domani.",
+  vitamina_d_am: "Una pastiglia. 5 secondi.",
+  creatina_am: "10g nell'acqua. 5 secondi.",
+  creatina_pm: "10g nell'acqua. 5 secondi.",
+  multivitaminico_am: "Una pastiglia. 5 secondi.",
+  omega3_am: "Due capsule. 5 secondi.",
+  omega3_pm: "Una capsula. 5 secondi.",
+  magnesio_pm: "Una pastiglia. 5 secondi.",
+  pushup_am: "Buttati a terra, quello che esce. Anche 5.",
+  squat_am: "In piedi, 10 squat. Ora.",
+  plank_am: "20 secondi di plank. Vai.",
+  glute_bridge_am: "A terra, ponte. Un minuto in tutto.",
+  calf_raises_am: "Sui polpacci, 15 volte. In piedi dove sei.",
+  affondi_pm: "Affondi, quello che viene.",
+  deadbug_pm: "A terra, dead bug lenti.",
+  side_plank_pm: "Side plank, 20 secondi per lato.",
+  superman_pm: "A pancia in giù, superman.",
+  calf_raises_pm: "Sui polpacci, 15 volte."
+};
+function v17GestoCandidates(date) {
+  const habits = loadHabits().filter(h => h.frequency === "daily");
+  const undone = habits.filter(h => !v17StreakDone(h, date));
+  const hr = new Date().getHours();
+  let order;
+  if (hr < 12) order = ["circuito_am","vitamina_d_am","multivitaminico_am","creatina_am","omega3_am","lettura_libri","water2l","walk7k"];
+  else if (hr < 18) order = ["walk7k","water2l","lettura_libri","circuito_am"];
+  else order = ["circuito_pm","creatina_pm","magnesio_pm","omega3_pm","lettura_libri","water2l","walk7k"];
+  const ids = undone.map(h => h.id);
+  const ranked = order.filter(id => ids.includes(id));
+  const rest = ids.filter(id => !ranked.includes(id));
+  return ranked.concat(rest);
+}
+function v17NextGesto() {
+  const c = v17GestoCandidates(currentAbitudineDate || todayStr());
+  if (c.length) v17GestoIdx = (v17GestoIdx + 1) % c.length;
+  renderAbitudini();
+}
+function v17MarkDone(id) {
+  const date = currentAbitudineDate || todayStr();
+  if (id === "circuito_am" || id === "circuito_pm") { v17CompleteCircuit(id); return; }
+  const h = loadHabits().find(x => x.id === id);
+  if (!h) return;
+  if (h.type === "value") { const log = getHabitDayLog(date, id) || {}; log.value = h.targetValue; setHabitDayLog(date, id, log); }
+  else if (h.type === "sets") { const v = (h.variants && h.variants[0]) ? h.variants[0].key : "full"; setHabitDayLog(date, id, { sets: [{ variant: v, reps: h.targetTotal }] }); }
+  else { setHabitDayLog(date, id, { done: true }); }
+  v17GestoIdx = 0;
+  try { showToast("✓ " + h.name.split(" (")[0], "ok"); } catch(e) {}
+  renderAbitudini();
+}
+function v17GestoCard(date, viewingToday) {
+  if (!viewingToday) return "";
+  const cand = v17GestoCandidates(date);
+  if (cand.length === 0) {
+    return '<div style="background:linear-gradient(135deg,#064e3b,#065f46);border:1px solid rgba(16,185,129,.4);border-radius:18px;padding:22px;margin-bottom:16px;text-align:center;">'
+      + '<div style="font-size:40px;">🎉</div>'
+      + '<div style="font-size:20px;font-weight:900;color:#fff;margin-top:6px;">Tutto fatto per oggi.</div>'
+      + '<div style="font-size:15px;color:rgba(255,255,255,.75);margin-top:4px;">Ogni abitudine del giorno è verde. Vai a vivere.</div></div>';
+  }
+  if (v17GestoIdx >= cand.length) v17GestoIdx = 0;
+  const id = cand[v17GestoIdx];
+  const h = loadHabits().find(x => x.id === id);
+  if (!h) return "";
+  const name = h.name.split(" (")[0];
+  const micro = V17_GESTO_MICRO[id] || "Falla adesso. Una cosa sola.";
+  const more = cand.length > 1
+    ? '<button onclick="v17NextGesto()" style="background:transparent;border:1px solid rgba(255,255,255,.3);color:rgba(255,255,255,.85);padding:14px 16px;border-radius:12px;cursor:pointer;font-size:15px;font-weight:700;">Un\'altra →</button>'
+    : "";
+  return '<div style="background:linear-gradient(135deg,#7c2d12,#9a3412);border:1px solid rgba(249,115,22,.5);border-radius:18px;padding:22px;margin-bottom:16px;">'
+    + '<div style="font-size:13px;color:rgba(255,255,255,.65);letter-spacing:2px;margin-bottom:12px;">👊 ORA · UNA COSA SOLA</div>'
+    + '<div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;"><div style="font-size:40px;line-height:1;">' + h.icon + '</div>'
+    + '<div style="font-size:26px;font-weight:900;color:#fff;line-height:1.1;">' + name + '</div></div>'
+    + '<div style="font-size:16px;color:rgba(255,255,255,.9);margin-bottom:18px;">' + micro + '</div>'
+    + '<div style="display:flex;gap:10px;">'
+    + '<button onclick="v17MarkDone(\'' + id + '\')" style="flex:1;background:#fff;color:#9a3412;border:none;border-radius:12px;padding:15px;cursor:pointer;font-size:16px;font-weight:900;">✓ Fatto</button>'
+    + more + '</div></div>';
+}
+
+
+
+// ─── v17.16: pannello recap chiamate (SALES) ───
+function v17UpdateCallField(date, field, val){
+  const log = getHabitDayLog(date, "chiamate") || {};
+  log[field] = Math.max(0, parseInt(val)||0);
+  setHabitDayLog(date, "chiamate", log); // salva silenzioso, niente re-render (mantiene il focus)
+}
+function v17CallPanel(date){
+  const l = getHabitDayLog(date,"chiamate") || {};
+  const v = k => (l[k]!=null ? l[k] : "");
+  const row = (label,key) => `<div style="display:grid;grid-template-columns:1fr 72px;gap:8px;align-items:center;margin-bottom:6px;"><div style="font-size:15px;color:var(--text);">${label}</div><input type="text" inputmode="numeric" class="habit-detail-input" style="padding:8px;text-align:center;" value="${v(key)}" oninput="v17UpdateCallField('${date}','${key}',this.value)"></div>`;
+  return `<div style="margin-top:10px;background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.25);border-radius:10px;padding:12px;">
+    <div style="font-size:14px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">📞 Recap chiamate di oggi</div>
+    ${row("Chiamate fatte","value")}
+    ${row("Non risposte","nonrisp")}
+    ${row("Risposte","risp")}
+    <div style="height:1px;background:var(--border);margin:9px 0;"></div>
+    ${row("Esito Sì ✅","si")}
+    ${row("Esito No ❌","no")}
+    ${row("Follow-up 🔁","fu")}
+    <button onclick="renderAbitudini()" style="width:100%;margin-top:10px;background:linear-gradient(90deg,var(--blue),#2563eb);color:#fff;border:none;border-radius:10px;padding:11px;font-weight:800;font-size:15px;cursor:pointer;">✓ Salva recap chiamate</button>
+  </div>`;
 }
 
 function showTab(name) {
@@ -3690,9 +3821,9 @@ function renderPasti(){
   if (!list) return;
 
   if (pasti.length === 0) {
-    list.innerHTML = `<div style="color:var(--muted);font-size:13px;padding:14px;text-align:center;font-style:italic;">
+    list.innerHTML = `<div style="color:var(--muted);font-size:14px;padding:14px;text-align:center;font-style:italic;">
       Nessun pasto registrato per oggi.<br><br>
-      <span style="font-size:12px;">Usa <strong style="color:#fcd34d;">📋 Incolla giornata</strong> per importare i pasti che dici a Claude.</span>
+      <span style="font-size:13px;">Usa <strong style="color:#fcd34d;">📋 Incolla giornata</strong> per importare i pasti che dici a Claude.</span>
     </div>`;
     totalsEl.style.display = "none";
     return;
@@ -3714,11 +3845,11 @@ function renderPasti(){
 
     return `<div style="background:var(--surface2);border-radius:10px;padding:12px 14px;margin-bottom:8px;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-        <div style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:14px;text-transform:capitalize;">${icon} ${(p.meal || "pasto").replace(/_/g," ")} ${p.time ? `<span style="font-size:13px;color:var(--muted);font-weight:600;">· ${p.time}</span>` : ""}</div>
-        <div style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:18px;color:#fcd34d;">${kcal} <span style="font-size:13px;color:var(--muted);font-weight:600;">kcal · ${Math.round((kcal/1700)*100)}%</span></div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:15px;text-transform:capitalize;">${icon} ${(p.meal || "pasto").replace(/_/g," ")} ${p.time ? `<span style="font-size:14px;color:var(--muted);font-weight:600;">· ${p.time}</span>` : ""}</div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:18px;color:#fcd34d;">${kcal} <span style="font-size:14px;color:var(--muted);font-weight:600;">kcal · ${Math.round((kcal/1700)*100)}%</span></div>
       </div>
-      <div style="font-size:13px;color:var(--text);margin-bottom:6px;line-height:1.4;">${p.food || "—"}</div>
-      <div style="display:flex;gap:14px;font-size:13px;color:var(--muted);">
+      <div style="font-size:14px;color:var(--text);margin-bottom:6px;line-height:1.4;">${p.food || "—"}</div>
+      <div style="display:flex;gap:14px;font-size:14px;color:var(--muted);">
         ${prot ? `<span>P: <strong style="color:#93c5fd;">${prot}g</strong></span>` : ""}
         ${carb ? `<span>C: <strong style="color:#fcd34d;">${carb}g</strong></span>` : ""}
         ${fat ? `<span>G: <strong style="color:#fca5a5;">${fat}g</strong></span>` : ""}
@@ -3747,22 +3878,22 @@ function renderPasti(){
   totalsEl.innerHTML = `
     <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;">
       <div style="background:rgba(252,211,77,.08);border-radius:8px;padding:10px;">
-        <div style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;">Calorie</div>
-        <div style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;color:${color(totalKcal,tgtKcal,true)};">${totalKcal} <span style="font-size:13px;color:var(--muted);font-weight:600;">/ ${tgtKcal}</span> <span style="font-size:14px;font-weight:800;color:${color(totalKcal,tgtKcal,true)};">· ${Math.round((totalKcal/tgtKcal)*100)}%</span></div>
+        <div style="font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;">Calorie</div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;color:${color(totalKcal,tgtKcal,true)};">${totalKcal} <span style="font-size:14px;color:var(--muted);font-weight:600;">/ ${tgtKcal}</span> <span style="font-size:15px;font-weight:800;color:${color(totalKcal,tgtKcal,true)};">· ${Math.round((totalKcal/tgtKcal)*100)}%</span></div>
         <div style="height:4px;background:rgba(255,255,255,.06);border-radius:4px;margin-top:4px;"><div style="height:100%;background:${color(totalKcal,tgtKcal,true)};border-radius:4px;width:${pct(totalKcal,tgtKcal)}%;"></div></div>
       </div>
       <div style="background:rgba(147,197,253,.08);border-radius:8px;padding:10px;">
-        <div style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;">Proteine</div>
-        <div style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;color:${color(totalProt,tgtProt,false)};">${totalProt} <span style="font-size:13px;color:var(--muted);font-weight:600;">/ ${tgtProt}g</span></div>
+        <div style="font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;">Proteine</div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;color:${color(totalProt,tgtProt,false)};">${totalProt} <span style="font-size:14px;color:var(--muted);font-weight:600;">/ ${tgtProt}g</span></div>
         <div style="height:4px;background:rgba(255,255,255,.06);border-radius:4px;margin-top:4px;"><div style="height:100%;background:${color(totalProt,tgtProt,false)};border-radius:4px;width:${pct(totalProt,tgtProt)}%;"></div></div>
       </div>
       <div style="background:rgba(252,211,77,.05);border-radius:8px;padding:10px;">
-        <div style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;">Carbo</div>
-        <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:900;color:#fcd34d;">${totalCarb} <span style="font-size:13px;color:var(--muted);font-weight:600;">/ ${tgtCarb}g</span></div>
+        <div style="font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;">Carbo</div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:900;color:#fcd34d;">${totalCarb} <span style="font-size:14px;color:var(--muted);font-weight:600;">/ ${tgtCarb}g</span></div>
       </div>
       <div style="background:rgba(252,165,165,.05);border-radius:8px;padding:10px;">
-        <div style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;">Grassi</div>
-        <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:900;color:${color(totalFat,tgtFat,true)};">${totalFat} <span style="font-size:13px;color:var(--muted);font-weight:600;">/ ${tgtFat}g</span></div>
+        <div style="font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;">Grassi</div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:900;color:${color(totalFat,tgtFat,true)};">${totalFat} <span style="font-size:14px;color:var(--muted);font-weight:600;">/ ${tgtFat}g</span></div>
       </div>
     </div>
   `;
@@ -3794,7 +3925,7 @@ function updateRangeDisplay(key,val,isPain){const el=document.getElementById("rv
 // ═══════════════════════════════════════════════════════════
 function renderSplitsInput(){
   const c=document.getElementById("splitsInputContainer");
-  c.innerHTML=currentSplits.length===0?`<div style="color:var(--muted);font-size:13px;padding:8px 0;">Nessun parziale. Clicca + per aggiungere.</div>`:currentSplits.map((s,i)=>`<div class="split-input-row"><input type="text" value="${s.km||''}" placeholder="km" oninput="updateSplit(${i},'km',this.value)"><input type="text" value="${s.passo||''}" placeholder="Passo (8'39&quot;)" oninput="updateSplit(${i},'passo',this.value)"><input type="text" value="${s.dislivello||''}" placeholder="Disl." oninput="updateSplit(${i},'dislivello',this.value)"><input type="text" value="${s.note||''}" placeholder="Note" oninput="updateSplit(${i},'note',this.value)"><button class="btn-sm" onclick="removeSplit(${i})">✕</button></div>`).join("");
+  c.innerHTML=currentSplits.length===0?`<div style="color:var(--muted);font-size:14px;padding:8px 0;">Nessun parziale. Clicca + per aggiungere.</div>`:currentSplits.map((s,i)=>`<div class="split-input-row"><input type="text" value="${s.km||''}" placeholder="km" oninput="updateSplit(${i},'km',this.value)"><input type="text" value="${s.passo||''}" placeholder="Passo (8'39&quot;)" oninput="updateSplit(${i},'passo',this.value)"><input type="text" value="${s.dislivello||''}" placeholder="Disl." oninput="updateSplit(${i},'dislivello',this.value)"><input type="text" value="${s.note||''}" placeholder="Note" oninput="updateSplit(${i},'note',this.value)"><button class="btn-sm" onclick="removeSplit(${i})">✕</button></div>`).join("");
   renderSplitsPreview();updateSplitsStats();
 }
 function updateSplitsStats(){
@@ -3816,7 +3947,7 @@ function renderSplitsPreview(){
   const paceTimes=valid.map(s=>parsePaceToSec(s.passo)).filter(Boolean);
   const bestSec=paceTimes.length>0?Math.min(...paceTimes):null;
   const worstSec=paceTimes.length>1?Math.max(...paceTimes):null;
-  c.innerHTML=`<table class="splits-table"><thead><tr><th>KM</th><th>PASSO</th><th>DISL.</th><th>NOTE</th><th>STAT</th></tr></thead><tbody>${currentSplits.map(s=>{const km=parseFloat(s.km);const isExcluded=isNaN(km)||km<0.5;const sec=parsePaceToSec(s.passo);const isBest=!isExcluded&&sec&&sec===bestSec;const isWorst=!isExcluded&&sec&&sec===worstSec&&bestSec!==worstSec;return`<tr><td style="font-weight:700;">${s.km}</td><td class="${isBest?"split-best":isWorst?"split-worst":isExcluded?"split-excluded":""}">${s.passo||"—"}</td><td style="color:var(--muted);">${s.dislivello||"—"}</td><td style="color:var(--muted);font-size:12px;">${s.note||""}</td><td style="font-size:12px;">${isBest?"🟢 Best":isWorst?"🔴 Worst":isExcluded?"⚪ Excl.":""}</td></tr>`;}).join("")}</tbody></table>`;
+  c.innerHTML=`<table class="splits-table"><thead><tr><th>KM</th><th>PASSO</th><th>DISL.</th><th>NOTE</th><th>STAT</th></tr></thead><tbody>${currentSplits.map(s=>{const km=parseFloat(s.km);const isExcluded=isNaN(km)||km<0.5;const sec=parsePaceToSec(s.passo);const isBest=!isExcluded&&sec&&sec===bestSec;const isWorst=!isExcluded&&sec&&sec===worstSec&&bestSec!==worstSec;return`<tr><td style="font-weight:700;">${s.km}</td><td class="${isBest?"split-best":isWorst?"split-worst":isExcluded?"split-excluded":""}">${s.passo||"—"}</td><td style="color:var(--muted);">${s.dislivello||"—"}</td><td style="color:var(--muted);font-size:13px;">${s.note||""}</td><td style="font-size:13px;">${isBest?"🟢 Best":isWorst?"🔴 Worst":isExcluded?"⚪ Excl.":""}</td></tr>`;}).join("")}</tbody></table>`;
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -3837,7 +3968,7 @@ function renderWeekStrip(){
     const l=logs[d];const s=fmtShort(d);
     const isPending=pendingQueue.includes(d);
     const cls=["week-day",d===currentDate?"active":"",l?"has-data":"",d===today?"today":"",isPending?"pending-sync":""].filter(Boolean).join(" ");
-    return`<div class="${cls}" onclick="jumpDate('${d}')"><div class="wd-name">${s.name}</div><div class="wd-num">${s.num}</div>${l?.km>0?`<div class="wd-km">${l.km}k</div>`:""}${isPending?"<div style='font-size:13px'>⏳</div>":""}</div>`;
+    return`<div class="${cls}" onclick="jumpDate('${d}')"><div class="wd-name">${s.name}</div><div class="wd-num">${s.num}</div>${l?.km>0?`<div class="wd-km">${l.km}k</div>`:""}${isPending?"<div style='font-size:14px'>⏳</div>":""}</div>`;
   }).join("");
 }
 function jumpDate(d){currentDate=d;document.getElementById("logDate").value=d;onDateChange();}
@@ -3927,8 +4058,8 @@ function renderHistory(){
     const chips=(l.activities||[]).map(a=>{const at=ACTIVITY_TYPES.find(x=>x.key===a);return at?`<span class="hist-chip" style="background:${at.color}22;color:${at.color}">${at.label}</span>`:""}).join("");
     const metsHtml=showMets.filter(k=>l[k]!==undefined&&l[k]!=="").map(k=>{const m=ALL_METRICS.find(x=>x.key===k)||{label:k,unit:"",icon:"📊"};return`<div class="hist-met"><div class="hist-met-val">${l[k]}${m.unit||""}</div><div class="hist-met-lbl">${m.icon} ${m.label}</div></div>`;}).join("");
     const splitsHtml=l.parziali?.length>0?`<div style="margin-top:10px;overflow-x:auto;"><table class="splits-table"><thead><tr><th>KM</th><th>PASSO</th><th>DISL.</th></tr></thead><tbody>${l.parziali.map(s=>`<tr><td>${s.km}</td><td>${s.passo||"—"}</td><td>${s.dislivello||"—"}</td></tr>`).join("")}</tbody></table></div>`:"";
-    const noteHtml=l.note?`<div style="margin-top:10px;padding:10px 14px;background:rgba(255,255,255,.04);border-radius:8px;font-size:13px;color:#94a3b8;font-style:italic;">"${l.note}"</div>`:"";
-    return`<div class="hist-item${isPending?" pending-sync":""}" onclick="toggleHist('${d}')"><div class="hist-head"><div><div style="font-weight:700;font-size:15px;margin-bottom:5px;">${fmtDate(d)}${isPending?' <span style="font-size:13px;color:var(--accent);">⏳ In attesa sync</span>':""}</div><div style="display:flex;gap:6px;flex-wrap:wrap;">${chips}</div></div><div style="display:flex;gap:8px;align-items:center;">${l.km?`<span style="color:var(--blue);font-weight:700;">${l.km}km</span>`:""}${l.peso?`<span style="color:var(--accent);font-weight:700;">${l.peso}kg</span>`:""}<span class="chev" id="chev-${d}">▼</span></div></div><div class="hist-body" id="body-${d}"><div class="hist-metrics">${metsHtml}</div>${splitsHtml}${noteHtml}</div></div>`;
+    const noteHtml=l.note?`<div style="margin-top:10px;padding:10px 14px;background:rgba(255,255,255,.04);border-radius:8px;font-size:14px;color:#94a3b8;font-style:italic;">"${l.note}"</div>`:"";
+    return`<div class="hist-item${isPending?" pending-sync":""}" onclick="toggleHist('${d}')"><div class="hist-head"><div><div style="font-weight:700;font-size:16px;margin-bottom:5px;">${fmtDate(d)}${isPending?' <span style="font-size:14px;color:var(--accent);">⏳ In attesa sync</span>':""}</div><div style="display:flex;gap:6px;flex-wrap:wrap;">${chips}</div></div><div style="display:flex;gap:8px;align-items:center;">${l.km?`<span style="color:var(--blue);font-weight:700;">${l.km}km</span>`:""}${l.peso?`<span style="color:var(--accent);font-weight:700;">${l.peso}kg</span>`:""}<span class="chev" id="chev-${d}">▼</span></div></div><div class="hist-body" id="body-${d}"><div class="hist-metrics">${metsHtml}</div>${splitsHtml}${noteHtml}</div></div>`;
   }).join("");
 }
 function toggleHist(d){const body=document.getElementById("body-"+d);const chev=document.getElementById("chev-"+d);const open=body.classList.toggle("open");chev.className="chev"+(open?" open":"");}
@@ -3945,9 +4076,9 @@ function copySheets(){const rows=buildRows();const tsv=[CSV_HEADERS,...rows].map
 // ═══════════════════════════════════════════════════════════
 function renderWorkoutSelector(){document.getElementById("woSelector").innerHTML=Object.entries(WORKOUTS).map(([k,w])=>`<button class="wo-btn" id="wo-${k}" onclick="selectWorkout('${k}')"><span class="wo-emoji">${w.emoji}</span>W ${k}<span class="wo-day">${w.day}</span></button>`).join("");selectWorkout("A");}
 function selectWorkout(k){activeWorkout=k;Object.keys(WORKOUTS).forEach(wk=>{const btn=document.getElementById("wo-"+wk);const w=WORKOUTS[wk];const active=wk===k;btn.style.borderColor=active?w.color:"rgba(255,255,255,.1)";btn.style.background=active?w.color+"20":"var(--surface2)";btn.style.color=active?w.color:"var(--muted)";});renderWorkout();}
-function renderWorkout(){const w=WORKOUTS[activeWorkout];document.getElementById("woBanner").style.borderLeft=`4px solid ${w.color}`;document.getElementById("woBanner").innerHTML=`<div style="font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:800;color:${w.color};margin-bottom:4px;">${w.emoji} ${w.label}</div><div style="font-size:13px;color:var(--muted);">${w.focus}</div>`;document.getElementById("exerciseList").innerHTML=w.exercises.map((ex,i)=>`<div class="ex-item" id="ex-item-${i}"><div class="ex-head" onclick="toggleEx(${i})"><div style="flex:1;"><div style="display:flex;gap:8px;align-items:center;margin-bottom:7px;flex-wrap:wrap;"><span class="ex-tag" style="background:${w.color}22;color:${w.color}">${i+1}</span><span style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:800;">${ex.name}</span></div><div style="display:flex;gap:5px;flex-wrap:wrap;"><span class="ex-tag" style="background:rgba(251,191,36,.15);color:var(--accent)">📊 ${ex.sets}</span><span class="ex-tag" style="background:rgba(255,255,255,.07);color:var(--muted)">⏱️ ${ex.rest}</span><span class="ex-tag" style="background:rgba(16,185,129,.15);color:#6ee7b7">💪 ${ex.load}</span></div></div><span class="chev" id="ex-chev-${i}">▼</span></div><div class="ex-body" id="ex-body-${i}"><div class="ex-section" style="background:rgba(59,130,246,.1);"><div class="ex-section-title" style="color:#93c5fd;">🎯 Perché</div><div style="font-size:13px;color:#cbd5e1;line-height:1.6;">${ex.why}</div></div><div class="ex-section" style="background:rgba(16,185,129,.1);"><div class="ex-section-title" style="color:#6ee7b7;">✅ Esecuzione</div>${ex.cues.map((c,j)=>`<div class="ex-cue"><span class="ex-cue-num" style="color:var(--green)">${j+1}.</span><span style="font-size:13px;color:#d1fae5;">${c}</span></div>`).join("")}</div><div class="ex-section" style="background:rgba(251,191,36,.1);"><div class="ex-section-title" style="color:#fcd34d;">📈 Progressione</div><div style="font-size:13px;color:#fef3c7;line-height:1.6;">${ex.prog}</div></div><div class="ex-section" style="background:rgba(239,68,68,.1);"><div class="ex-section-title" style="color:#fca5a5;">🩺 Previene</div><div style="font-size:13px;color:#fee2e2;">${ex.injury}</div></div></div></div>`).join("");}
+function renderWorkout(){const w=WORKOUTS[activeWorkout];document.getElementById("woBanner").style.borderLeft=`4px solid ${w.color}`;document.getElementById("woBanner").innerHTML=`<div style="font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:800;color:${w.color};margin-bottom:4px;">${w.emoji} ${w.label}</div><div style="font-size:14px;color:var(--muted);">${w.focus}</div>`;document.getElementById("exerciseList").innerHTML=w.exercises.map((ex,i)=>`<div class="ex-item" id="ex-item-${i}"><div class="ex-head" onclick="toggleEx(${i})"><div style="flex:1;"><div style="display:flex;gap:8px;align-items:center;margin-bottom:7px;flex-wrap:wrap;"><span class="ex-tag" style="background:${w.color}22;color:${w.color}">${i+1}</span><span style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:800;">${ex.name}</span></div><div style="display:flex;gap:5px;flex-wrap:wrap;"><span class="ex-tag" style="background:rgba(251,191,36,.15);color:var(--accent)">📊 ${ex.sets}</span><span class="ex-tag" style="background:rgba(255,255,255,.07);color:var(--muted)">⏱️ ${ex.rest}</span><span class="ex-tag" style="background:rgba(16,185,129,.15);color:#6ee7b7">💪 ${ex.load}</span></div></div><span class="chev" id="ex-chev-${i}">▼</span></div><div class="ex-body" id="ex-body-${i}"><div class="ex-section" style="background:rgba(59,130,246,.1);"><div class="ex-section-title" style="color:#93c5fd;">🎯 Perché</div><div style="font-size:14px;color:#cbd5e1;line-height:1.6;">${ex.why}</div></div><div class="ex-section" style="background:rgba(16,185,129,.1);"><div class="ex-section-title" style="color:#6ee7b7;">✅ Esecuzione</div>${ex.cues.map((c,j)=>`<div class="ex-cue"><span class="ex-cue-num" style="color:var(--green)">${j+1}.</span><span style="font-size:14px;color:#d1fae5;">${c}</span></div>`).join("")}</div><div class="ex-section" style="background:rgba(251,191,36,.1);"><div class="ex-section-title" style="color:#fcd34d;">📈 Progressione</div><div style="font-size:14px;color:#fef3c7;line-height:1.6;">${ex.prog}</div></div><div class="ex-section" style="background:rgba(239,68,68,.1);"><div class="ex-section-title" style="color:#fca5a5;">🩺 Previene</div><div style="font-size:14px;color:#fee2e2;">${ex.injury}</div></div></div></div>`).join("");}
 function toggleEx(i){const body=document.getElementById("ex-body-"+i);const chev=document.getElementById("ex-chev-"+i);const item=document.getElementById("ex-item-"+i);const w=WORKOUTS[activeWorkout];const open=body.classList.toggle("open");chev.className="chev"+(open?" open":"");item.style.borderColor=open?w.color+"50":"transparent";}
-function renderWeekStructure(){document.getElementById("weekStructure").innerHTML=WEEK_STRUCTURE.map(d=>`<div style="display:flex;gap:12px;align-items:center;padding:10px 14px;background:rgba(255,255,255,.03);border-radius:9px;margin-bottom:6px;border-left:3px solid ${d.color}"><span style="font-family:'Barlow Condensed',sans-serif;font-weight:900;color:${d.color};min-width:28px;">${d.day}</span><span style="font-size:18px;">${d.icon}</span><div style="flex:1;"><div style="font-weight:700;font-size:14px;">${d.type}</div><div style="font-size:12px;color:var(--muted);">${d.detail}</div></div></div>`).join("");}
+function renderWeekStructure(){document.getElementById("weekStructure").innerHTML=WEEK_STRUCTURE.map(d=>`<div style="display:flex;gap:12px;align-items:center;padding:10px 14px;background:rgba(255,255,255,.03);border-radius:9px;margin-bottom:6px;border-left:3px solid ${d.color}"><span style="font-family:'Barlow Condensed',sans-serif;font-weight:900;color:${d.color};min-width:28px;">${d.day}</span><span style="font-size:18px;">${d.icon}</span><div style="flex:1;"><div style="font-weight:700;font-size:15px;">${d.type}</div><div style="font-size:13px;color:var(--muted);">${d.detail}</div></div></div>`).join("");}
 
 // ═══════════════════════════════════════════════════════════
 // SETTINGS
@@ -4197,17 +4328,17 @@ function previewPasteDay() {
     previewByDate.forEach(p => {
       html += `<div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:10px;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-          <div style="font-family:'Barlow Condensed',sans-serif;font-weight:800;color:var(--accent);font-size:15px;">📅 ${fmtDate(p.date)}</div>
-          <div style="font-size:13px;color:var(--muted);">${p.changes.length} ${p.changes.length===1?"modifica":"modifiche"}</div>
+          <div style="font-family:'Barlow Condensed',sans-serif;font-weight:800;color:var(--accent);font-size:16px;">📅 ${fmtDate(p.date)}</div>
+          <div style="font-size:14px;color:var(--muted);">${p.changes.length} ${p.changes.length===1?"modifica":"modifiche"}</div>
         </div>`;
       if (p.changes.length === 0) {
-        html += `<div style="font-size:12px;color:var(--muted);font-style:italic;">Nessuna modifica</div>`;
+        html += `<div style="font-size:13px;color:var(--muted);font-style:italic;">Nessuna modifica</div>`;
       } else {
         html += `<div style="display:flex;flex-direction:column;gap:4px;">`;
         for (const c of p.changes) {
           const fromStr = String(c.from).length > 30 ? String(c.from).slice(0,30)+"..." : String(c.from);
           const toStr = String(c.to).length > 40 ? String(c.to).slice(0,40)+"..." : String(c.to);
-          html += `<div style="display:grid;grid-template-columns:1fr auto auto;gap:8px;font-size:12px;align-items:center;padding:3px 0;">
+          html += `<div style="display:grid;grid-template-columns:1fr auto auto;gap:8px;font-size:13px;align-items:center;padding:3px 0;">
             <div style="color:var(--text);font-weight:600;">${c.field}</div>
             <div style="color:var(--muted);">${fromStr}</div>
             <div style="color:var(--green);font-weight:700;">→ ${toStr}</div>
@@ -4445,7 +4576,7 @@ function renderImportPreview(data) {
     const acts = data.activities.map(a=>ACTIVITY_TYPES.find(x=>x.key===a)?.label||a).join(", ");
     const d = document.createElement("div");
     d.className = "preview-item highlight";
-    d.innerHTML = `<div class="preview-label">🏃 Attività</div><div class="preview-val" style="font-size:13px;">${acts}</div>`;
+    d.innerHTML = `<div class="preview-label">🏃 Attività</div><div class="preview-val" style="font-size:14px;">${acts}</div>`;
     grid.appendChild(d);
     hasItems = true;
   }
@@ -4459,7 +4590,7 @@ function renderImportPreview(data) {
     hasItems = true;
   }
   if (!hasItems) {
-    grid.innerHTML = `<div style="color:var(--muted);font-size:13px;">Nessun campo riconosciuto nel JSON.</div>`;
+    grid.innerHTML = `<div style="color:var(--muted);font-size:14px;">Nessun campo riconosciuto nel JSON.</div>`;
   }
   // Splits preview
   const splitsEl = document.getElementById("previewSplits");
@@ -4467,13 +4598,13 @@ function renderImportPreview(data) {
     const valid = data.parziali.filter(s=>parseFloat(s.km)>=0.5);
     const excl = data.parziali.length - valid.length;
     splitsEl.innerHTML = `
-      <div style="font-size:13px;font-weight:700;margin-bottom:6px;color:var(--text);">📊 Parziali (${data.parziali.length} totali${excl>0?`, ${excl} esclusi dal calcolo`:""}):</div>
+      <div style="font-size:14px;font-weight:700;margin-bottom:6px;color:var(--text);">📊 Parziali (${data.parziali.length} totali${excl>0?`, ${excl} esclusi dal calcolo`:""}):</div>
       <div style="overflow-x:auto;">
         <table class="splits-table">
           <thead><tr><th>KM</th><th>PASSO</th><th>DISL.</th><th>STAT</th></tr></thead>
           <tbody>${data.parziali.map(s=>{
             const km=parseFloat(s.km);const excl=km<0.5;
-            return`<tr><td style="font-weight:700;">${s.km}</td><td class="${excl?"split-excluded":""}">${s.passo||"—"}</td><td style="color:var(--muted);">${s.dislivello||"—"}</td><td style="font-size:12px;">${excl?"⚪ Excl.":""}</td></tr>`;
+            return`<tr><td style="font-weight:700;">${s.km}</td><td class="${excl?"split-excluded":""}">${s.passo||"—"}</td><td style="color:var(--muted);">${s.dislivello||"—"}</td><td style="font-size:13px;">${excl?"⚪ Excl.":""}</td></tr>`;
           }).join("")}</tbody>
         </table>
       </div>`;
