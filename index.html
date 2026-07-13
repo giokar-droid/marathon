@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>🏅 Marathon Tracker v17.26</title>
+<title>🏅 Marathon Tracker v17.29</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -291,7 +291,7 @@ code{background:rgba(255,255,255,.1);padding:2px 7px;border-radius:5px;font-size
   <div class="topbar-inner">
     <div class="topbar-row1">
       <div>
-        <div class="topbar-sub">Marathon Tracker <span class="v-badge">v17.26</span></div>
+        <div class="topbar-sub">Marathon Tracker <span class="v-badge">v17.29</span></div>
         <div class="topbar-title">🏅 25.10.2026 — <span id="topbarReadiness" title="Proiezione Readiness aggiornata">…</span></div>
       </div>
       <!-- SYNC STATUS STRIP -->
@@ -1174,7 +1174,12 @@ async function pullHabitsFromSheets() {
 
     const remoteSavedAt = String(row.savedAt || "");
     const existing = habitLogs[dateStr]?.[row.habit_id];
-    const localSavedAt = String(existing?._savedAt || "");
+    // Il salvataggio locale scrive "savedAt"; il pull scrive "_savedAt". Leggo ENTRAMBI
+    // e prendo il più recente, altrimenti la protezione "non sovrascrivere il locale
+    // più nuovo" non scatta e i parziali (acqua/passi/lettura) vengono persi.
+    const _a = existing && existing._savedAt ? String(existing._savedAt) : "";
+    const _b = existing && existing.savedAt ? String(existing.savedAt) : "";
+    const localSavedAt = _a > _b ? _a : _b;
 
     // Skip se locale è più recente
     if (existing && localSavedAt && remoteSavedAt && remoteSavedAt < localSavedAt) continue;
@@ -1491,6 +1496,7 @@ async function syncAll(silent) {
   try {
     await pullFromSheets();
     await flushPending();
+    await v17FlushHabitDirty(true);
     onDateChange();
     updateSyncUI("ok", "Sincronizzato • " + new Date().toLocaleTimeString("it-IT"), 0);
     logOk("Sync completato");
@@ -1710,6 +1716,7 @@ const DEFAULT_HABITS = [
   // — SALES / PRODUTTIVITÀ (v17.16) — priorità n°1, sempre in cima
   { id: "prep_call_30", icon: "📝", name: "Prep/review call script (30')", color: "#3b82f6", type: "value", targetValue: 30, unit: "min", frequency: "daily", category: "sales" },
   { id: "chiamate",     icon: "📞", name: "Chiamate outreach",             color: "#2563eb", type: "value", targetValue: 1,  unit: "chiamate", frequency: "daily", category: "sales" },
+  { id: "lavoro_deliberato", icon: "🎯", name: "Lavoro deliberato netto (bussola)", color: "#2563eb", type: "value", targetValue: 400, unit: "min", blockSize: 25, frequency: "daily", category: "sales" },
   // — Allenamento base (giornaliero, 4 sessioni AM/PM)
   { id: "pushup_am", icon: "💪", name: "Push-up mattina (3×8)", color: "#f97316", type: "sets", targetTotal: 24, variants: [{key:"full",label:"Completi",icon:"💯"},{key:"knee",label:"Ginocchia",icon:"🦵"}], frequency: "daily", category: "workout" },
   { id: "squat_am",  icon: "🦵", name: "Squat mattina (3×10)", color: "#10b981", type: "sets", targetTotal: 30, variants: [{key:"full",label:"Completi",icon:"💯"},{key:"assisted",label:"Assistiti",icon:"🤝"}], frequency: "daily", category: "workout" },
@@ -1849,6 +1856,40 @@ function setHabitDayLog(date, habitId, data) {
     all[date][habitId] = { ...data, savedAt: new Date().toISOString() };
   }
   saveHabitLogs(all);
+  try { v17MarkHabitDirty(date); } catch(e) {}
+}
+
+// ─── v17.29: AUTO-SYNC ABITUDINI ───
+// Ogni salvataggio marca la data come "sporca"; dopo 4s di quiete parte il push
+// automatico verso Sheets. Il badge dice sempre la verità (in attesa / sincronizzato).
+let v17HabitDirty = new Set();
+try { (JSON.parse(localStorage.getItem("mt_habit_dirty_v1")||"[]")).forEach(d=>v17HabitDirty.add(d)); } catch(e) {}
+let v17HabitPushTimer = null;
+function v17SaveHabitDirty(){ try{ localStorage.setItem("mt_habit_dirty_v1", JSON.stringify([...v17HabitDirty])); }catch(e){} }
+function v17MarkHabitDirty(date){
+  v17HabitDirty.add(date); v17SaveHabitDirty();
+  try { updateSyncUI("pending","Abitudini da sincronizzare…",pendingQueue.length); } catch(e) {}
+  clearTimeout(v17HabitPushTimer);
+  v17HabitPushTimer = setTimeout(()=>{ v17FlushHabitDirty(true).catch(()=>{}); }, 4000);
+}
+async function v17FlushHabitDirty(silent){
+  if (!sheetUrl || v17HabitDirty.size===0) return;
+  if (!navigator.onLine) { try{ updateSyncUI("pending","Offline — abitudini in attesa",pendingQueue.length); }catch(e){} return; }
+  const logsAll = loadHabitLogs();
+  const dates=[...v17HabitDirty];
+  let ok=0, fail=0;
+  for (const d of dates){
+    try {
+      if (logsAll[d]) await pushHabitsForDate(d, logsAll[d]);
+      v17HabitDirty.delete(d); ok++;
+    } catch(e){ fail++; try{ logWarn("Push abitudini fallito per "+d, e.message); }catch(_){} }
+  }
+  v17SaveHabitDirty();
+  try {
+    if (fail===0) updateSyncUI("ok","Sincronizzato • "+new Date().toLocaleTimeString("it-IT"),pendingQueue.length);
+    else updateSyncUI("error","Sync abitudini parziale — riprova",pendingQueue.length);
+  } catch(e) {}
+  if (ok>0) { try{ logOk("Abitudini sincronizzate ("+ok+" giorni)"); }catch(_){} }
 }
 
 function isHabitDoneToday(habit, date) {
@@ -3070,7 +3111,7 @@ window.onload = function() {
   currentDate = todayStr();
 
   // Log startup info
-  logInfo("Marathon Tracker v17.26 avviato");
+  logInfo("Marathon Tracker v17.29 avviato");
   try{ updateTopbarReadiness(); }catch(e){}
 
   // Auto-seed baseline VO2max test if empty
@@ -3723,18 +3764,20 @@ function v17GestoCandidates(date) {
     // Abitudini a blocchi: restano candidate finché non raggiungono il TARGET PIENO,
     // non lo streak minimo (altrimenti la lettura sparirebbe già a 5' invece che a 30').
     if (h.blockSize && h.type === "value" && h.targetValue) {
-      // Abitudine a blocchi: resta nella card ORA finché l'utente non tocca "Ho finito"
-      // (gestoDone) — così può aggiungere blocchi anche OLTRE il target senza che sparisca.
+      // Abitudine a blocchi: candidata SOLO finché non è finita — cioè finché il valore
+      // è sotto il target E non hai toccato "Ho finito". Una volta piena sparisce dal
+      // banner (ha senso: è fatta). Per aggiungere OLTRE il target usa la scheda, che non ha tetto.
       const log = getHabitDayLog(date, h.id) || {};
-      return !log.gestoDone;
+      const v = parseFloat(log.value) || 0;
+      return v < h.targetValue && !log.gestoDone;
     }
     return !v17StreakDone(h, date);
   });
   const hr = new Date().getHours();
   let order;
-  if (hr < 12) order = ["circuito_am","vitamina_d_am","multivitaminico_am","creatina_am","omega3_am","lettura_libri","water2l","walk7k"];
-  else if (hr < 18) order = ["walk7k","water2l","lettura_libri","circuito_am"];
-  else order = ["circuito_pm","creatina_pm","magnesio_pm","omega3_pm","lettura_libri","water2l","walk7k"];
+  if (hr < 12) order = ["prep_call_30","chiamate","lavoro_deliberato","circuito_am","vitamina_d_am","multivitaminico_am","creatina_am","omega3_am","lettura_libri","water2l","walk7k"];
+  else if (hr < 18) order = ["prep_call_30","chiamate","lavoro_deliberato","walk7k","water2l","lettura_libri","circuito_am"];
+  else order = ["prep_call_30","chiamate","lavoro_deliberato","circuito_pm","creatina_pm","magnesio_pm","omega3_pm","lettura_libri","water2l","walk7k"];
   const ids = undone.map(h => h.id);
   const ranked = order.filter(id => ids.includes(id));
   const rest = ids.filter(id => !ranked.includes(id));
@@ -3768,6 +3811,30 @@ function v17GestoCard(date, viewingToday) {
   if (!viewingToday) return "";
   const cand = v17GestoCandidates(date);
   if (cand.length === 0) {
+    // CENTIMETRO IN PIÙ (v17.28): a obblighi finiti, proponi UN blocco extra sulle priorità
+    if (localStorage.getItem("mt_extra_dismiss_"+date)) {
+      return '<div style="background:linear-gradient(135deg,#064e3b,#065f46);border:1px solid rgba(16,185,129,.4);border-radius:18px;padding:22px;margin-bottom:16px;text-align:center;">'
+        + '<div style="font-size:40px;">🎉</div>'
+        + '<div style="font-size:20px;font-weight:900;color:#fff;margin-top:6px;">Giornata chiusa.</div>'
+        + '<div style="font-size:15px;color:rgba(255,255,255,.75);margin-top:4px;">Obblighi + centimetro extra. Vai a vivere.</div></div>';
+    }
+    const EXTRA_PRIORITY = ["lavoro_deliberato","prep_call_30","lettura_libri","walk7k","water2l"];
+    const allH = loadHabits();
+    const ex = EXTRA_PRIORITY.map(i=>allH.find(x=>x.id===i)).find(x=>x && x.blockSize && x.type==="value");
+    if (ex) {
+      const evGv = parseFloat((getHabitDayLog(date, ex.id)||{}).value) || 0;
+      const exName = ex.name.split(" (")[0];
+      return '<div style="background:linear-gradient(135deg,#1e3a5f,#1d4ed8);border:1px solid rgba(59,130,246,.5);border-radius:18px;padding:22px;margin-bottom:16px;">'
+        + '<div style="font-size:13px;color:rgba(255,255,255,.65);letter-spacing:2px;margin-bottom:12px;">📏 CENTIMETRO IN PIÙ · facoltativo</div>'
+        + '<div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;"><div style="font-size:40px;line-height:1;">'+ex.icon+'</div>'
+        + '<div style="font-size:24px;font-weight:900;color:#fff;line-height:1.1;">'+exName+'</div></div>'
+        + '<div style="font-size:15px;color:rgba(255,255,255,.9);margin-bottom:6px;">Gli obblighi sono fatti. Un solo blocco extra ti avvicina agli obiettivi che contano — anche stanco, soprattutto stanco.</div>'
+        + '<div style="font-size:14px;color:rgba(255,255,255,.7);margin-bottom:14px;">Oggi: '+evGv+(ex.unit?" "+ex.unit:"")+'</div>'
+        + '<div style="display:flex;gap:10px;">'
+        + '<button onclick="v17AddBlock(\''+ex.id+'\',\''+date+'\')" style="flex:1;background:#fff;color:#1d4ed8;border:none;border-radius:12px;padding:15px;cursor:pointer;font-size:16px;font-weight:900;">＋ '+ex.blockSize+(ex.unit?" "+ex.unit:"")+' extra</button>'
+        + '<button onclick="localStorage.setItem(\'mt_extra_dismiss_'+date+'\',1);renderAbitudini()" style="background:transparent;border:1px solid rgba(255,255,255,.3);color:rgba(255,255,255,.85);padding:14px 16px;border-radius:12px;cursor:pointer;font-size:15px;font-weight:700;">Basta per oggi</button>'
+        + '</div></div>';
+    }
     return '<div style="background:linear-gradient(135deg,#064e3b,#065f46);border:1px solid rgba(16,185,129,.4);border-radius:18px;padding:22px;margin-bottom:16px;text-align:center;">'
       + '<div style="font-size:40px;">🎉</div>'
       + '<div style="font-size:20px;font-weight:900;color:#fff;margin-top:6px;">Tutto fatto per oggi.</div>'
@@ -3791,8 +3858,12 @@ function v17GestoCard(date, viewingToday) {
     let pips=""; for(let i=0;i<bN;i++){ pips+='<div style="flex:1;height:12px;border-radius:5px;background:'+(i<bDone?"#fff":"rgba(255,255,255,.18)")+';"></div>'; }
     progressHtml = '<div style="display:flex;gap:5px;margin-bottom:8px;">'+pips+'</div>'
       + '<div style="font-size:14px;color:rgba(255,255,255,.85);margin-bottom:16px;">'+bDone+'/'+bN+' blocchi · '+gv+'/'+h.targetValue+(h.unit?" "+h.unit:"")+(reached?' ✅ target raggiunto — continua se vuoi':'')+'</div>';
+    const mini = (h.unit==="min" && h.blockSize>5)
+      ? '<button onclick="v17AddMinutes(\''+id+'\',\''+date+'\',5)" style="flex:0 0 auto;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.35);color:#fff;border-radius:12px;padding:15px 14px;cursor:pointer;font-size:15px;font-weight:800;">solo 5\'</button>'
+      : "";
     btnRow = '<div style="display:flex;gap:10px;">'
       + '<button onclick="v17AddBlock(\''+id+'\',\''+date+'\')" style="flex:1;background:#fff;color:#9a3412;border:none;border-radius:12px;padding:15px;cursor:pointer;font-size:16px;font-weight:900;">＋ '+h.blockSize+(h.unit?" "+h.unit:"")+(reached?" extra":"")+'</button>'
+      + mini
       + more + '</div>'
       + '<button onclick="v17GestoFinish(\''+id+'\',\''+date+'\')" style="width:100%;margin-top:8px;background:transparent;border:none;color:rgba(255,255,255,.75);padding:10px;cursor:pointer;font-size:14px;font-weight:800;text-decoration:underline;">✓ Ho finito → avanti</button>';
   } else {
@@ -3845,6 +3916,13 @@ function v17BlocksDone(h, value){
   if(!h.blockSize) return 0;
   return Math.min(v17BlockCount(h), Math.floor((value||0) / h.blockSize));
 }
+function v17AddMinutes(id, date, min){
+  const h=loadHabits().find(x=>x.id===id); if(!h) return;
+  const log=getHabitDayLog(date,id)||{};
+  log.value=Math.max(0,(parseFloat(log.value)||0)+min);
+  setHabitDayLog(date,id,log);
+  renderAbitudini();
+}
 function v17AddBlock(id, date){
   const h=loadHabits().find(x=>x.id===id); if(!h||!h.blockSize) return;
   const log=getHabitDayLog(date,id)||{};
@@ -3896,7 +3974,7 @@ function v17BlockTracker(h, value, date){
       <button onclick="v17AddBlock('${h.id}','${date}')" style="flex:1;background:linear-gradient(90deg,var(--blue),#2563eb);color:#fff;border:none;border-radius:10px;padding:11px;font-weight:800;font-size:14px;cursor:pointer;">＋ blocco (+${h.blockSize}${h.unit?" "+h.unit:""})</button>
     </div>
     <div style="display:flex;justify-content:space-between;align-items:center;margin-top:9px;">
-      <div style="font-size:13px;color:var(--muted);">${rest>0?"Resta "+rest+(h.unit?" "+h.unit:""):"✅ Target raggiunto"}</div>
+      <div style="font-size:13px;color:var(--muted);">${rest>0?("Resta "+rest+(h.unit?" "+h.unit:"")):(h.id==="lavoro_deliberato"?"🔓 400' netti fatti — extra sport / progetti sbloccati":"✅ Target raggiunto")}</div>
       <div style="font-size:13px;color:var(--muted);display:flex;align-items:center;gap:5px;">blocco <input type="text" inputmode="numeric" value="${h.blockSize}" onchange="v17SetBlockSize('${h.id}',this.value)" style="width:56px;text-align:center;background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:5px;font-size:14px;"></div>
     </div>
   </div>`;
