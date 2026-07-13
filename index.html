@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>🏅 Marathon Tracker v17.20</title>
+<title>🏅 Marathon Tracker v17.21</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -291,7 +291,7 @@ code{background:rgba(255,255,255,.1);padding:2px 7px;border-radius:5px;font-size
   <div class="topbar-inner">
     <div class="topbar-row1">
       <div>
-        <div class="topbar-sub">Marathon Tracker <span class="v-badge">v17.20</span></div>
+        <div class="topbar-sub">Marathon Tracker <span class="v-badge">v17.21</span></div>
         <div class="topbar-title">🏅 25.10.2026 — <span id="topbarReadiness" title="Proiezione Readiness aggiornata">…</span></div>
       </div>
       <!-- SYNC STATUS STRIP -->
@@ -1736,7 +1736,7 @@ const DEFAULT_HABITS = [
   { id: "magnesio_pm",      icon: "⚡", name: "Magnesio sera",           color: "#84cc16", type: "value", targetValue: 1, unit: "cps", frequency: "daily", category: "supplement" },
   // — Stile di vita (metriche giornaliere)
   { id: "walk7k",    icon: "🚶", name: "7000+ passi",     color: "#3b82f6", type: "value", targetValue: 7000, unit: "passi", frequency: "daily", category: "lifestyle", blockSize: 2500 },
-  { id: "water2l",   icon: "💧", name: "Acqua 2L+",       color: "#06b6d4", type: "value", targetValue: 2, unit: "L", frequency: "daily", category: "lifestyle" },
+  { id: "water2l",   icon: "💧", name: "Acqua 2L+",       color: "#06b6d4", type: "value", targetValue: 2, unit: "L", frequency: "daily", category: "lifestyle", blockSize: 0.25 },
   { id: "sleep7h",   icon: "😴", name: "Sonno 7h+",       color: "#8b5cf6", type: "value", targetValue: 7, unit: "h", frequency: "daily", category: "lifestyle" },
   // — v17.8: lettura libri, doppia soglia (streak ≥5', target pieno 30')
   { id: "lettura_libri", icon: "📚", name: "Lettura libri (streak ≥5', target 30')", color: "#d97706", type: "value", targetValue: 30, unit: "min", streakMin: 5, frequency: "daily", category: "lifestyle" }
@@ -3061,7 +3061,7 @@ window.onload = function() {
   currentDate = todayStr();
 
   // Log startup info
-  logInfo("Marathon Tracker v17.20 avviato");
+  logInfo("Marathon Tracker v17.21 avviato");
   try{ updateTopbarReadiness(); }catch(e){}
 
   // Auto-seed baseline VO2max test if empty
@@ -3834,7 +3834,8 @@ function v17RemoveBlock(id, date){
 }
 function v17SetBlockSize(id,val){
   const arr=loadHabits(); const h=arr.find(x=>x.id===id); if(!h) return;
-  h.blockSize=Math.max(1,parseInt(val)||1);
+  const n=parseFloat(String(val).replace(",","."));
+  h.blockSize=(isFinite(n)&&n>0)?n:h.blockSize;
   saveHabits(arr); renderAbitudini();
 }
 function v17EnableBlocks(id){
