@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>🏅 Marathon Tracker v17</title>
+<title>🏅 Marathon Tracker v17.5</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -289,8 +289,8 @@ code{background:rgba(255,255,255,.1);padding:2px 7px;border-radius:5px;font-size
   <div class="topbar-inner">
     <div class="topbar-row1">
       <div>
-        <div class="topbar-sub">Marathon Tracker <span class="v-badge">v17</span></div>
-        <div class="topbar-title">🏅 25.10.2026 — 5h00'</div>
+        <div class="topbar-sub">Marathon Tracker <span class="v-badge">v17.5</span></div>
+        <div class="topbar-title">🏅 25.10.2026 — <span id="topbarReadiness" title="Proiezione Readiness aggiornata">…</span></div>
       </div>
       <!-- SYNC STATUS STRIP -->
       <div class="sync-strip">
@@ -304,6 +304,7 @@ code{background:rgba(255,255,255,.1);padding:2px 7px;border-radius:5px;font-size
     <div class="tabs">
       <button class="tab active" onclick="showTab('diario')">📊 Diario</button>
       <button class="tab" onclick="showTab('abitudini')">🔥 Abitudini</button>
+      <button class="tab" onclick="showTab('peso')">⚖️ Peso</button>
       <button class="tab" onclick="showTab('crescita')">🎯 Crescita</button>
       <button class="tab" onclick="showTab('piano')">📋 Piano</button>
       <button class="tab" onclick="showTab('readiness')">🎯 Readiness</button>
@@ -403,6 +404,8 @@ code{background:rgba(255,255,255,.1);padding:2px 7px;border-radius:5px;font-size
 
 <!-- ═══ ABITUDINI ═══ -->
 <div id="tab-abitudini" style="display:none;"><div id="abitudiniDashboard"></div></div>
+
+<div id="tab-peso" style="display:none;"><div id="pesoDashboard"></div></div>
 
 <div id="tab-crescita" style="display:none;"><div id="crescitaDashboard"></div></div>
 
@@ -1704,13 +1707,17 @@ const DEFAULT_HABITS = [
   { id: "squat_am",  icon: "🦵", name: "Squat mattina",   color: "#10b981", type: "sets", targetTotal: 25, variants: [{key:"full",label:"Completi",icon:"💯"},{key:"assisted",label:"Assistiti",icon:"🤝"}], frequency: "daily", category: "workout" },
   { id: "pushup_pm", icon: "💪", name: "Push-up sera",    color: "#f97316", type: "sets", targetTotal: 25, variants: [{key:"full",label:"Completi",icon:"💯"},{key:"knee",label:"Ginocchia",icon:"🦵"}], frequency: "daily", category: "workout" },
   { id: "squat_pm",  icon: "🦵", name: "Squat sera",      color: "#10b981", type: "sets", targetTotal: 25, variants: [{key:"full",label:"Completi",icon:"💯"},{key:"assisted",label:"Assistiti",icon:"🤝"}], frequency: "daily", category: "workout" },
+  // — Circuiti terapia d'urto (v17.3, 12 lug 2026)
+  { id: "circuito_am", icon: "🔥", name: "Circuito mattina (15')", color: "#ef4444", type: "value", targetValue: 15, unit: "min", frequency: "daily", category: "workout" },
+  { id: "circuito_pm", icon: "🌙", name: "Circuito sera (15')",    color: "#6366f1", type: "value", targetValue: 15, unit: "min", frequency: "daily", category: "workout" },
   // — Allenamento core/stabilizzatori (3×/settimana, introdotti v15)
   { id: "plank_am",       icon: "🧘", name: "Plank mattina",      color: "#ec4899", type: "sets", targetSeconds: 60, variants: [{key:"standard",label:"Standard",icon:"🧘"},{key:"side",label:"Laterale",icon:"↔️"}], frequency: "3x_week", category: "workout" },
   { id: "calf_raises_am", icon: "🦶", name: "Calf raises mattina", color: "#14b8a6", type: "sets", targetTotal: 30, variants: [{key:"standard",label:"Standard",icon:"⬆️"}], frequency: "3x_week", category: "workout" },
   // — Integratori (giornaliero)
   { id: "creatina_am",      icon: "💊", name: "Creatina mattina (10g)",  color: "#a855f7", type: "value", targetValue: 10, unit: "g", frequency: "daily", category: "supplement" },
   { id: "creatina_pm",      icon: "💊", name: "Creatina sera (10g)",     color: "#a855f7", type: "value", targetValue: 10, unit: "g", frequency: "daily", category: "supplement" },
-  { id: "omega3_am",        icon: "🐟", name: "Omega-3 (3 cps)",         color: "#0ea5e9", type: "value", targetValue: 3, unit: "cps", frequency: "daily", category: "supplement" },
+  { id: "omega3_am",        icon: "🐟", name: "Omega-3 mattina (2 cps)", color: "#0ea5e9", type: "value", targetValue: 2, unit: "cps", frequency: "daily", category: "supplement" },
+  { id: "omega3_pm",        icon: "🐟", name: "Omega-3 sera (1 cps)",    color: "#0ea5e9", type: "value", targetValue: 1, unit: "cps", frequency: "daily", category: "supplement" },
   { id: "multivitaminico_am", icon: "🌈", name: "Multivitaminico",        color: "#eab308", type: "value", targetValue: 1, unit: "cps", frequency: "daily", category: "supplement" },
   { id: "magnesio_pm",      icon: "⚡", name: "Magnesio sera",           color: "#84cc16", type: "value", targetValue: 1, unit: "cps", frequency: "daily", category: "supplement" },
   // — Stile di vita (metriche giornaliere)
@@ -1752,6 +1759,13 @@ function loadHabits() {
     }
     if (newAdded > 0) {
       logInfo(`v15: aggiunte ${newAdded} nuove abitudini (plank, calf raises, integratori)`);
+    }
+    // v17.2 Migration: split Omega-3 in AM (2 cps) + PM (1 cps), streak separati
+    const oAm = upgraded.find(h => h.id === "omega3_am");
+    if (oAm && oAm.targetValue !== 2) {
+      oAm.targetValue = 2; oAm.name = "Omega-3 mattina (2 cps)";
+      migrated = true;
+      logInfo("v17.2: Omega-3 splittato in mattina (2 cps) + sera (1 cps)");
     }
     if (migrated) {
       saveHabits(upgraded);
@@ -2259,6 +2273,10 @@ function renderAbitudini() {
         <div class="total-card">
           <div class="total-val">${trackedDays}</div>
           <div class="total-lbl">Giorni tracciati</div>
+        </div>
+        <div class="total-card">
+          <div class="total-val" style="color:${(()=>{const a=parseFloat(getHabitDayLog(viewingDate,"omega3_am")?.value)||0;const p=parseFloat(getHabitDayLog(viewingDate,"omega3_pm")?.value)||0;return (a+p)>=3?"var(--green)":(a+p)>0?"var(--accent)":"var(--muted)";})()};">🐟 ${(()=>{const a=parseFloat(getHabitDayLog(viewingDate,"omega3_am")?.value)||0;const p=parseFloat(getHabitDayLog(viewingDate,"omega3_pm")?.value)||0;return (a+p);})()}/3</div>
+          <div class="total-lbl">Omega-3 cps ${viewingToday?"oggi":"giorno"}</div>
         </div>
       </div>
     </div>
@@ -2884,8 +2902,25 @@ function computeReadiness(logs) {
   return {projectedSec,score:Math.round(score),indicators,currentWeight,longestRun,totalKm,daysLeft,progressPct,bestPaceSec,strengthDays,weeklyKms,last5:recentPaces.slice(0,5)};
 }
 
+
+// ─── v17.5: topbar mostra la proiezione Readiness aggiornata, non il target fisso ───
+function updateTopbarReadiness(){
+  const el=document.getElementById("topbarReadiness"); if(!el) return;
+  try{
+    const R=computeReadiness(logs);
+    const s=R.projectedSec;
+    const h=Math.floor(s/3600), m=Math.floor((s%3600)/60);
+    const txt=h+"h"+String(m).padStart(2,"0")+"'";
+    const color=s<=GOAL_SECONDS?"var(--green)":s<5.5*3600?"var(--accent)":s<6*3600?"var(--orange)":"var(--red)";
+    el.textContent=txt;
+    el.style.color=color;
+    el.title="Proiezione Readiness attuale (target 5h00). Score: "+Math.round(R.score);
+  }catch(e){ el.textContent="5h00'"; }
+}
+
 function renderReadiness() {
   try {
+  updateTopbarReadiness();
   const R=computeReadiness(logs);
   const diffSec=R.projectedSec-GOAL_SECONDS;
   const diffMin=Math.abs(Math.round(diffSec/60));
@@ -2954,7 +2989,8 @@ window.onload = function() {
   currentDate = todayStr();
 
   // Log startup info
-  logInfo("Marathon Tracker v17 avviato");
+  logInfo("Marathon Tracker v17.5 avviato");
+  try{ updateTopbarReadiness(); }catch(e){}
 
   // Auto-seed baseline VO2max test if empty
   const vo2Tests = loadVO2Tests();
@@ -3202,27 +3238,27 @@ function renderCrescita(){
   html += `<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;">`;
   presets.forEach(([mode,label])=>{
     const active = crescitaPeriod.mode===mode;
-    html += `<button onclick="setCrescitaPeriod('${mode}')" style="padding:8px 14px;border-radius:10px;border:1px solid ${active?'#6366f1':'var(--border)'};background:${active?'linear-gradient(90deg,#3b82f6,#6366f1)':'var(--card)'};color:${active?'#fff':'var(--muted)'};font-weight:700;font-size:14px;cursor:pointer;">${label}</button>`;
+    html += `<button onclick="setCrescitaPeriod('${mode}')" style="padding:8px 14px;border-radius:10px;border:1px solid ${active?'#6366f1':'var(--border)'};background:${active?'linear-gradient(90deg,#3b82f6,#6366f1)':'var(--surface)'};color:${active?'#fff':'var(--muted)'};font-weight:700;font-size:14px;cursor:pointer;">${label}</button>`;
   });
   html += `</div>`;
 
   // ─── DATE PICKER ───
   if(crescitaPeriod.mode==="custom"){
-    html += `<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px;">
+    html += `<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px;">
       <div style="display:flex;flex-direction:column;gap:3px;">
         <label style="font-size:11px;color:var(--muted);text-transform:uppercase;font-weight:700;">Da</label>
-        <input type="date" value="${range.from}" onchange="setCrescitaCustomFrom(this.value)" style="padding:9px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--fg);font-size:14px;">
+        <input type="date" value="${range.from}" onchange="setCrescitaCustomFrom(this.value)" style="padding:9px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:14px;">
       </div>
       <div style="display:flex;flex-direction:column;gap:3px;">
         <label style="font-size:11px;color:var(--muted);text-transform:uppercase;font-weight:700;">A</label>
-        <input type="date" value="${range.to}" onchange="setCrescitaCustomTo(this.value)" style="padding:9px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--fg);font-size:14px;">
+        <input type="date" value="${range.to}" onchange="setCrescitaCustomTo(this.value)" style="padding:9px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:14px;">
       </div>
     </div>`;
   } else {
     // anche fuori da custom, permetto di cambiare la data di riferimento con un date picker
     html += `<div style="display:flex;gap:8px;align-items:center;margin-bottom:14px;">
       <span style="font-size:13px;color:var(--muted);">Riferimento:</span>
-      <input type="date" value="${currentDate}" onchange="document.getElementById('logDate').value=this.value; onDateChange(); showTab('crescita');" style="padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--fg);font-size:14px;">
+      <input type="date" value="${currentDate}" onchange="document.getElementById('logDate').value=this.value; onDateChange(); showTab('crescita');" style="padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:14px;">
     </div>`;
   }
 
@@ -3264,14 +3300,14 @@ function renderCrescita(){
 
   if(crescitaSelectedActivity){
     const act = CRESCITA_ACTIVITIES.find(a=>a.id===crescitaSelectedActivity);
-    html += `<div style="background:var(--card);border:2px solid ${CRESCITA_CATEGORIES[act.cat].color};border-radius:14px;padding:16px;margin-bottom:16px;">
+    html += `<div style="background:var(--surface);border:2px solid ${CRESCITA_CATEGORIES[act.cat].color};border-radius:14px;padding:16px;margin-bottom:16px;">
       <div style="font-size:18px;font-weight:800;margin-bottom:4px;">${act.icon} ${act.name}</div>
       <div style="font-size:12px;color:var(--muted);margin-bottom:14px;">${act.desc}</div>
       <div style="display:flex;gap:10px;align-items:center;margin-bottom:12px;">
-        <input id="crescitaMinInput" type="text" inputmode="numeric" placeholder="min" style="width:90px;padding:12px;border-radius:10px;border:1px solid var(--border);background:var(--bg);color:var(--fg);font-size:18px;font-weight:700;text-align:center;">
+        <input id="crescitaMinInput" type="text" inputmode="numeric" placeholder="min" style="width:90px;padding:12px;border-radius:10px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:18px;font-weight:700;text-align:center;">
         <span style="color:var(--muted);font-size:14px;">minuti netti</span>
       </div>
-      <input id="crescitaDescInput" type="text" placeholder="Cosa hai fatto? (opzionale)" style="width:100%;padding:12px;border-radius:10px;border:1px solid var(--border);background:var(--bg);color:var(--fg);font-size:14px;margin-bottom:14px;box-sizing:border-box;">
+      <input id="crescitaDescInput" type="text" placeholder="Cosa hai fatto? (opzionale)" style="width:100%;padding:12px;border-radius:10px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:14px;margin-bottom:14px;box-sizing:border-box;">
       <div style="display:flex;gap:10px;">
         <button onclick="confirmCrescitaInput()" style="flex:1;background:linear-gradient(90deg,var(--green),#059669);color:#fff;padding:13px;border-radius:10px;border:none;cursor:pointer;font-weight:800;font-size:15px;">✅ Registra</button>
         <button onclick="cancelCrescitaInput()" style="background:rgba(255,255,255,.08);color:var(--muted);padding:13px 18px;border-radius:10px;border:none;cursor:pointer;font-weight:700;">Annulla</button>
@@ -3286,10 +3322,10 @@ function renderCrescita(){
         <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;">`;
       acts.forEach(a=>{
         const todayMin = todaySessions.filter(s=>s.activity_id===a.id).reduce((sum,s)=>sum+s.minutes,0);
-        html += `<button onclick="selectCrescitaActivity('${a.id}')" style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px 14px;cursor:pointer;text-align:left;transition:all .15s;position:relative;min-height:104px;display:flex;flex-direction:column;gap:6px;">
+        html += `<button onclick="selectCrescitaActivity('${a.id}')" style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px 14px;cursor:pointer;text-align:left;transition:all .15s;position:relative;min-height:104px;display:flex;flex-direction:column;gap:6px;">
           <div style="display:flex;align-items:center;gap:10px;">
             <span style="font-size:26px;line-height:1;">${a.icon}</span>
-            <span style="font-size:18px;font-weight:800;color:var(--fg);line-height:1.15;">${a.name}</span>
+            <span style="font-size:18px;font-weight:800;color:var(--text);line-height:1.15;">${a.name}</span>
           </div>
           <div style="font-size:13px;color:var(--muted);line-height:1.3;">${a.desc}</div>
           ${todayMin>0 ? `<div style="position:absolute;top:12px;right:12px;background:${cat.color};color:#fff;font-size:13px;font-weight:800;padding:3px 9px;border-radius:12px;">${fmtMinutes(todayMin)}</div>` : ""}
@@ -3305,7 +3341,7 @@ function renderCrescita(){
     rangeSessions.forEach(s=>{
       const act = CRESCITA_ACTIVITIES.find(a=>a.id===s.activity_id) || {name:s.activity_id, icon:"•"};
       const cat = CRESCITA_CATEGORIES[s.category] || {color:"#888"};
-      html += `<div style="display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--border);border-left:3px solid ${cat.color};border-radius:10px;padding:12px 14px;margin-bottom:6px;">
+      html += `<div style="display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--border);border-left:3px solid ${cat.color};border-radius:10px;padding:12px 14px;margin-bottom:6px;">
         <div style="font-size:22px;">${act.icon}</div>
         <div style="flex:1;min-width:0;">
           <div style="font-size:16px;font-weight:700;">${act.name} · <span style="color:${cat.color};">${fmtMinutes(s.minutes)}</span></div>
@@ -3324,10 +3360,130 @@ function renderCrescita(){
 
 function fmtDateShort(s){ const d=strToDate(s); return String(d.getDate()).padStart(2,"0")+"/"+String(d.getMonth()+1).padStart(2,"0"); }
 
+
+// ─── v17.1 Stage 2: tab Peso (trend + proiezione) + report settimanale ───
+const V17_TARGET_WEIGHT = 86;
+function v17WeightSeries(days){
+  const out=[]; const cutoff=v17DateOffset(days||90);
+  Object.keys(logs).sort().forEach(d=>{ const w=parseFloat(logs[d]?.peso); if(!isNaN(w)&&w>0&&d>=cutoff) out.push({d,w}); });
+  return out;
+}
+function v17LinReg(pts){
+  const n=pts.length; if(n<2) return null;
+  let sx=0,sy=0,sxy=0,sxx=0;
+  pts.forEach(p=>{sx+=p.x;sy+=p.y;sxy+=p.x*p.y;sxx+=p.x*p.x;});
+  const denom=n*sxx-sx*sx; if(!denom) return null;
+  const m=(n*sxy-sx*sy)/denom; const b=(sy-m*sx)/n;
+  return {m,b};
+}
+function renderPeso(){
+  const c=document.getElementById("pesoDashboard"); if(!c) return;
+  const series=v17WeightSeries(90);
+  if(series.length===0){ c.innerHTML='<div style="text-align:center;color:var(--muted);padding:40px 20px;">Nessun peso registrato ancora.<br>Logga il peso dal Diario o col Paste Day.</div>'; return; }
+  const cur=series[series.length-1];
+  const day=86400000;
+  const t0=new Date(series[0].d+"T12:00:00").getTime();
+  const ma=series.map(p=>{ const tp=new Date(p.d+"T12:00:00").getTime(); const win=series.filter(q=>{const t=new Date(q.d+"T12:00:00").getTime();return t>=tp-6*day&&t<=tp;}); return {d:p.d,w:win.reduce((s,q)=>s+q.w,0)/win.length}; });
+  const cut21=v17DateOffset(21);
+  const recent=series.filter(p=>p.d>=cut21).map(p=>({x:(new Date(p.d+"T12:00:00").getTime()-t0)/day,y:p.w}));
+  const reg=recent.length>=3?v17LinReg(recent):null;
+  const slopeWk=reg?reg.m*7:null;
+  function nearest(offset){ const target=v17DateOffset(offset); let best=null; series.forEach(p=>{ if(p.d<=target&&(!best||p.d>best.d)) best=p; }); return best; }
+  const p7=nearest(7), p30=nearest(30);
+  const d7=p7?(cur.w-p7.w):null, d30=p30?(cur.w-p30.w):null;
+  let projHtml="";
+  if(slopeWk!==null&&slopeWk<-0.05){
+    const weeks=(cur.w-V17_TARGET_WEIGHT)/(-slopeWk);
+    const eta=new Date(Date.now()+weeks*7*day);
+    projHtml='Al ritmo attuale (<b>'+slopeWk.toFixed(2)+' kg/sett</b>) arrivi a <b>'+V17_TARGET_WEIGHT+' kg</b> intorno al <b>'+eta.toLocaleDateString("it-IT",{day:"numeric",month:"long",year:"numeric"})+'</b>.';
+  } else if(slopeWk!==null&&slopeWk>0.05){
+    projHtml='⚠️ Trend in <b>salita</b> (+'+slopeWk.toFixed(2)+' kg/sett negli ultimi 21g). Prima inverti il trend, poi si proietta.';
+  } else {
+    projHtml='Trend laterale o poche pesate negli ultimi 21 giorni: pesati con costanza per una proiezione affidabile.';
+  }
+  const W=340,H=170,P=28;
+  const ws=series.map(p=>p.w);
+  let ymin=Math.min(...ws), ymax=Math.max(...ws);
+  if(V17_TARGET_WEIGHT>ymin-3&&V17_TARGET_WEIGHT<ymax+3){ ymin=Math.min(ymin,V17_TARGET_WEIGHT); }
+  ymin=Math.floor(ymin-0.5); ymax=Math.ceil(ymax+0.5);
+  const tmin=new Date(series[0].d+"T12:00:00").getTime();
+  const tmax=Math.max(tmin+1,new Date(cur.d+"T12:00:00").getTime());
+  const X=t=>P+(W-2*P)*((t-tmin)/Math.max(1,(tmax-tmin)));
+  const Y=w=>H-P-(H-2*P)*((w-ymin)/Math.max(0.1,(ymax-ymin)));
+  const pt=p=>X(new Date(p.d+"T12:00:00").getTime()).toFixed(1)+","+Y(p.w).toFixed(1);
+  const line=series.map(pt).join(" ");
+  const maline=ma.map(pt).join(" ");
+  const dots=series.map(p=>'<circle cx="'+X(new Date(p.d+"T12:00:00").getTime()).toFixed(1)+'" cy="'+Y(p.w).toFixed(1)+'" r="2.5" fill="var(--accent)"/>').join("");
+  const tgtY=Y(V17_TARGET_WEIGHT);
+  const tgtLine=(V17_TARGET_WEIGHT>=ymin&&V17_TARGET_WEIGHT<=ymax)?('<line x1="'+P+'" y1="'+tgtY+'" x2="'+(W-P)+'" y2="'+tgtY+'" stroke="var(--green)" stroke-dasharray="5,4" stroke-width="1.5"/><text x="'+(W-P)+'" y="'+(tgtY-4)+'" fill="var(--green)" font-size="10" text-anchor="end">target '+V17_TARGET_WEIGHT+'</text>'):"";
+  const svg='<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:auto;">'
+    +'<line x1="'+P+'" y1="'+(H-P)+'" x2="'+(W-P)+'" y2="'+(H-P)+'" stroke="rgba(255,255,255,.15)"/>'
+    +'<text x="'+P+'" y="'+(Y(ymax)+4)+'" fill="var(--muted)" font-size="10">'+ymax+'</text>'
+    +'<text x="'+P+'" y="'+(H-P-2)+'" fill="var(--muted)" font-size="10">'+ymin+'</text>'
+    +tgtLine
+    +'<polyline points="'+maline+'" fill="none" stroke="rgba(59,130,246,.55)" stroke-width="2.5"/>'
+    +'<polyline points="'+line+'" fill="none" stroke="var(--accent)" stroke-width="1.5" opacity="0.8"/>'
+    +dots+'</svg>'
+    +'<div style="display:flex;gap:14px;font-size:11px;color:var(--muted);margin-top:4px;"><span>● peso</span><span style="color:#93c5fd;">— media 7g</span><span style="color:var(--green);">- - target</span></div>';
+  const stat=(v,l,color)=>'<div class="total-card"><div class="total-val"'+(color?' style="color:'+color+';"':'')+'>'+v+'</div><div class="total-lbl">'+l+'</div></div>';
+  const fmtDelta=x=>x===null?"—":(x>0?"+":"")+x.toFixed(1)+" kg";
+  const colDelta=x=>x===null?"":(x<0?"var(--green)":x>0?"var(--red)":"");
+  c.innerHTML='<div style="background:linear-gradient(135deg,#0a1628,#0f2a4a);border:1px solid rgba(59,130,246,.2);border-radius:18px;padding:22px;margin-bottom:16px;">'
+    +'<div style="font-size:11px;color:var(--muted);letter-spacing:2px;margin-bottom:6px;">⚖️ PESO · ultimi 90 giorni</div>'
+    +'<div style="display:flex;align-items:baseline;gap:10px;margin-bottom:8px;">'
+    +'<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:54px;font-weight:900;color:var(--accent);line-height:1;">'+cur.w.toFixed(1)+'</div>'
+    +'<div style="font-size:16px;color:var(--muted);">kg · '+fmtDate(cur.d)+'</div></div>'
+    +svg
+    +'<div class="totals-grid" style="margin-top:14px;">'
+    +stat(fmtDelta(d7),"vs 7 giorni fa",colDelta(d7))
+    +stat(fmtDelta(d30),"vs 30 giorni fa",colDelta(d30))
+    +stat(slopeWk===null?"—":((slopeWk>0?"+":"")+slopeWk.toFixed(2)),"kg/sett (21g)",colDelta(slopeWk))
+    +'</div>'
+    +'<div style="margin-top:14px;font-size:14px;color:#cbd5e1;background:rgba(255,255,255,.04);border-radius:10px;padding:12px;">'+projHtml+'</div>'
+    +'</div>'
+    +v17WeeklyReportCard();
+}
+function v17WeeklyReportData(){
+  const cut=v17DateOffset(6);
+  const dates=Object.keys(logs).sort().filter(d=>d>=cut);
+  let km=0, passi=0, sessions=0;
+  dates.forEach(d=>{ const l=logs[d]; km+=parseFloat(l.km)||0; passi+=parseInt(l.passi)||0; if((l.activities||[]).length>0) sessions++; });
+  const series=v17WeightSeries(365);
+  const inWin=series.filter(p=>p.d>=cut);
+  const dw=inWin.length>=2?(inWin[inWin.length-1].w-inWin[0].w):null;
+  const habits=loadHabits(); let full=0, tot=0;
+  for(let i=0;i<7;i++){ const ds=v17DateOffset(i); habits.forEach(h=>{ tot++; if(isHabitDoneToday(h,ds)==="full") full++; }); }
+  const pct=tot?Math.round(full/tot*100):0;
+  let best={name:"—",s:0}; habits.forEach(h=>{const s=calcHabitStreak(h); if(s>best.s) best={name:h.name,s:s};});
+  return {km:km.toFixed(1),passi:passi,sessions:sessions,dw:dw,pct:pct,best:best};
+}
+function v17WeeklyReportCard(){
+  const r=v17WeeklyReportData();
+  const dwTxt=r.dw===null?"—":(r.dw>0?"+":"")+r.dw.toFixed(1)+" kg";
+  return '<div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px;">'
+    +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">'
+    +'<div style="font-weight:800;font-size:16px;">📋 Report ultimi 7 giorni</div>'
+    +'<button onclick="v17CopyWeeklyReport()" style="background:rgba(59,130,246,.15);border:1px solid rgba(59,130,246,.4);color:#93c5fd;padding:6px 12px;border-radius:10px;cursor:pointer;font-size:12px;font-weight:700;">Copia</button></div>'
+    +'<div class="totals-grid">'
+    +'<div class="total-card"><div class="total-val">'+dwTxt+'</div><div class="total-lbl">Peso 7g</div></div>'
+    +'<div class="total-card"><div class="total-val">'+r.pct+'%</div><div class="total-lbl">Abitudini full</div></div>'
+    +'<div class="total-card"><div class="total-val">'+r.km+'</div><div class="total-lbl">km</div></div>'
+    +'<div class="total-card"><div class="total-val">'+r.passi.toLocaleString("it-IT")+'</div><div class="total-lbl">passi</div></div>'
+    +'<div class="total-card"><div class="total-val">'+r.sessions+'</div><div class="total-lbl">sessioni</div></div>'
+    +'<div class="total-card"><div class="total-val">🔥 '+r.best.s+'</div><div class="total-lbl">'+r.best.name+'</div></div>'
+    +'</div></div>';
+}
+function v17CopyWeeklyReport(){
+  const r=v17WeeklyReportData();
+  const dwTxt=r.dw===null?"n.d.":(r.dw>0?"+":"")+r.dw.toFixed(1)+" kg";
+  const txt="📋 Report settimana (ultimi 7g)\n⚖️ Peso: "+dwTxt+"\n🔥 Abitudini full: "+r.pct+"%\n🏃 "+r.km+" km · "+r.sessions+" sessioni\n🚶 "+r.passi.toLocaleString("it-IT")+" passi\n🏆 Streak top: "+r.best.name+" ("+r.best.s+"g)";
+  (navigator.clipboard?navigator.clipboard.writeText(txt):Promise.reject()).then(()=>showToast("📋 Report copiato","ok")).catch(()=>prompt("Copia il report:",txt));
+}
+
 function showTab(name) {
-  ["diario","abitudini","crescita","piano","readiness","vo2","storico","forza","settings"].forEach(t=>document.getElementById("tab-"+t).style.display=t===name?"block":"none");
+  ["diario","abitudini","peso","crescita","piano","readiness","vo2","storico","forza","settings"].forEach(t=>document.getElementById("tab-"+t).style.display=t===name?"block":"none");
   document.querySelectorAll(".tab").forEach(b=>b.classList.remove("active"));
-  const map={diario:0,abitudini:1,crescita:2,piano:3,readiness:4,vo2:5,storico:6,forza:7,settings:8};
+  const map={diario:0,abitudini:1,peso:2,crescita:3,piano:4,readiness:5,vo2:6,storico:7,forza:8,settings:9};
   document.querySelectorAll(".tab")[map[name]]?.classList.add("active");
   if(name==="storico") renderHistory();
   if(name==="forza") renderWorkout();
@@ -3335,6 +3491,7 @@ function showTab(name) {
   if(name==="piano") renderPiano();
   if(name==="vo2") renderVO2();
   if(name==="abitudini") renderAbitudini();
+  if(name==="peso") renderPeso();
   if(name==="crescita") renderCrescita();
 }
 
@@ -3990,6 +4147,7 @@ function confirmPasteDay() {
 
   try { saveLocal(); } catch(e) { logError("saveLocal failed", e.message); }
   try { dedupePastiInLogs(); } catch(e) { logError("dedupe post-paste failed", e.message); } // v16.7: pulisce eventuali doppioni subito dopo il merge
+  try { updateTopbarReadiness(); } catch(e) {}
 
   closePasteDayModal();
 
