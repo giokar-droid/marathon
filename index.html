@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>🏅 Marathon Tracker v17.9</title>
+<title>🏅 Marathon Tracker v17.11</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -179,6 +179,8 @@ code{background:rgba(255,255,255,.1);padding:2px 7px;border-radius:5px;font-size
 .hstrip-week{font-size:11px;color:var(--muted);font-weight:700;margin-left:6px;}
 .habit-note{margin-top:6px;font-size:12px;color:#cbd5e1;background:rgba(255,255,255,.05);border-radius:8px;padding:5px 9px;display:inline-block;}
 .habit-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin-bottom:10px;border-left:4px solid;}
+.habit-card.hfull{background:rgba(16,185,129,.13);border-color:rgba(16,185,129,.55);box-shadow:inset 0 0 0 1px rgba(16,185,129,.25);}
+.habit-card.hpartial{background:rgba(245,158,11,.07);}
 .habit-row{display:grid;grid-template-columns:38px 1fr auto;gap:12px;align-items:center;}
 .habit-icon{font-size:24px;}
 .habit-name{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:800;}
@@ -289,7 +291,7 @@ code{background:rgba(255,255,255,.1);padding:2px 7px;border-radius:5px;font-size
   <div class="topbar-inner">
     <div class="topbar-row1">
       <div>
-        <div class="topbar-sub">Marathon Tracker <span class="v-badge">v17.9</span></div>
+        <div class="topbar-sub">Marathon Tracker <span class="v-badge">v17.11</span></div>
         <div class="topbar-title">🏅 25.10.2026 — <span id="topbarReadiness" title="Proiezione Readiness aggiornata">…</span></div>
       </div>
       <!-- SYNC STATUS STRIP -->
@@ -1727,6 +1729,7 @@ const DEFAULT_HABITS = [
   { id: "omega3_am",        icon: "🐟", name: "Omega-3 mattina (2 cps)", color: "#0ea5e9", type: "value", targetValue: 2, unit: "cps", frequency: "daily", category: "supplement" },
   { id: "omega3_pm",        icon: "🐟", name: "Omega-3 sera (1 cps)",    color: "#0ea5e9", type: "value", targetValue: 1, unit: "cps", frequency: "daily", category: "supplement" },
   { id: "multivitaminico_am", icon: "🌈", name: "Multivitaminico",        color: "#eab308", type: "value", targetValue: 1, unit: "cps", frequency: "daily", category: "supplement" },
+  { id: "vitamina_d_am",      icon: "☀️", name: "Vitamina D mattina",      color: "#fbbf24", type: "value", targetValue: 1, unit: "dose", frequency: "daily", category: "supplement" },
   { id: "magnesio_pm",      icon: "⚡", name: "Magnesio sera",           color: "#84cc16", type: "value", targetValue: 1, unit: "cps", frequency: "daily", category: "supplement" },
   // — Stile di vita (metriche giornaliere)
   { id: "walk7k",    icon: "🚶", name: "7000+ passi",     color: "#3b82f6", type: "value", targetValue: 7000, unit: "passi", frequency: "daily", category: "lifestyle" },
@@ -2261,7 +2264,7 @@ function renderAbitudini() {
         </div>`;
     }
 
-    return `<div class="habit-card" style="border-left-color:${h.color};">
+    return `<div class="habit-card ${status==="full"?"hfull":status==="partial"?"hpartial":""}" style="border-left-color:${status==="full"?"var(--green)":h.color};">
       <div class="habit-row">
         <div class="habit-icon">${h.icon}</div>
         <div>
@@ -3026,7 +3029,7 @@ window.onload = function() {
   currentDate = todayStr();
 
   // Log startup info
-  logInfo("Marathon Tracker v17.9 avviato");
+  logInfo("Marathon Tracker v17.11 avviato");
   try{ updateTopbarReadiness(); }catch(e){}
 
   // Auto-seed baseline VO2max test if empty
