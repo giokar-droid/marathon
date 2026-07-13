@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>🏅 Marathon Tracker v17.17</title>
+<title>🏅 Marathon Tracker v17.19</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -12,7 +12,7 @@
   --red:#ef4444;--purple:#8b5cf6;--orange:#f97316;--cyan:#06b6d4;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:16px;}
+body{font-family:Verdana,Geneva,'DejaVu Sans',Tahoma,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:16px;}
 h1,h2,h3{font-family:'Barlow Condensed',sans-serif;letter-spacing:.02em;}
 .topbar{background:linear-gradient(135deg,#080e1a,#0d1f3c);border-bottom:1px solid var(--border);padding:12px 20px;position:sticky;top:0;z-index:100;}
 .topbar-inner{max-width:920px;margin:0 auto;}
@@ -68,7 +68,7 @@ h1,h2,h3{font-family:'Barlow Condensed',sans-serif;letter-spacing:.02em;}
 .metric-unit{font-size:14px;color:var(--muted);margin-top:4px;}
 .range-val{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:900;}
 input[type=range]{width:100%;margin-top:6px;accent-color:var(--green);}
-textarea{width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:12px 14px;color:var(--text);font-family:'Barlow',sans-serif;font-size:15px;resize:vertical;min-height:70px;outline:none;}
+textarea{width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:12px 14px;color:var(--text);font-family:Verdana,Geneva,'DejaVu Sans',Tahoma,sans-serif;font-size:15px;resize:vertical;min-height:70px;outline:none;}
 textarea:focus{border-color:var(--blue);}
 .splits-table{width:100%;border-collapse:collapse;font-size:14px;}
 .splits-table th{color:var(--muted);font-weight:600;font-size:14px;letter-spacing:1px;padding:6px 8px;text-align:left;border-bottom:1px solid var(--border);}
@@ -92,7 +92,7 @@ textarea:focus{border-color:var(--blue);}
 .stat-box{background:rgba(255,255,255,.05);border-radius:10px;padding:10px 14px;text-align:center;flex:1;min-width:65px;}
 .stat-val{font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:900;color:var(--accent);}
 .stat-lbl{font-size:13px;color:var(--muted);margin-top:2px;}
-input[type=date]{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:9px;padding:10px 14px;color:white;font-size:16px;font-family:'Barlow',sans-serif;outline:none;width:100%;box-sizing:border-box;display:block;}
+input[type=date]{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:9px;padding:10px 14px;color:white;font-size:16px;font-family:Verdana,Geneva,'DejaVu Sans',Tahoma,sans-serif;outline:none;width:100%;box-sizing:border-box;display:block;}
 input[type=date]::-webkit-calendar-picker-indicator{filter:invert(1);}
 /* READINESS */
 .readiness-hero{background:linear-gradient(135deg,#0a1628,#0f2a4a);border:1px solid rgba(59,130,246,.2);border-radius:18px;padding:24px;margin-bottom:18px;}
@@ -133,7 +133,7 @@ input[type=date]::-webkit-calendar-picker-indicator{filter:invert(1);}
 .setup-banner{background:linear-gradient(135deg,rgba(245,158,11,.15),rgba(239,68,68,.1));border:1px solid rgba(245,158,11,.3);border-radius:14px;padding:16px 18px;margin-bottom:18px;}
 .setup-step{display:flex;gap:12px;margin-bottom:8px;font-size:15px;align-items:flex-start;}
 .step-num{background:var(--accent);color:#000;font-family:'Barlow Condensed',sans-serif;font-weight:900;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;min-width:24px;}
-.settings-input{width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);border-radius:9px;padding:12px 14px;color:white;font-size:15px;font-family:'Barlow',sans-serif;outline:none;margin-top:8px;}
+.settings-input{width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);border-radius:9px;padding:12px 14px;color:white;font-size:15px;font-family:Verdana,Geneva,'DejaVu Sans',Tahoma,sans-serif;outline:none;margin-top:8px;}
 .settings-input:focus{border-color:var(--blue);}
 code{background:rgba(255,255,255,.1);padding:2px 7px;border-radius:5px;font-size:13px;font-family:monospace;color:#93c5fd;}
 /* IMPORT MODAL */
@@ -291,7 +291,7 @@ code{background:rgba(255,255,255,.1);padding:2px 7px;border-radius:5px;font-size
   <div class="topbar-inner">
     <div class="topbar-row1">
       <div>
-        <div class="topbar-sub">Marathon Tracker <span class="v-badge">v17.17</span></div>
+        <div class="topbar-sub">Marathon Tracker <span class="v-badge">v17.19</span></div>
         <div class="topbar-title">🏅 25.10.2026 — <span id="topbarReadiness" title="Proiezione Readiness aggiornata">…</span></div>
       </div>
       <!-- SYNC STATUS STRIP -->
@@ -328,7 +328,7 @@ code{background:rgba(255,255,255,.1);padding:2px 7px;border-radius:5px;font-size
       <div style="flex:1;min-width:0;">
         <div class="card-label">Data</div>
         <input type="date" id="logDate" onchange="onDateChange()"
-          style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:9px;padding:9px 12px;color:white;font-size:16px;font-family:'Barlow',sans-serif;outline:none;width:100%;box-sizing:border-box;display:block;">
+          style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:9px;padding:9px 12px;color:white;font-size:16px;font-family:Verdana,Geneva,'DejaVu Sans',Tahoma,sans-serif;outline:none;width:100%;box-sizing:border-box;display:block;">
         <div id="dayName" style="font-size:13px;color:var(--muted);margin-top:5px;"></div>
       </div>
       <div style="display:flex;gap:10px;">
@@ -588,7 +588,7 @@ code{background:rgba(255,255,255,.1);padding:2px 7px;border-radius:5px;font-size
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
           <div>
             <div class="metric-label">📝 Note aggiuntive</div>
-            <textarea id="importNote" style="width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:8px 10px;color:white;font-size:14px;min-height:60px;outline:none;font-family:'Barlow',sans-serif;" placeholder="Aggiungi note..."></textarea>
+            <textarea id="importNote" style="width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:8px 10px;color:white;font-size:14px;min-height:60px;outline:none;font-family:Verdana,Geneva,'DejaVu Sans',Tahoma,sans-serif;" placeholder="Aggiungi note..."></textarea>
           </div>
           <div>
             <div class="metric-label">👟 Scarpe</div>
@@ -2624,7 +2624,7 @@ function renderVO2() {
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
         <div>
           <div class="metric-label">📅 Data</div>
-          <input type="date" id="vo2Date" value="${todayStr()}" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:9px;padding:9px 12px;color:white;font-size:16px;font-family:'Barlow',sans-serif;outline:none;width:100%;box-sizing:border-box;display:block;">
+          <input type="date" id="vo2Date" value="${todayStr()}" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:9px;padding:9px 12px;color:white;font-size:16px;font-family:Verdana,Geneva,'DejaVu Sans',Tahoma,sans-serif;outline:none;width:100%;box-sizing:border-box;display:block;">
         </div>
         <div>
           <div class="metric-label">🫁 VO₂max</div>
@@ -3050,7 +3050,7 @@ window.onload = function() {
   currentDate = todayStr();
 
   // Log startup info
-  logInfo("Marathon Tracker v17.17 avviato");
+  logInfo("Marathon Tracker v17.19 avviato");
   try{ updateTopbarReadiness(); }catch(e){}
 
   // Auto-seed baseline VO2max test if empty
@@ -3745,14 +3745,29 @@ function v17GestoCard(date, viewingToday) {
   const more = cand.length > 1
     ? '<button onclick="v17NextGesto()" style="background:transparent;border:1px solid rgba(255,255,255,.3);color:rgba(255,255,255,.85);padding:14px 16px;border-radius:12px;cursor:pointer;font-size:15px;font-weight:700;">Un\'altra →</button>'
     : "";
+  const isBlock = !!(h.blockSize && h.type==="value" && h.targetValue);
+  const gv = parseFloat((getHabitDayLog(date, id)||{}).value) || 0;
+  let progressHtml = "", btnRow = "";
+  if (isBlock) {
+    const bN=v17BlockCount(h), bDone=v17BlocksDone(h,gv);
+    let pips=""; for(let i=0;i<bN;i++){ pips+='<div style="flex:1;height:12px;border-radius:5px;background:'+(i<bDone?"#fff":"rgba(255,255,255,.18)")+';"></div>'; }
+    progressHtml = '<div style="display:flex;gap:5px;margin-bottom:8px;">'+pips+'</div>'
+      + '<div style="font-size:14px;color:rgba(255,255,255,.85);margin-bottom:16px;">'+bDone+'/'+bN+' blocchi · '+gv+'/'+h.targetValue+(h.unit?" "+h.unit:"")+'</div>';
+    btnRow = '<div style="display:flex;gap:10px;">'
+      + '<button onclick="v17AddBlock(\''+id+'\',\''+date+'\')" style="flex:1;background:#fff;color:#9a3412;border:none;border-radius:12px;padding:15px;cursor:pointer;font-size:16px;font-weight:900;">＋ 1 blocco (+'+h.blockSize+(h.unit?" "+h.unit:"")+')</button>'
+      + more + '</div>'
+      + '<button onclick="v17MarkDone(\''+id+'\')" style="width:100%;margin-top:8px;background:transparent;border:none;color:rgba(255,255,255,.6);padding:8px;cursor:pointer;font-size:14px;font-weight:700;text-decoration:underline;">✓ segna tutto fatto</button>';
+  } else {
+    btnRow = '<div style="display:flex;gap:10px;">'
+      + '<button onclick="v17MarkDone(\''+id+'\')" style="flex:1;background:#fff;color:#9a3412;border:none;border-radius:12px;padding:15px;cursor:pointer;font-size:16px;font-weight:900;">✓ Fatto</button>'
+      + more + '</div>';
+  }
   return '<div style="background:linear-gradient(135deg,#7c2d12,#9a3412);border:1px solid rgba(249,115,22,.5);border-radius:18px;padding:22px;margin-bottom:16px;">'
     + '<div style="font-size:13px;color:rgba(255,255,255,.65);letter-spacing:2px;margin-bottom:12px;">👊 ORA · UNA COSA SOLA</div>'
     + '<div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;"><div style="font-size:40px;line-height:1;">' + h.icon + '</div>'
     + '<div style="font-size:26px;font-weight:900;color:#fff;line-height:1.1;">' + name + '</div></div>'
     + '<div style="font-size:16px;color:rgba(255,255,255,.9);margin-bottom:18px;">' + micro + '</div>'
-    + '<div style="display:flex;gap:10px;">'
-    + '<button onclick="v17MarkDone(\'' + id + '\')" style="flex:1;background:#fff;color:#9a3412;border:none;border-radius:12px;padding:15px;cursor:pointer;font-size:16px;font-weight:900;">✓ Fatto</button>'
-    + more + '</div></div>';
+    + progressHtml + btnRow + '</div>';
 }
 
 
@@ -3793,29 +3808,28 @@ function v17BlocksDone(h, value){
   return Math.min(v17BlockCount(h), Math.floor((value||0) / h.blockSize));
 }
 function v17AddBlock(id, date){
-  const h=(habits||[]).find(x=>x.id===id); if(!h||!h.blockSize) return;
+  const h=loadHabits().find(x=>x.id===id); if(!h||!h.blockSize) return;
   const log=getHabitDayLog(date,id)||{};
   log.value=(parseFloat(log.value)||0)+h.blockSize;
   setHabitDayLog(date,id,log);
   renderAbitudini(); // re-render: aggiorna caselle + auto-completa il parent se target raggiunto
 }
 function v17RemoveBlock(id, date){
-  const h=(habits||[]).find(x=>x.id===id); if(!h||!h.blockSize) return;
+  const h=loadHabits().find(x=>x.id===id); if(!h||!h.blockSize) return;
   const log=getHabitDayLog(date,id)||{};
   log.value=Math.max(0,(parseFloat(log.value)||0)-h.blockSize);
   setHabitDayLog(date,id,log);
   renderAbitudini();
 }
 function v17SetBlockSize(id,val){
-  const h=(habits||[]).find(x=>x.id===id); if(!h) return;
-  const n=Math.max(1,parseInt(val)||1);
-  h.blockSize=n; saveHabits(); renderAbitudini();
+  const arr=loadHabits(); const h=arr.find(x=>x.id===id); if(!h) return;
+  h.blockSize=Math.max(1,parseInt(val)||1);
+  saveHabits(arr); renderAbitudini();
 }
 function v17EnableBlocks(id){
-  const h=(habits||[]).find(x=>x.id===id); if(!h||!h.targetValue) return;
-  // default sensato: ~1/3 del target, arrotondato
+  const arr=loadHabits(); const h=arr.find(x=>x.id===id); if(!h||!h.targetValue) return;
   h.blockSize=Math.max(1,Math.round((h.targetValue/3)/50)*50)||Math.ceil(h.targetValue/3);
-  saveHabits(); renderAbitudini();
+  saveHabits(arr); renderAbitudini();
 }
 function v17BlockTracker(h, value, date){
   if(!h || h.type!=="value") return "";
