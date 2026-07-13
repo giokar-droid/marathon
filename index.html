@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>🏅 Marathon Tracker v17.16</title>
+<title>🏅 Marathon Tracker v17.17</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -291,7 +291,7 @@ code{background:rgba(255,255,255,.1);padding:2px 7px;border-radius:5px;font-size
   <div class="topbar-inner">
     <div class="topbar-row1">
       <div>
-        <div class="topbar-sub">Marathon Tracker <span class="v-badge">v17.16</span></div>
+        <div class="topbar-sub">Marathon Tracker <span class="v-badge">v17.17</span></div>
         <div class="topbar-title">🏅 25.10.2026 — <span id="topbarReadiness" title="Proiezione Readiness aggiornata">…</span></div>
       </div>
       <!-- SYNC STATUS STRIP -->
@@ -1735,7 +1735,7 @@ const DEFAULT_HABITS = [
   { id: "vitamina_d_am",      icon: "☀️", name: "Vitamina D mattina",      color: "#fbbf24", type: "value", targetValue: 1, unit: "dose", frequency: "daily", category: "supplement" },
   { id: "magnesio_pm",      icon: "⚡", name: "Magnesio sera",           color: "#84cc16", type: "value", targetValue: 1, unit: "cps", frequency: "daily", category: "supplement" },
   // — Stile di vita (metriche giornaliere)
-  { id: "walk7k",    icon: "🚶", name: "7000+ passi",     color: "#3b82f6", type: "value", targetValue: 7000, unit: "passi", frequency: "daily", category: "lifestyle" },
+  { id: "walk7k",    icon: "🚶", name: "7000+ passi",     color: "#3b82f6", type: "value", targetValue: 7000, unit: "passi", frequency: "daily", category: "lifestyle", blockSize: 2500 },
   { id: "water2l",   icon: "💧", name: "Acqua 2L+",       color: "#06b6d4", type: "value", targetValue: 2, unit: "L", frequency: "daily", category: "lifestyle" },
   { id: "sleep7h",   icon: "😴", name: "Sonno 7h+",       color: "#8b5cf6", type: "value", targetValue: 7, unit: "h", frequency: "daily", category: "lifestyle" },
   // — v17.8: lettura libri, doppia soglia (streak ≥5', target pieno 30')
@@ -2264,7 +2264,7 @@ function renderAbitudini() {
             <div class="habit-detail-label">Target</div>
             <div style="text-align:center;font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:900;color:${value>=h.targetValue?"var(--green)":value>0?"var(--accent)":"var(--muted)"};padding-top:6px;">${value}${h.unit?" "+h.unit:""}<span style="font-size:14px;color:var(--muted);font-weight:600;"> / ${h.targetValue}${h.unit?" "+h.unit:""}</span></div>
           </div>
-        </div>`;
+        </div>${v17BlockTracker(h, value, viewingDate)}`;
     }
 
     return {cat:(h.category||"altro"), html:`<div class="habit-card ${status==="full"?"hfull":status==="partial"?"hpartial":""}" style="border-left-color:${status==="full"?"var(--green)":h.color};">
@@ -3050,7 +3050,7 @@ window.onload = function() {
   currentDate = todayStr();
 
   // Log startup info
-  logInfo("Marathon Tracker v17.16 avviato");
+  logInfo("Marathon Tracker v17.17 avviato");
   try{ updateTopbarReadiness(); }catch(e){}
 
   // Auto-seed baseline VO2max test if empty
@@ -3777,6 +3777,75 @@ function v17CallPanel(date){
     ${row("Esito No ❌","no")}
     ${row("Follow-up 🔁","fu")}
     <button onclick="renderAbitudini()" style="width:100%;margin-top:10px;background:linear-gradient(90deg,var(--blue),#2563eb);color:#fff;border:none;border-radius:10px;padding:11px;font-weight:800;font-size:15px;cursor:pointer;">✓ Salva recap chiamate</button>
+  </div>`;
+}
+
+
+// ─── v17.17: motore SOTTO-OBIETTIVI a blocchi (generico per abitudini value) ───
+// Design: un blocco = incremento di blockSize sul valore. Il parent si completa
+// da solo quando value>=target (stessa fonte dati, nessun modello separato).
+function v17BlockCount(h){
+  if(!h || !h.blockSize || h.blockSize<=0 || !h.targetValue) return 0;
+  return Math.max(1, Math.ceil(h.targetValue / h.blockSize));
+}
+function v17BlocksDone(h, value){
+  if(!h.blockSize) return 0;
+  return Math.min(v17BlockCount(h), Math.floor((value||0) / h.blockSize));
+}
+function v17AddBlock(id, date){
+  const h=(habits||[]).find(x=>x.id===id); if(!h||!h.blockSize) return;
+  const log=getHabitDayLog(date,id)||{};
+  log.value=(parseFloat(log.value)||0)+h.blockSize;
+  setHabitDayLog(date,id,log);
+  renderAbitudini(); // re-render: aggiorna caselle + auto-completa il parent se target raggiunto
+}
+function v17RemoveBlock(id, date){
+  const h=(habits||[]).find(x=>x.id===id); if(!h||!h.blockSize) return;
+  const log=getHabitDayLog(date,id)||{};
+  log.value=Math.max(0,(parseFloat(log.value)||0)-h.blockSize);
+  setHabitDayLog(date,id,log);
+  renderAbitudini();
+}
+function v17SetBlockSize(id,val){
+  const h=(habits||[]).find(x=>x.id===id); if(!h) return;
+  const n=Math.max(1,parseInt(val)||1);
+  h.blockSize=n; saveHabits(); renderAbitudini();
+}
+function v17EnableBlocks(id){
+  const h=(habits||[]).find(x=>x.id===id); if(!h||!h.targetValue) return;
+  // default sensato: ~1/3 del target, arrotondato
+  h.blockSize=Math.max(1,Math.round((h.targetValue/3)/50)*50)||Math.ceil(h.targetValue/3);
+  saveHabits(); renderAbitudini();
+}
+function v17BlockTracker(h, value, date){
+  if(!h || h.type!=="value") return "";
+  if(!h.blockSize){
+    // affordance discreta: spezza in blocchi (flessibilità futura, ogni obiettivo value)
+    return `<div style="margin-top:8px;text-align:center;"><button onclick="v17EnableBlocks('${h.id}')" style="background:none;border:1px dashed var(--border);color:var(--muted);font-size:13px;padding:6px 12px;border-radius:10px;cursor:pointer;">＋ spezza in blocchi</button></div>`;
+  }
+  const n=v17BlockCount(h), done=v17BlocksDone(h,value);
+  const rest=Math.max(0, h.targetValue-(value||0));
+  const pct=Math.min(100, Math.round((value||0)/h.targetValue*100));
+  let pips="";
+  for(let i=0;i<n;i++){
+    const on=i<done;
+    pips+=`<div style="flex:1;height:14px;border-radius:5px;background:${on?"var(--green)":"rgba(255,255,255,.08)"};border:1px solid ${on?"var(--green)":"var(--border)"};transition:background .3s;"></div>`;
+  }
+  const minLabel = h.id==="walk7k" ? " · ~"+Math.max(1,Math.round(h.blockSize/120))+" min l'uno" : "";
+  return `<div style="margin-top:10px;background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.22);border-radius:10px;padding:12px;">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;">
+      <div style="font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;">🎯 Blocchi${minLabel}</div>
+      <div style="font-size:14px;font-weight:800;color:${done>=n?"var(--green)":"var(--accent)"};">${done}/${n} · ${pct}%</div>
+    </div>
+    <div style="display:flex;gap:5px;margin-bottom:10px;">${pips}</div>
+    <div style="display:flex;gap:8px;">
+      <button onclick="v17RemoveBlock('${h.id}','${date}')" style="flex:0 0 52px;background:rgba(255,255,255,.06);border:1px solid var(--border);color:var(--text);border-radius:10px;padding:11px 0;font-weight:800;font-size:16px;cursor:pointer;">−</button>
+      <button onclick="v17AddBlock('${h.id}','${date}')" style="flex:1;background:linear-gradient(90deg,var(--blue),#2563eb);color:#fff;border:none;border-radius:10px;padding:11px;font-weight:800;font-size:14px;cursor:pointer;">＋ blocco (+${h.blockSize}${h.unit?" "+h.unit:""})</button>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:9px;">
+      <div style="font-size:13px;color:var(--muted);">${rest>0?"Resta "+rest+(h.unit?" "+h.unit:""):"✅ Target raggiunto"}</div>
+      <div style="font-size:13px;color:var(--muted);display:flex;align-items:center;gap:5px;">blocco <input type="text" inputmode="numeric" value="${h.blockSize}" onchange="v17SetBlockSize('${h.id}',this.value)" style="width:56px;text-align:center;background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:5px;font-size:14px;"></div>
+    </div>
   </div>`;
 }
 
