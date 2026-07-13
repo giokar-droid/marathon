@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>🏅 Marathon Tracker v16.6</title>
+<title>🏅 Marathon Tracker v17</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -168,6 +168,16 @@ code{background:rgba(255,255,255,.1);padding:2px 7px;border-radius:5px;font-size
 ::-webkit-scrollbar-track{background:var(--bg);}
 ::-webkit-scrollbar-thumb{background:#2a3a55;border-radius:3px;}
 /* ABITUDINI */
+.habit-alert{margin-top:6px;font-size:12px;font-weight:800;padding:4px 10px;border-radius:8px;display:inline-block;}
+.habit-alert.warn{background:rgba(252,211,77,.15);color:#fcd34d;border:1px solid rgba(252,211,77,.4);}
+.habit-alert.broken{background:rgba(239,68,68,.12);color:#f87171;border:1px solid rgba(239,68,68,.35);}
+.hstrip{display:flex;align-items:center;gap:3px;margin-top:8px;flex-wrap:wrap;}
+.hstrip-dot{width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,.10);display:inline-block;}
+.hstrip-dot.on{background:var(--green);}
+.hstrip-dot.half{background:var(--accent);}
+.hstrip-dot.today{box-shadow:0 0 0 2px rgba(255,255,255,.35);}
+.hstrip-week{font-size:11px;color:var(--muted);font-weight:700;margin-left:6px;}
+.habit-note{margin-top:6px;font-size:12px;color:#cbd5e1;background:rgba(255,255,255,.05);border-radius:8px;padding:5px 9px;display:inline-block;}
 .habit-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin-bottom:10px;border-left:4px solid;}
 .habit-row{display:grid;grid-template-columns:38px 1fr auto;gap:12px;align-items:center;}
 .habit-icon{font-size:24px;}
@@ -279,7 +289,7 @@ code{background:rgba(255,255,255,.1);padding:2px 7px;border-radius:5px;font-size
   <div class="topbar-inner">
     <div class="topbar-row1">
       <div>
-        <div class="topbar-sub">Marathon Tracker <span class="v-badge">v16.6</span></div>
+        <div class="topbar-sub">Marathon Tracker <span class="v-badge">v17</span></div>
         <div class="topbar-title">🏅 25.10.2026 — 5h00'</div>
       </div>
       <!-- SYNC STATUS STRIP -->
@@ -819,7 +829,7 @@ function dedupePastiInLogs() {
     const seen = new Set();
     const out = [];
     for (const p of l.pasti) {
-      const key = `${(p.meal||"").trim()}|${(p.time||"").trim()}|${(p.food||"").trim()}`;
+      const key = (p.meal||"").trim().toLowerCase(); // v16.7: dedup per tipo pasto per giorno
       if (seen.has(key)) { cleaned++; continue; }
       seen.add(key);
       out.push(p);
@@ -1915,6 +1925,38 @@ function calcHabitStreak(habit) {
   return streak;
 }
 
+
+// ─── v17 Stage 1: habit core (mai-due-miss, striscia 21g, note) ───
+function v17DateOffset(off){ const d=new Date(); d.setDate(d.getDate()-off); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+function v17HabitAlert(habit){
+  if (isHabitDoneToday(habit, todayStr()) === "full") return null;
+  const y1 = isHabitDoneToday(habit, v17DateOffset(1)) === "full";
+  const y2 = isHabitDoneToday(habit, v17DateOffset(2)) === "full";
+  if (!y1 && !y2) return {cls:"broken", html:"❌ Streak rotto — riparti oggi"};
+  if (!y1) return {cls:"warn", html:"⚠️ Ieri saltato — MAI 2 di fila"};
+  return null;
+}
+function v17HabitStrip(habit, days){
+  days = days || 21; let dots = "";
+  for (let i = days-1; i >= 0; i--){
+    const ds = v17DateOffset(i);
+    const st = isHabitDoneToday(habit, ds);
+    const cls = st === "full" ? "on" : st === "partial" ? "half" : "off";
+    dots += `<span class="hstrip-dot ${cls}${i===0?" today":""}" title="${ds}"></span>`;
+  }
+  let w = 0; for (let i = 0; i < 7; i++){ if (isHabitDoneToday(habit, v17DateOffset(i)) === "full") w++; }
+  return `<div class="hstrip">${dots}<span class="hstrip-week">7g: ${w}/7</span></div>`;
+}
+function v17EditHabitNote(habitId){
+  const date = currentAbitudineDate || todayStr();
+  const log = getHabitDayLog(date, habitId) || {};
+  const n = prompt("Nota per questa abitudine (es. 'Atomic Habits, 2 idee'):", log.note || "");
+  if (n === null) return;
+  log.note = n.trim();
+  setHabitDayLog(date, habitId, log);
+  renderAbitudini();
+}
+
 function getMonthCalendar(year, month) {
   // month 0-indexed
   const first = new Date(year, month, 1);
@@ -2176,8 +2218,12 @@ function renderAbitudini() {
           <div class="habit-name">${h.name}</div>
           <div class="habit-meta">${h.type === "sets" ? `Target: ${h.targetTotal} reps totali · varianti: ${(h.variants||[]).map(v=>v.icon+" "+v.label).join(", ")}` : h.type === "reps" ? `Target: ${h.targetSets}×${h.targetReps} = ${h.targetSets*h.targetReps} totali` : h.type === "value" ? `Target: ${h.targetValue}${h.unit?" "+h.unit:""}` : "Fatto/Non fatto"} · ${h.frequency==="daily"?"Quotidiana":h.frequency}</div>
           ${streak > 0 ? `<div class="habit-streak">🔥 <span class="habit-streak-num">${streak}</span> ${streak === 1 ? "giorno" : "giorni"}</div>` : ""}
+          ${viewingToday ? (()=>{const a=v17HabitAlert(h); return a ? `<div class="habit-alert ${a.cls}">${a.html}</div>` : "";})() : ""}
+          ${v17HabitStrip(h)}
+          ${log && log.note ? `<div class="habit-note">📝 ${log.note}</div>` : ""}
         </div>
         <div class="habit-status">
+          <button class="habit-edit-btn" onclick="v17EditHabitNote('${h.id}')" title="Nota del giorno">📝</button>
           <button class="habit-edit-btn" onclick="deleteHabit('${h.id}')" title="Cancella">✕</button>
           <button class="${btnClass}" onclick="quickToggleHabit('${h.id}')" title="Toggle">${btnIcon}</button>
         </div>
@@ -2908,7 +2954,7 @@ window.onload = function() {
   currentDate = todayStr();
 
   // Log startup info
-  logInfo("Marathon Tracker v16.6 avviato");
+  logInfo("Marathon Tracker v17 avviato");
 
   // Auto-seed baseline VO2max test if empty
   const vo2Tests = loadVO2Tests();
@@ -3746,7 +3792,7 @@ function mergePasteDayIntoLog(existing, incoming) {
         }
       } else {
         const existingPasti = Array.isArray(merged.pasti) ? [...merged.pasti] : [];
-        const mealKey = p => `${(p.meal||"").trim()}|${(p.time||"").trim()}|${(p.food||"").trim()}`;
+        const mealKey = p => (p.meal||"").trim().toLowerCase(); // v16.7: identità pasto = solo tipo pasto per giorno (una riga per meal/giorno)
         let added = 0, updated = 0;
         for (const np of incoming.pasti) {
           const idx = existingPasti.findIndex(ep => mealKey(ep) === mealKey(np));
@@ -3943,6 +3989,7 @@ function confirmPasteDay() {
   }
 
   try { saveLocal(); } catch(e) { logError("saveLocal failed", e.message); }
+  try { dedupePastiInLogs(); } catch(e) { logError("dedupe post-paste failed", e.message); } // v16.7: pulisce eventuali doppioni subito dopo il merge
 
   closePasteDayModal();
 
