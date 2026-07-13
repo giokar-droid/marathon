@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>🏅 Marathon Tracker v17.21</title>
+<title>🏅 Marathon Tracker v17.23</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -291,7 +291,7 @@ code{background:rgba(255,255,255,.1);padding:2px 7px;border-radius:5px;font-size
   <div class="topbar-inner">
     <div class="topbar-row1">
       <div>
-        <div class="topbar-sub">Marathon Tracker <span class="v-badge">v17.21</span></div>
+        <div class="topbar-sub">Marathon Tracker <span class="v-badge">v17.23</span></div>
         <div class="topbar-title">🏅 25.10.2026 — <span id="topbarReadiness" title="Proiezione Readiness aggiornata">…</span></div>
       </div>
       <!-- SYNC STATUS STRIP -->
@@ -313,6 +313,7 @@ code{background:rgba(255,255,255,.1);padding:2px 7px;border-radius:5px;font-size
       <button class="tab" onclick="showTab('vo2')">🫁 VO₂</button>
       <button class="tab" onclick="showTab('storico')">📅 Storico</button>
       <button class="tab" onclick="showTab('forza')">🏋️ Forza</button>
+      <button class="tab" onclick="showTab('lettura')">📚 Lettura</button>
       <button class="tab" onclick="showTab('settings')">⚙️</button>
     </div>
   </div>
@@ -447,6 +448,8 @@ code{background:rgba(255,255,255,.1);padding:2px 7px;border-radius:5px;font-size
 </div>
 
 <!-- ═══ SETTINGS ═══ -->
+<div id="tab-lettura" style="display:none;"></div>
+
 <div id="tab-settings" style="display:none;">
   <div class="setup-banner">
     <div style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;margin-bottom:10px;color:var(--accent);">⚙️ Setup Google Sheets — v4</div>
@@ -1739,7 +1742,7 @@ const DEFAULT_HABITS = [
   { id: "water2l",   icon: "💧", name: "Acqua 2L+",       color: "#06b6d4", type: "value", targetValue: 2, unit: "L", frequency: "daily", category: "lifestyle", blockSize: 0.25 },
   { id: "sleep7h",   icon: "😴", name: "Sonno 7h+",       color: "#8b5cf6", type: "value", targetValue: 7, unit: "h", frequency: "daily", category: "lifestyle" },
   // — v17.8: lettura libri, doppia soglia (streak ≥5', target pieno 30')
-  { id: "lettura_libri", icon: "📚", name: "Lettura libri (streak ≥5', target 30')", color: "#d97706", type: "value", targetValue: 30, unit: "min", streakMin: 5, frequency: "daily", category: "lifestyle" }
+  { id: "lettura_libri", icon: "📚", name: "Lettura libri (streak ≥5', target 30')", color: "#d97706", type: "value", targetValue: 30, unit: "min", streakMin: 5, frequency: "daily", category: "lifestyle", blockSize: 5 }
 ];
 
 function loadHabits() {
@@ -3061,7 +3064,7 @@ window.onload = function() {
   currentDate = todayStr();
 
   // Log startup info
-  logInfo("Marathon Tracker v17.21 avviato");
+  logInfo("Marathon Tracker v17.23 avviato");
   try{ updateTopbarReadiness(); }catch(e){}
 
   // Auto-seed baseline VO2max test if empty
@@ -3875,10 +3878,94 @@ function v17BlockTracker(h, value, date){
   </div>`;
 }
 
+
+// ═══════════════════════════════════════════════════════════
+// v17.23: MODULO LETTURA — KPI minuti (fonte dati = log abitudine lettura_libri)
+// ═══════════════════════════════════════════════════════════
+function v17FmtMin(mins){ mins=Math.round(mins||0); const h=Math.floor(mins/60), m=mins%60; return h?(h+"h"+(m?" "+m+"'":"")):(m+"'"); }
+function v17ReadingStats(){
+  const all=loadHabitLogs();
+  const today=v17DateOffset(0), ym=today.slice(0,7), yr=today.slice(0,4), d7=v17DateOffset(6);
+  let today_m=0,week_m=0,month_m=0,year_m=0,total_m=0,daysRead=0,best={date:null,m:0};
+  const daily={};
+  for(const date in all){
+    const rec=all[date] && all[date]["lettura_libri"];
+    const m=rec?(parseFloat(rec.value)||0):0;
+    if(m<=0) continue;
+    daily[date]=m; total_m+=m; daysRead++;
+    if(m>best.m) best={date,m};
+    if(date===today) today_m+=m;
+    if(date>=d7) week_m+=m;
+    if(date.slice(0,7)===ym) month_m+=m;
+    if(date.slice(0,4)===yr) year_m+=m;
+  }
+  return {today_m,week_m,month_m,year_m,total_m,daysRead,best,avg:daysRead?Math.round(total_m/daysRead):0,daily,today};
+}
+function v17ReadAdd(min){
+  const today=v17DateOffset(0);
+  const log=getHabitDayLog(today,"lettura_libri")||{};
+  log.value=Math.max(0,(parseFloat(log.value)||0)+min);
+  setHabitDayLog(today,"lettura_libri",log);
+  renderLettura();
+}
+function v17ReadSetMinutes(val){
+  const n=parseFloat(String(val).replace(",",".")); if(!isFinite(n)||n<0) return;
+  const today=v17DateOffset(0);
+  const log=getHabitDayLog(today,"lettura_libri")||{};
+  log.value=n; setHabitDayLog(today,"lettura_libri",log);
+  renderLettura();
+}
+function renderLettura(){
+  const s=v17ReadingStats();
+  const el=document.getElementById("tab-lettura"); if(!el) return;
+  const card=(icon,val,lbl,color)=>'<div style="flex:1;min-width:130px;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;text-align:center;"><div style="font-family:\'Barlow Condensed\',sans-serif;font-size:30px;font-weight:900;line-height:1;color:'+(color||'var(--accent)')+';">'+val+'</div><div style="font-size:13px;color:var(--muted);margin-top:4px;">'+icon+' '+lbl+'</div></div>';
+  const days=14, W=700, H=150, P=26; const bw=(W-2*P)/days;
+  let maxv=1; const arr=[];
+  for(let i=days-1;i>=0;i--){ const d=v17DateOffset(i); const m=s.daily[d]||0; arr.push({d,m}); if(m>maxv)maxv=m; }
+  let bars="";
+  arr.forEach((o,i)=>{ const bh=Math.round((o.m/maxv)*(H-2*P)); const x=P+i*bw; const y=H-P-bh; const isT=o.d===s.today;
+    bars+='<rect x="'+(x+2)+'" y="'+y+'" width="'+(bw-4)+'" height="'+bh+'" rx="3" fill="'+(isT?'var(--accent)':'rgba(59,130,246,.45)')+'"><title>'+o.d+' · '+o.m+"'"+'</title></rect>';
+  });
+  const chart = s.total_m>0
+    ? '<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:auto;margin-top:6px;"><line x1="'+P+'" y1="'+(H-P)+'" x2="'+(W-P)+'" y2="'+(H-P)+'" stroke="rgba(255,255,255,.15)"/>'+bars+'</svg><div style="font-size:12px;color:var(--muted);text-align:center;">ultimi 14 giorni · minuti/die</div>'
+    : '<div style="text-align:center;color:var(--muted);padding:20px;font-size:14px;">Nessuna lettura ancora registrata. Aggiungi i primi minuti qui sotto.</div>';
+  el.innerHTML =
+    '<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;"><div style="font-family:\'Barlow Condensed\',sans-serif;font-size:26px;font-weight:900;color:var(--text);">📚 Lettura</div><span style="flex:1;height:1px;background:var(--border);"></span></div>'
+    + '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;">'
+    + card("📖", v17FmtMin(s.today_m), "oggi", s.today_m>0?"var(--green)":"var(--muted)")
+    + card("🗓️", v17FmtMin(s.week_m), "7 giorni")
+    + card("📅", v17FmtMin(s.month_m), "questo mese")
+    + card("🏆", v17FmtMin(s.year_m), "quest'anno")
+    + '</div>'
+    + '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">'
+    + card("📚", s.daysRead, "giorni letti", "var(--text)")
+    + card("📈", v17FmtMin(s.avg), "media/giorno", "var(--text)")
+    + card("⭐", v17FmtMin(s.best.m), "record giornata", "var(--text)")
+    + card("⏱️", v17FmtMin(s.total_m), "totale", "var(--text)")
+    + '</div>'
+    + '<div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:16px;">'
+    + '<div style="font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">➕ Aggiungi lettura di oggi</div>'
+    + '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">'
+    + '<button onclick="v17ReadAdd(5)" style="flex:1;min-width:70px;background:linear-gradient(90deg,var(--blue),#2563eb);color:#fff;border:none;border-radius:10px;padding:12px;font-weight:800;font-size:15px;cursor:pointer;">+5\'</button>'
+    + '<button onclick="v17ReadAdd(10)" style="flex:1;min-width:70px;background:linear-gradient(90deg,var(--blue),#2563eb);color:#fff;border:none;border-radius:10px;padding:12px;font-weight:800;font-size:15px;cursor:pointer;">+10\'</button>'
+    + '<button onclick="v17ReadAdd(15)" style="flex:1;min-width:70px;background:linear-gradient(90deg,var(--blue),#2563eb);color:#fff;border:none;border-radius:10px;padding:12px;font-weight:800;font-size:15px;cursor:pointer;">+15\'</button>'
+    + '<button onclick="v17ReadAdd(-5)" style="flex:0 0 52px;background:rgba(255,255,255,.06);border:1px solid var(--border);color:var(--text);border-radius:10px;padding:12px;font-weight:800;font-size:15px;cursor:pointer;">−5\'</button>'
+    + '</div>'
+    + '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">'
+    + '<span style="font-size:14px;color:var(--muted);">oppure minuti esatti:</span>'
+    + '<input id="readExact" type="text" inputmode="numeric" placeholder="es. 47" value="'+(s.today_m||'')+'" style="width:80px;text-align:center;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:8px;font-size:15px;">'
+    + '<button onclick="v17ReadSetMinutes(document.getElementById(\'readExact\').value)" style="background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:8px 14px;font-weight:700;font-size:14px;cursor:pointer;">Imposta</button>'
+    + '</div>'
+    + '<div style="font-size:12px;color:var(--muted);margin-top:8px;">Streak a 5\', target giornaliero 30\' — qui puoi registrare oltre, senza tetto.</div>'
+    + '</div>'
+    + chart
+    + '<div style="background:var(--surface);border:1px dashed var(--border);border-radius:14px;padding:16px;margin-top:16px;text-align:center;color:var(--muted);font-size:14px;">📕 Libri completati (titolo, data, pagine) — in arrivo, step 2</div>';
+}
+
 function showTab(name) {
-  ["diario","abitudini","peso","crescita","piano","readiness","vo2","storico","forza","settings"].forEach(t=>document.getElementById("tab-"+t).style.display=t===name?"block":"none");
+  ["diario","abitudini","peso","crescita","piano","readiness","vo2","storico","forza","lettura","settings"].forEach(t=>document.getElementById("tab-"+t).style.display=t===name?"block":"none");
   document.querySelectorAll(".tab").forEach(b=>b.classList.remove("active"));
-  const map={diario:0,abitudini:1,peso:2,crescita:3,piano:4,readiness:5,vo2:6,storico:7,forza:8,settings:9};
+  const map={diario:0,abitudini:1,peso:2,crescita:3,piano:4,readiness:5,vo2:6,storico:7,forza:8,lettura:9,settings:10};
   document.querySelectorAll(".tab")[map[name]]?.classList.add("active");
   if(name==="storico") renderHistory();
   if(name==="forza") renderWorkout();
@@ -3888,6 +3975,7 @@ function showTab(name) {
   if(name==="abitudini") renderAbitudini();
   if(name==="peso") renderPeso();
   if(name==="crescita") renderCrescita();
+  if(name==="lettura") renderLettura();
 }
 
 // ═══════════════════════════════════════════════════════════
