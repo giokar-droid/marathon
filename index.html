@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>🏅 Marathon Tracker v17.7</title>
+<title>🏅 Marathon Tracker v17.9</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -289,7 +289,7 @@ code{background:rgba(255,255,255,.1);padding:2px 7px;border-radius:5px;font-size
   <div class="topbar-inner">
     <div class="topbar-row1">
       <div>
-        <div class="topbar-sub">Marathon Tracker <span class="v-badge">v17.7</span></div>
+        <div class="topbar-sub">Marathon Tracker <span class="v-badge">v17.9</span></div>
         <div class="topbar-title">🏅 25.10.2026 — <span id="topbarReadiness" title="Proiezione Readiness aggiornata">…</span></div>
       </div>
       <!-- SYNC STATUS STRIP -->
@@ -1731,7 +1731,9 @@ const DEFAULT_HABITS = [
   // — Stile di vita (metriche giornaliere)
   { id: "walk7k",    icon: "🚶", name: "7000+ passi",     color: "#3b82f6", type: "value", targetValue: 7000, unit: "passi", frequency: "daily", category: "lifestyle" },
   { id: "water2l",   icon: "💧", name: "Acqua 2L+",       color: "#06b6d4", type: "value", targetValue: 2, unit: "L", frequency: "daily", category: "lifestyle" },
-  { id: "sleep7h",   icon: "😴", name: "Sonno 7h+",       color: "#8b5cf6", type: "value", targetValue: 7, unit: "h", frequency: "daily", category: "lifestyle" }
+  { id: "sleep7h",   icon: "😴", name: "Sonno 7h+",       color: "#8b5cf6", type: "value", targetValue: 7, unit: "h", frequency: "daily", category: "lifestyle" },
+  // — v17.8: lettura libri, doppia soglia (streak ≥5', target pieno 30')
+  { id: "lettura_libri", icon: "📚", name: "Lettura libri (streak ≥5', target 30')", color: "#d97706", type: "value", targetValue: 30, unit: "min", streakMin: 5, frequency: "daily", category: "lifestyle" }
 ];
 
 function loadHabits() {
@@ -1941,18 +1943,28 @@ function updateHabitTotalDisplay(habitId) {
   }
 }
 
+// v17.8: doppia soglia — lo streak si tiene con streakMin (se definito), il "full" resta al target pieno
+function v17StreakDone(habit, date){
+  if (habit && habit.streakMin != null) {
+    const log = getHabitDayLog(date, habit.id);
+    const v = parseFloat(log && log.value) || 0;
+    return v >= habit.streakMin;
+  }
+  return isHabitDoneToday(habit, date) === "full";
+}
+
 function calcHabitStreak(habit) {
   // Conta giorni consecutivi (inclusi oggi se completato) all'indietro con stato "full"
   const today = todayStr();
   let streak = 0;
   let d = new Date(today + "T12:00:00");
   // If today not done, start from yesterday
-  if (isHabitDoneToday(habit, today) !== "full") {
+  if (!v17StreakDone(habit, today)) {
     d.setDate(d.getDate() - 1);
   }
   for (let i = 0; i < 365; i++) {
     const ds = d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
-    if (isHabitDoneToday(habit, ds) === "full") {
+    if (v17StreakDone(habit, ds)) {
       streak++;
       d.setDate(d.getDate() - 1);
     } else {
@@ -1966,9 +1978,9 @@ function calcHabitStreak(habit) {
 // ─── v17 Stage 1: habit core (mai-due-miss, striscia 21g, note) ───
 function v17DateOffset(off){ const d=new Date(); d.setDate(d.getDate()-off); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
 function v17HabitAlert(habit){
-  if (isHabitDoneToday(habit, todayStr()) === "full") return null;
-  const y1 = isHabitDoneToday(habit, v17DateOffset(1)) === "full";
-  const y2 = isHabitDoneToday(habit, v17DateOffset(2)) === "full";
+  if (v17StreakDone(habit, todayStr())) return null;
+  const y1 = v17StreakDone(habit, v17DateOffset(1));
+  const y2 = v17StreakDone(habit, v17DateOffset(2));
   if (!y1 && !y2) return {cls:"broken", html:"❌ Streak rotto — riparti oggi"};
   if (!y1) return {cls:"warn", html:"⚠️ Ieri saltato — MAI 2 di fila"};
   return null;
@@ -1978,10 +1990,11 @@ function v17HabitStrip(habit, days){
   for (let i = days-1; i >= 0; i--){
     const ds = v17DateOffset(i);
     const st = isHabitDoneToday(habit, ds);
-    const cls = st === "full" ? "on" : st === "partial" ? "half" : "off";
+    const kept = v17StreakDone(habit, ds);
+    const cls = kept ? "on" : st !== "none" ? "half" : "off";
     dots += `<span class="hstrip-dot ${cls}${i===0?" today":""}" title="${ds}"></span>`;
   }
-  let w = 0; for (let i = 0; i < 7; i++){ if (isHabitDoneToday(habit, v17DateOffset(i)) === "full") w++; }
+  let w = 0; for (let i = 0; i < 7; i++){ if (v17StreakDone(habit, v17DateOffset(i))) w++; }
   return `<div class="hstrip">${dots}<span class="hstrip-week">7g: ${w}/7</span></div>`;
 }
 function v17EditHabitNote(habitId){
@@ -2266,6 +2279,7 @@ function renderAbitudini() {
         </div>
       </div>
       ${detailHtml}
+      ${(h.id==="circuito_am"||h.id==="circuito_pm") ? v17RenderCircuitPanel(h.id) : ""}
     </div>`;
   }).join("");
 
@@ -3012,7 +3026,7 @@ window.onload = function() {
   currentDate = todayStr();
 
   // Log startup info
-  logInfo("Marathon Tracker v17.7 avviato");
+  logInfo("Marathon Tracker v17.9 avviato");
   try{ updateTopbarReadiness(); }catch(e){}
 
   // Auto-seed baseline VO2max test if empty
@@ -3501,6 +3515,101 @@ function v17CopyWeeklyReport(){
   const dwTxt=r.dw===null?"n.d.":(r.dw>0?"+":"")+r.dw.toFixed(1)+" kg";
   const txt="📋 Report settimana (ultimi 7g)\n⚖️ Peso: "+dwTxt+"\n🔥 Abitudini full: "+r.pct+"%\n🏃 "+r.km+" km · "+r.sessions+" sessioni\n🚶 "+r.passi.toLocaleString("it-IT")+" passi\n🏆 Streak top: "+r.best.name+" ("+r.best.s+"g)";
   (navigator.clipboard?navigator.clipboard.writeText(txt):Promise.reject()).then(()=>showToast("📋 Report copiato","ok")).catch(()=>prompt("Copia il report:",txt));
+}
+
+
+// ─── v17.9: pannello circuito — piano serie×reps, ultima esecuzione, log automatico ───
+const V17_CIRCUIT_DEFAULTS = {
+  circuito_am: [
+    {id:"squat_am", sets:3, reps:10},
+    {id:"pushup_am", sets:3, reps:8},
+    {id:"plank_am", sets:3, reps:20},
+    {id:"glute_bridge_am", sets:3, reps:12},
+    {id:"calf_raises_am", sets:3, reps:15}
+  ],
+  circuito_pm: [
+    {id:"affondi_pm", sets:3, reps:20},
+    {id:"deadbug_pm", sets:3, reps:10},
+    {id:"side_plank_pm", sets:3, reps:40},
+    {id:"superman_pm", sets:3, reps:10},
+    {id:"calf_raises_pm", sets:3, reps:15}
+  ]
+};
+const KEY_CIRCUIT_PLANS = "mt_circuit_plans_v1";
+function v17GetCircuitPlan(cid){
+  try{ const all=JSON.parse(localStorage.getItem(KEY_CIRCUIT_PLANS)||"{}"); if(all[cid]&&Array.isArray(all[cid])&&all[cid].length) return all[cid]; }catch(e){}
+  return JSON.parse(JSON.stringify(V17_CIRCUIT_DEFAULTS[cid]||[]));
+}
+function v17SaveCircuitPlan(cid, plan){
+  try{ const all=JSON.parse(localStorage.getItem(KEY_CIRCUIT_PLANS)||"{}"); all[cid]=plan; localStorage.setItem(KEY_CIRCUIT_PLANS, JSON.stringify(all)); }catch(e){}
+}
+function v17UpdateCircuitPlanItem(cid, idx, field, val){
+  const plan=v17GetCircuitPlan(cid);
+  if(!plan[idx]) return;
+  plan[idx][field]=Math.max(0, parseInt(val)||0);
+  v17SaveCircuitPlan(cid, plan);
+}
+function v17LastCircuitLine(cid, beforeDate){
+  const plan=v17GetCircuitPlan(cid);
+  const habits=loadHabits();
+  for(let i=1;i<=14;i++){
+    const d=new Date((beforeDate||todayStr())+"T12:00:00"); d.setDate(d.getDate()-i);
+    const ds=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+    const parts=[];
+    plan.forEach(it=>{
+      const log=getHabitDayLog(ds,it.id);
+      if(log&&log.sets&&log.sets.length){
+        const h=habits.find(x=>x.id===it.id);
+        const reps=log.sets.map(s=>parseInt(s.reps)||0);
+        const same=reps.every(r=>r===reps[0]);
+        parts.push((h?h.icon:"")+" "+reps.length+"×"+(same?reps[0]:reps.join("/")));
+      }
+    });
+    if(parts.length) return "Ultima volta ("+ds.slice(8,10)+"/"+ds.slice(5,7)+"): "+parts.join(" · ");
+  }
+  return "Nessun circuito registrato negli ultimi 14 giorni.";
+}
+function v17RenderCircuitPanel(cid){
+  const plan=v17GetCircuitPlan(cid);
+  const habits=loadHabits();
+  const rows=plan.map((it,idx)=>{
+    const h=habits.find(x=>x.id===it.id);
+    if(!h) return "";
+    const shortName=h.name.split(" (")[0];
+    return `<div style="display:grid;grid-template-columns:1fr 54px 16px 54px;gap:6px;align-items:center;margin-bottom:5px;">
+      <div style="font-size:13px;color:var(--text);">${h.icon} ${shortName}</div>
+      <input type="text" inputmode="numeric" class="habit-detail-input" style="padding:6px;text-align:center;" value="${it.sets}" oninput="v17UpdateCircuitPlanItem('${cid}',${idx},'sets',this.value)">
+      <div style="text-align:center;color:var(--muted);">×</div>
+      <input type="text" inputmode="numeric" class="habit-detail-input" style="padding:6px;text-align:center;" value="${it.reps}" oninput="v17UpdateCircuitPlanItem('${cid}',${idx},'reps',this.value)">
+    </div>`;
+  }).join("");
+  return `<div style="margin-top:10px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:12px;">
+    <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Piano circuito · serie × reps (prossima volta, modificabile)</div>
+    ${rows}
+    <div style="font-size:12px;color:var(--muted);margin:8px 0;">${v17LastCircuitLine(cid, currentAbitudineDate||todayStr())}</div>
+    <button onclick="v17CompleteCircuit('${cid}')" style="width:100%;background:linear-gradient(90deg,var(--green),#059669);color:#fff;border:none;border-radius:10px;padding:12px;font-weight:800;font-size:15px;cursor:pointer;">✅ Circuito fatto → logga tutti gli esercizi</button>
+  </div>`;
+}
+function v17CompleteCircuit(cid){
+  const date=currentAbitudineDate||todayStr();
+  const plan=v17GetCircuitPlan(cid);
+  const habits=loadHabits();
+  let n=0;
+  plan.forEach(it=>{
+    const h=habits.find(x=>x.id===it.id);
+    if(!h||!it.sets||!it.reps) return;
+    const variant=(h.variants&&h.variants[0])?h.variants[0].key:"full";
+    const sets=[]; for(let i=0;i<it.sets;i++) sets.push({variant:variant, reps:it.reps});
+    setHabitDayLog(date, it.id, {sets:sets});
+    n++;
+  });
+  const ch=habits.find(x=>x.id===cid);
+  if(ch){
+    const cur=getHabitDayLog(date,cid)||{};
+    if((parseFloat(cur.value)||0) < ch.targetValue){ cur.value=ch.targetValue; setHabitDayLog(date,cid,cur); }
+  }
+  showToast("✅ Circuito loggato: "+n+" esercizi aggiornati","ok");
+  renderAbitudini();
 }
 
 function showTab(name) {
