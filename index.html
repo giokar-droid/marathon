@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>🏅 Marathon Tracker v17.5</title>
+<title>🏅 Marathon Tracker v17.7</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -289,7 +289,7 @@ code{background:rgba(255,255,255,.1);padding:2px 7px;border-radius:5px;font-size
   <div class="topbar-inner">
     <div class="topbar-row1">
       <div>
-        <div class="topbar-sub">Marathon Tracker <span class="v-badge">v17.5</span></div>
+        <div class="topbar-sub">Marathon Tracker <span class="v-badge">v17.7</span></div>
         <div class="topbar-title">🏅 25.10.2026 — <span id="topbarReadiness" title="Proiezione Readiness aggiornata">…</span></div>
       </div>
       <!-- SYNC STATUS STRIP -->
@@ -1703,16 +1703,24 @@ const KEY_HABIT_LOGS = "mt_habit_logs_v10"; // log giornaliero { date: { habitId
 // Abitudini default — pre-configurate per Giorgio
 const DEFAULT_HABITS = [
   // — Allenamento base (giornaliero, 4 sessioni AM/PM)
-  { id: "pushup_am", icon: "💪", name: "Push-up mattina", color: "#f97316", type: "sets", targetTotal: 25, variants: [{key:"full",label:"Completi",icon:"💯"},{key:"knee",label:"Ginocchia",icon:"🦵"}], frequency: "daily", category: "workout" },
-  { id: "squat_am",  icon: "🦵", name: "Squat mattina",   color: "#10b981", type: "sets", targetTotal: 25, variants: [{key:"full",label:"Completi",icon:"💯"},{key:"assisted",label:"Assistiti",icon:"🤝"}], frequency: "daily", category: "workout" },
+  { id: "pushup_am", icon: "💪", name: "Push-up mattina (3×8)", color: "#f97316", type: "sets", targetTotal: 24, variants: [{key:"full",label:"Completi",icon:"💯"},{key:"knee",label:"Ginocchia",icon:"🦵"}], frequency: "daily", category: "workout" },
+  { id: "squat_am",  icon: "🦵", name: "Squat mattina (3×10)", color: "#10b981", type: "sets", targetTotal: 30, variants: [{key:"full",label:"Completi",icon:"💯"},{key:"assisted",label:"Assistiti",icon:"🤝"}], frequency: "daily", category: "workout" },
   { id: "pushup_pm", icon: "💪", name: "Push-up sera",    color: "#f97316", type: "sets", targetTotal: 25, variants: [{key:"full",label:"Completi",icon:"💯"},{key:"knee",label:"Ginocchia",icon:"🦵"}], frequency: "daily", category: "workout" },
   { id: "squat_pm",  icon: "🦵", name: "Squat sera",      color: "#10b981", type: "sets", targetTotal: 25, variants: [{key:"full",label:"Completi",icon:"💯"},{key:"assisted",label:"Assistiti",icon:"🤝"}], frequency: "daily", category: "workout" },
   // — Circuiti terapia d'urto (v17.3, 12 lug 2026)
   { id: "circuito_am", icon: "🔥", name: "Circuito mattina (15')", color: "#ef4444", type: "value", targetValue: 15, unit: "min", frequency: "daily", category: "workout" },
   { id: "circuito_pm", icon: "🌙", name: "Circuito sera (15')",    color: "#6366f1", type: "value", targetValue: 15, unit: "min", frequency: "daily", category: "workout" },
   // — Allenamento core/stabilizzatori (3×/settimana, introdotti v15)
-  { id: "plank_am",       icon: "🧘", name: "Plank mattina",      color: "#ec4899", type: "sets", targetSeconds: 60, variants: [{key:"standard",label:"Standard",icon:"🧘"},{key:"side",label:"Laterale",icon:"↔️"}], frequency: "3x_week", category: "workout" },
-  { id: "calf_raises_am", icon: "🦶", name: "Calf raises mattina", color: "#14b8a6", type: "sets", targetTotal: 30, variants: [{key:"standard",label:"Standard",icon:"⬆️"}], frequency: "3x_week", category: "workout" },
+  { id: "plank_am",       icon: "🧘", name: "Plank mattina (3×20\")", color: "#ec4899", type: "sets", targetTotal: 60, variants: [{key:"standard",label:"Standard",icon:"🧘"},{key:"side",label:"Laterale",icon:"↔️"}], frequency: "daily", category: "workout" },
+  { id: "calf_raises_am", icon: "🦶", name: "Calf raises mattina (3×15)", color: "#14b8a6", type: "sets", targetTotal: 45, variants: [{key:"standard",label:"Standard",icon:"⬆️"}], frequency: "daily", category: "workout" },
+  // — Circuito AM: voce nuova (v17.6)
+  { id: "glute_bridge_am", icon: "🌉", name: "Glute bridge mattina (3×12)", color: "#f59e0b", type: "sets", targetTotal: 36, variants: [{key:"standard",label:"Standard",icon:"🌉"}], frequency: "daily", category: "workout" },
+  // — Circuito PM: voci nuove (v17.6) — plank/side plank: reps = secondi
+  { id: "affondi_pm",     icon: "🚶", name: "Affondi sera (3×10/gamba)",    color: "#8b5cf6", type: "sets", targetTotal: 60,  variants: [{key:"standard",label:"Statici",icon:"🚶"}], frequency: "daily", category: "workout" },
+  { id: "deadbug_pm",     icon: "🪲", name: "Dead bug sera (3×10)",         color: "#06b6d4", type: "sets", targetTotal: 30,  variants: [{key:"standard",label:"Standard",icon:"🪲"}], frequency: "daily", category: "workout" },
+  { id: "side_plank_pm",  icon: "↔️", name: "Side plank sera (3×20\"/lato)", color: "#ec4899", type: "sets", targetTotal: 120, variants: [{key:"standard",label:"Standard",icon:"↔️"}], frequency: "daily", category: "workout" },
+  { id: "superman_pm",    icon: "🦸", name: "Superman sera (3×10)",         color: "#ef4444", type: "sets", targetTotal: 30,  variants: [{key:"standard",label:"Standard",icon:"🦸"}], frequency: "daily", category: "workout" },
+  { id: "calf_raises_pm", icon: "🦶", name: "Calf raises sera (3×15)",      color: "#14b8a6", type: "sets", targetTotal: 45,  variants: [{key:"standard",label:"Standard",icon:"⬆️"}], frequency: "daily", category: "workout" },
   // — Integratori (giornaliero)
   { id: "creatina_am",      icon: "💊", name: "Creatina mattina (10g)",  color: "#a855f7", type: "value", targetValue: 10, unit: "g", frequency: "daily", category: "supplement" },
   { id: "creatina_pm",      icon: "💊", name: "Creatina sera (10g)",     color: "#a855f7", type: "value", targetValue: 10, unit: "g", frequency: "daily", category: "supplement" },
@@ -1759,6 +1767,21 @@ function loadHabits() {
     }
     if (newAdded > 0) {
       logInfo(`v15: aggiunte ${newAdded} nuove abitudini (plank, calf raises, integratori)`);
+    }
+    // v17.6 Migration: allinea le voci circuito (serie×reps) e frequenza daily
+    const v176 = {
+      pushup_am:      { name: "Push-up mattina (3×8)",  targetTotal: 24, frequency: "daily" },
+      squat_am:       { name: "Squat mattina (3×10)",   targetTotal: 30, frequency: "daily" },
+      plank_am:       { name: "Plank mattina (3×20\")", targetTotal: 60, frequency: "daily" },
+      calf_raises_am: { name: "Calf raises mattina (3×15)", targetTotal: 45, frequency: "daily" }
+    };
+    for (const id in v176) {
+      const h = upgraded.find(x => x.id === id);
+      if (h && (h.targetTotal !== v176[id].targetTotal || h.frequency !== "daily" || h.name !== v176[id].name)) {
+        Object.assign(h, v176[id]);
+        if (h.targetSeconds !== undefined) delete h.targetSeconds;
+        migrated = true;
+      }
     }
     // v17.2 Migration: split Omega-3 in AM (2 cps) + PM (1 cps), streak separati
     const oAm = upgraded.find(h => h.id === "omega3_am");
@@ -2989,7 +3012,7 @@ window.onload = function() {
   currentDate = todayStr();
 
   // Log startup info
-  logInfo("Marathon Tracker v17.5 avviato");
+  logInfo("Marathon Tracker v17.7 avviato");
   try{ updateTopbarReadiness(); }catch(e){}
 
   // Auto-seed baseline VO2max test if empty
@@ -3546,7 +3569,7 @@ function renderPasti(){
     return `<div style="background:var(--surface2);border-radius:10px;padding:12px 14px;margin-bottom:8px;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
         <div style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:14px;text-transform:capitalize;">${icon} ${(p.meal || "pasto").replace(/_/g," ")} ${p.time ? `<span style="font-size:11px;color:var(--muted);font-weight:600;">· ${p.time}</span>` : ""}</div>
-        <div style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:18px;color:#fcd34d;">${kcal} <span style="font-size:11px;color:var(--muted);font-weight:600;">kcal</span></div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:18px;color:#fcd34d;">${kcal} <span style="font-size:11px;color:var(--muted);font-weight:600;">kcal · ${Math.round((kcal/1700)*100)}%</span></div>
       </div>
       <div style="font-size:13px;color:var(--text);margin-bottom:6px;line-height:1.4;">${p.food || "—"}</div>
       <div style="display:flex;gap:14px;font-size:11px;color:var(--muted);">
@@ -3579,7 +3602,7 @@ function renderPasti(){
     <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;">
       <div style="background:rgba(252,211,77,.08);border-radius:8px;padding:10px;">
         <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;">Calorie</div>
-        <div style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;color:${color(totalKcal,tgtKcal,true)};">${totalKcal} <span style="font-size:11px;color:var(--muted);font-weight:600;">/ ${tgtKcal}</span></div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;color:${color(totalKcal,tgtKcal,true)};">${totalKcal} <span style="font-size:11px;color:var(--muted);font-weight:600;">/ ${tgtKcal}</span> <span style="font-size:14px;font-weight:800;color:${color(totalKcal,tgtKcal,true)};">· ${Math.round((totalKcal/tgtKcal)*100)}%</span></div>
         <div style="height:4px;background:rgba(255,255,255,.06);border-radius:4px;margin-top:4px;"><div style="height:100%;background:${color(totalKcal,tgtKcal,true)};border-radius:4px;width:${pct(totalKcal,tgtKcal)}%;"></div></div>
       </div>
       <div style="background:rgba(147,197,253,.08);border-radius:8px;padding:10px;">
