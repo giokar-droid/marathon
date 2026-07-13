@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>🏅 Marathon Tracker v17.19</title>
+<title>🏅 Marathon Tracker v17.20</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -291,7 +291,7 @@ code{background:rgba(255,255,255,.1);padding:2px 7px;border-radius:5px;font-size
   <div class="topbar-inner">
     <div class="topbar-row1">
       <div>
-        <div class="topbar-sub">Marathon Tracker <span class="v-badge">v17.19</span></div>
+        <div class="topbar-sub">Marathon Tracker <span class="v-badge">v17.20</span></div>
         <div class="topbar-title">🏅 25.10.2026 — <span id="topbarReadiness" title="Proiezione Readiness aggiornata">…</span></div>
       </div>
       <!-- SYNC STATUS STRIP -->
@@ -1798,6 +1798,17 @@ function loadHabits() {
       migrated = true;
       logInfo("v17.2: Omega-3 splittato in mattina (2 cps) + sera (1 cps)");
     }
+    // v17.20 Migration: propaga blockSize dai default alle abitudini esistenti (sotto-obiettivi a blocchi)
+    for (const def of DEFAULT_HABITS) {
+      if (def.blockSize) {
+        const h = upgraded.find(x => x.id === def.id);
+        if (h && h.blockSize === undefined) {
+          h.blockSize = def.blockSize;
+          migrated = true;
+          logInfo(`v17.20: blockSize ${def.blockSize} propagato su ${def.id}`);
+        }
+      }
+    }
     if (migrated) {
       saveHabits(upgraded);
     }
@@ -3050,7 +3061,7 @@ window.onload = function() {
   currentDate = todayStr();
 
   // Log startup info
-  logInfo("Marathon Tracker v17.19 avviato");
+  logInfo("Marathon Tracker v17.20 avviato");
   try{ updateTopbarReadiness(); }catch(e){}
 
   // Auto-seed baseline VO2max test if empty
