@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>🏅 Marathon Tracker v17.29</title>
+<title>🏅 Tracker v18</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -291,8 +291,8 @@ code{background:rgba(255,255,255,.1);padding:2px 7px;border-radius:5px;font-size
   <div class="topbar-inner">
     <div class="topbar-row1">
       <div>
-        <div class="topbar-sub">Marathon Tracker <span class="v-badge">v17.29</span></div>
-        <div class="topbar-title">🏅 25.10.2026 — <span id="topbarReadiness" title="Proiezione Readiness aggiornata">…</span></div>
+        <div class="topbar-sub">Tracker <span class="v-badge">v18</span></div>
+        <div class="topbar-title">⚖️ <span id="topbarWeight" title="Peso attuale → target di fase">…</span></div>
       </div>
       <!-- SYNC STATUS STRIP -->
       <div class="sync-strip">
@@ -723,6 +723,7 @@ const RACE_DATE = new Date("2026-10-25T09:00:00");
 const GOAL_SECONDS = 4*3600+30*60;
 const START_WEIGHT = 98;
 const GOAL_WEIGHT = 85;
+const INTERIM_GOAL_WEIGHT = 95;   // v18: target di fase (fine agosto), non la maratona
 const START_DATE = "2026-03-28";
 const DEVICE_ID = (() => { let d=localStorage.getItem("mt_device_id"); if(!d){d="dev_"+Math.random().toString(36).slice(2,8);localStorage.setItem("mt_device_id",d);} return d; })();
 
@@ -1713,10 +1714,13 @@ const KEY_HABIT_LOGS = "mt_habit_logs_v10"; // log giornaliero { date: { habitId
 
 // Abitudini default — pre-configurate per Giorgio
 const DEFAULT_HABITS = [
+  // — v18 ESSENZIALI — le uniche 5 marcate core: peso + lavoro
+  { id: "pesata_digiuno", icon: "⚖️", name: "Pesata a digiuno", color: "#10b981", type: "binary", frequency: "daily", category: "lifestyle", core: true },
+  { id: "cena_pulita",    icon: "🍽️", name: "Cena pulita / niente alcol", color: "#10b981", type: "binary", frequency: "daily", category: "lifestyle", core: true },
   // — SALES / PRODUTTIVITÀ (v17.16) — priorità n°1, sempre in cima
   { id: "prep_call_30", icon: "📝", name: "Prep/review call script (30')", color: "#3b82f6", type: "value", targetValue: 30, unit: "min", frequency: "daily", category: "sales" },
-  { id: "chiamate",     icon: "📞", name: "Chiamate outreach",             color: "#2563eb", type: "value", targetValue: 1,  unit: "chiamate", frequency: "daily", category: "sales" },
-  { id: "lavoro_deliberato", icon: "🎯", name: "Lavoro deliberato netto (bussola)", color: "#2563eb", type: "value", targetValue: 400, unit: "min", blockSize: 25, frequency: "daily", category: "sales" },
+  { id: "chiamate",     icon: "📞", name: "Chiamate outreach",             color: "#2563eb", type: "value", targetValue: 1,  unit: "chiamate", frequency: "daily", category: "sales", core: true },
+  { id: "lavoro_deliberato", icon: "🎯", name: "Lavoro deliberato netto (bussola)", color: "#2563eb", type: "value", targetValue: 400, unit: "min", blockSize: 25, frequency: "daily", category: "sales", core: true },
   // — Allenamento base (giornaliero, 4 sessioni AM/PM)
   { id: "pushup_am", icon: "💪", name: "Push-up mattina (3×8)", color: "#f97316", type: "sets", targetTotal: 24, variants: [{key:"full",label:"Completi",icon:"💯"},{key:"knee",label:"Ginocchia",icon:"🦵"}], frequency: "daily", category: "workout" },
   { id: "squat_am",  icon: "🦵", name: "Squat mattina (3×10)", color: "#10b981", type: "sets", targetTotal: 30, variants: [{key:"full",label:"Completi",icon:"💯"},{key:"assisted",label:"Assistiti",icon:"🤝"}], frequency: "daily", category: "workout" },
@@ -1745,7 +1749,7 @@ const DEFAULT_HABITS = [
   { id: "vitamina_d_am",      icon: "☀️", name: "Vitamina D mattina",      color: "#fbbf24", type: "value", targetValue: 1, unit: "dose", frequency: "daily", category: "supplement" },
   { id: "magnesio_pm",      icon: "⚡", name: "Magnesio sera",           color: "#84cc16", type: "value", targetValue: 1, unit: "cps", frequency: "daily", category: "supplement" },
   // — Stile di vita (metriche giornaliere)
-  { id: "walk7k",    icon: "🚶", name: "7000+ passi",     color: "#3b82f6", type: "value", targetValue: 7000, unit: "passi", frequency: "daily", category: "lifestyle", blockSize: 2500 },
+  { id: "walk7k",    icon: "🚶", name: "7000+ passi",     color: "#3b82f6", type: "value", targetValue: 7000, unit: "passi", frequency: "daily", category: "lifestyle", blockSize: 2500, core: true },
   { id: "water2l",   icon: "💧", name: "Acqua 2L+",       color: "#06b6d4", type: "value", targetValue: 2, unit: "L", frequency: "daily", category: "lifestyle", blockSize: 0.25 },
   { id: "sleep7h",   icon: "😴", name: "Sonno 7h+",       color: "#8b5cf6", type: "value", targetValue: 7, unit: "h", frequency: "daily", category: "lifestyle" },
   // — v17.8: lettura libri, doppia soglia (streak ≥5', target pieno 30')
@@ -1807,6 +1811,13 @@ function loadHabits() {
       oAm.targetValue = 2; oAm.name = "Omega-3 mattina (2 cps)";
       migrated = true;
       logInfo("v17.2: Omega-3 splittato in mattina (2 cps) + sera (1 cps)");
+    }
+    // v18 Migration: propaga il flag core dai default alle abitudini esistenti
+    for (const def of DEFAULT_HABITS) {
+      if (def.core) {
+        const h = upgraded.find(x => x.id === def.id);
+        if (h && h.core === undefined) { h.core = true; migrated = true; }
+      }
     }
     // v17.20 Migration: propaga blockSize dai default alle abitudini esistenti (sotto-obiettivi a blocchi)
     for (const def of DEFAULT_HABITS) {
@@ -2192,7 +2203,8 @@ function changeAbitudineMonth(delta) {
 
 function renderAbitudini() {
   const c = document.getElementById("abitudiniDashboard");
-  const habits = loadHabits();
+  const habitsAll = loadHabits();
+  const habits = v18FilterHabits(habitsAll);   // v18: contatore e card seguono la vista attiva
   const today = todayStr();
   const viewingDate = currentAbitudineDate || today;
   const viewingToday = viewingDate === today;
@@ -2357,7 +2369,7 @@ function renderAbitudini() {
     {key:"supplement",label:"💊 INTEGRATORI",          color:"#a855f7"},
     {key:"lifestyle", label:"🌿 STILE DI VITA",        color:"#10b981"}
   ];
-  let habitsHtml = ""; const seenCats = new Set();
+  let habitsHtml = v18ToggleBar(habits.length, habitsAll.length); const seenCats = new Set();
   CAT_SECTIONS.forEach(sec=>{
     const cards = habitCards.filter(c=>c.cat===sec.key);
     if(!cards.length) return;
@@ -3027,17 +3039,17 @@ function computeReadiness(logs) {
 
 // ─── v17.5: topbar mostra la proiezione Readiness aggiornata, non il target fisso ───
 function updateTopbarReadiness(){
-  const el=document.getElementById("topbarReadiness"); if(!el) return;
+  // v18: la metrica in cima è il PESO (target di fase), non più il countdown maratona.
+  const el=document.getElementById("topbarWeight"); if(!el) return;
   try{
     const R=computeReadiness(logs);
-    const s=R.projectedSec;
-    const h=Math.floor(s/3600), m=Math.floor((s%3600)/60);
-    const txt=h+"h"+String(m).padStart(2,"0")+"'";
-    const color=s<=GOAL_SECONDS?"var(--green)":s<5.5*3600?"var(--accent)":s<6*3600?"var(--orange)":"var(--red)";
-    el.textContent=txt;
-    el.style.color=color;
-    el.title="Proiezione Readiness attuale (target 5h00). Score: "+Math.round(R.score);
-  }catch(e){ el.textContent="5h00'"; }
+    const w=Number(R.currentWeight);
+    if(!isFinite(w)) throw new Error("no weight");
+    const delta=w-INTERIM_GOAL_WEIGHT;
+    el.textContent=w.toFixed(1)+" kg → "+INTERIM_GOAL_WEIGHT;
+    el.style.color = delta<=0 ? "var(--green)" : delta<=2 ? "var(--accent)" : "var(--orange)";
+    el.title = delta>0 ? ("Mancano "+delta.toFixed(1)+" kg al target di fase") : "Target di fase raggiunto";
+  }catch(e){ el.textContent="— kg → "+INTERIM_GOAL_WEIGHT; }
 }
 
 function renderReadiness() {
@@ -3111,7 +3123,7 @@ window.onload = function() {
   currentDate = todayStr();
 
   // Log startup info
-  logInfo("Marathon Tracker v17.29 avviato");
+  logInfo("Tracker v18 avviato — modalità Essenziale");
   try{ updateTopbarReadiness(); }catch(e){}
 
   // Auto-seed baseline VO2max test if empty
@@ -3759,7 +3771,7 @@ const V17_GESTO_MICRO = {
   calf_raises_pm: "Sui polpacci, 15 volte."
 };
 function v17GestoCandidates(date) {
-  const habits = loadHabits().filter(h => h.frequency === "daily");
+  const habits = v18FilterHabits(loadHabits()).filter(h => h.frequency === "daily");
   const undone = habits.filter(h => {
     // Abitudini a blocchi: restano candidate finché non raggiungono il TARGET PIENO,
     // non lo streak minimo (altrimenti la lettura sparirebbe già a 5' invece che a 30').
@@ -4062,6 +4074,32 @@ function renderLettura(){
     + '</div>'
     + chart
     + '<div style="background:var(--surface);border:1px dashed var(--border);border-radius:14px;padding:16px;margin-top:16px;text-align:center;color:var(--muted);font-size:14px;">📕 Libri completati (titolo, data, pagine) — in arrivo, step 2</div>';
+}
+
+
+// ─── v18: MODALITÀ ESSENZIALE ───
+// Non cancella nulla: filtra la vista. Le 29 abitudini restano con i loro storici,
+// ma di default se ne vedono 5. Un tap per il quadro completo.
+function v18EssentialMode(){ return localStorage.getItem("mt_essential_mode_v18") !== "0"; }
+function v18SetEssentialMode(on){
+  localStorage.setItem("mt_essential_mode_v18", on ? "1" : "0");
+  renderAbitudini();
+}
+function v18FilterHabits(arr){
+  if (!v18EssentialMode()) return arr;
+  const core = arr.filter(h => h.core);
+  return core.length ? core : arr;   // safety: se nessuna core, mostra tutto
+}
+function v18ToggleBar(nShown, nAll){
+  const on = v18EssentialMode();
+  const btn = (active,label,fn) => '<button onclick="'+fn+'" style="flex:1;background:'+(active?"linear-gradient(90deg,var(--blue),#2563eb)":"transparent")+';color:'+(active?"#fff":"var(--muted)")+';border:1px solid '+(active?"transparent":"var(--border)")+';border-radius:10px;padding:10px;font-weight:800;font-size:14px;cursor:pointer;">'+label+'</button>';
+  return '<div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:12px;margin-bottom:14px;">'
+    + '<div style="display:flex;gap:8px;">'
+    + btn(on,"🎯 Essenziali ("+nShown+")","v18SetEssentialMode(true)")
+    + btn(!on,"Tutte ("+nAll+")","v18SetEssentialMode(false)")
+    + '</div>'
+    + (on ? '<div style="font-size:13px;color:var(--muted);margin-top:8px;text-align:center;">Le altre non sono cancellate: storici e streak restano intatti.</div>' : "")
+    + '</div>';
 }
 
 function showTab(name) {
