@@ -35,4 +35,4 @@ Punti da chiarire:
 > C'è un simulatore fiscale o possiamo farlo noi?
 
 - Verificare i calcolatori ufficiali disponibili (calcolatore d'imposta della Confederazione / cantonale).
-- In alternativa: valutare se preparare noi un piccolo simulatore/foglio di calcolo per il confronto fonte vs. TOU (si aggancia alla domanda 3).
+- ✅ Fatto: simulatore nostro in `strumenti/Simulatore_TOU_Ticino.xlsx` — confronto fonte vs. TOU per cliente, impostato sul Ticino (tariffe nel foglio Parametri da verificare prima dell'uso col cliente; risponde anche alla domanda 3).
