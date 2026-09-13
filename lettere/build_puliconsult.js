@@ -15,7 +15,7 @@ const doc = new Document({
   sections: [{
     properties: { page: { margin: { top: 1300, bottom: 1000, left: 1418, right: 1418 } } },
     children: [
-      L('Maria Isaura Almeida Coelho', true), L('Via G. Maggi 4'), L('6963 Pregassona'), L('076 558 27 69 · isauracoelho20@gmail.com'),
+      L('Maria Isaura De Almeida Coelho', true), L('Via G. Maggi 4'), L('6963 Pregassona'), L('076 558 27 69 · isauracoelho20@gmail.com'),
       P('', { after: 300 }),
       L('Puliconsult SA', true), L('Ufficio del personale'), L('Via Industria 60'), L('6987 Caslano'),
       P('', { after: 300 }),
