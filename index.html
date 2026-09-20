@@ -949,8 +949,8 @@ function jsonpFetch(url, timeoutMs=10000) {
       const troppoLungo = (script.src || "").length > V19_URL_MAX;
       reject(v19Err(troppoLungo ? "TROPPO_LUNGO" : "BLOCCATO",
         troppoLungo
-          ? ("URL di " + script.src.length + " caratteri: l'Apps Script rifiuta oltre ~" + V19_URL_MAX + ".")
-          : "Lo script non si e' caricato. Il deployment puo' essere sano: controlla blocco contenuti, prevenzione tracciamento, VPN o filtro DNS sul dispositivo."));
+          ? ("Payload troppo lungo (" + script.src.length + " car.)")
+          : "Script bloccato \u2014 apri \ud83e\ude7a Diagnostica"));
     };
     const sep = url.includes("?") ? "&" : "?";
     script.src = url + sep + "callback=" + cbName + "&t=" + Date.now();
@@ -5441,10 +5441,20 @@ async function v19Diagnostica(){
   showToast("🩺 Diagnostica in corso...", "info");
 
   add(navigator.onLine ? "✅" : "❌", "Rete del dispositivo: " + (navigator.onLine ? "online" : "OFFLINE"));
-  add(sheetUrl ? "✅" : "❌", "URL configurato: " + (sheetUrl ? sheetUrl.slice(0,58) + "..." : "NESSUNO"));
+  // Un URL corrotto e' invisibile finche' non lo si guarda: va detto, non dedotto.
+  const urlOk = /^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+\/exec/.test(sheetUrl);
+  add(sheetUrl ? (urlOk ? "✅" : "❌") : "❌",
+      "URL configurato: " + (sheetUrl ? (sheetUrl.length > 58 ? sheetUrl.slice(0,58) + "..." : sheetUrl) : "NESSUNO"));
   add(secretKey ? "✅" : "⚠️", "Chiave segreta: " + (secretKey ? "presente" : "assente"));
 
   if (!sheetUrl){ v19MostraDiagnostica(out, "Manca l'URL dell'Apps Script: vai in Settings e incollalo."); return; }
+  if (!urlOk){
+    v19MostraDiagnostica(out,
+      "L'URL salvato NON e' un indirizzo Apps Script: deve cominciare con https://script.google.com/macros/s/ e finire con /exec. "
+      + "Non e' un problema di rete ne' di deployment: e' la stringa salvata nell'app che e' sbagliata. "
+      + "Ricopiala da Distribuisci → Gestisci deployment → Applicazione web → URL, e incollala in Settings.");
+    return;
+  }
 
   // Gradino 1 — fetch diretta
   let fetchOk = false;
