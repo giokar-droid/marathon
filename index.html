@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>🏅 Tracker v19</title>
+<title>🏅 Tracker v20</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -291,7 +291,7 @@ code{background:rgba(255,255,255,.1);padding:2px 7px;border-radius:5px;font-size
   <div class="topbar-inner">
     <div class="topbar-row1">
       <div>
-        <div class="topbar-sub">Tracker <span class="v-badge">v19</span></div>
+        <div class="topbar-sub">Tracker <span class="v-badge">v20</span></div>
         <div class="topbar-title">⚖️ <span id="topbarWeight" title="Peso attuale → target di fase">…</span></div>
       </div>
       <!-- SYNC STATUS STRIP -->
@@ -542,6 +542,16 @@ code{background:rgba(255,255,255,.1);padding:2px 7px;border-radius:5px;font-size
         <input type="number" inputmode="numeric" id="v19End" class="settings-input" style="margin-top:4px;"></div>
     </div>
     <button class="btn" style="background:var(--purple);color:#fff;margin-top:12px;" onclick="v19SalvaSoglie()">💾 Salva soglie</button>
+  </div>
+
+  <!-- ═══ v20: STATO CONDIVISO ═══ -->
+  <div class="card" style="background:rgba(99,102,241,.08);border-color:rgba(99,102,241,.3);">
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:800;color:#a5b4fc;margin-bottom:6px;">🔁 Stesso tracker da ogni dispositivo</div>
+    <div style="font-size:14px;color:var(--muted);margin-bottom:10px;">Definizioni delle abitudini, VO2, piani circuito, soglie e preferenze passano dal foglio <code>Stato_v1</code>, come gia' facevano corsa, pasti, abitudini e crescita. Si scarica sempre prima di caricare, e si carica solo cio' che e' cambiato davvero.</div>
+    <div id="v20Stato" style="font-size:14px;font-weight:700;margin-bottom:12px;">—</div>
+    <div style="font-size:13px;color:#fcd34d;margin-bottom:10px;">Su un dispositivo nuovo il primo collegamento <strong>scarica soltanto</strong>. Per pubblicare i dati di questo dispositivo premi il pulsante qui sotto: falla la prima volta dal telefono, che e' quello che ha i dati veri.</div>
+    <button class="btn" style="background:#6366f1;color:#fff;" onclick="v20Sync(false)">🔁 Sincronizza tutto adesso</button>
+    <div style="font-size:13px;color:var(--muted);margin-top:10px;">La regola e' <strong>l'ultima scrittura vince</strong>, per blocco. Con un dispositivo per volta non ti tocca mai; se invece modifichi le stesse cose su due dispositivi senza riaprire l'altro, una delle due versioni si perde.</div>
   </div>
 
   <!-- ═══ v19: TOGGL ═══ -->
@@ -3166,7 +3176,7 @@ window.onload = function() {
   currentDate = todayStr();
 
   // Log startup info
-  logInfo("Tracker v19 avviato — modalità Essenziale");
+  logInfo("Tracker v20 avviato — modalità Essenziale");
   try{ updateTopbarReadiness(); }catch(e){}
 
   // Auto-seed baseline VO2max test if empty
@@ -5361,12 +5371,13 @@ async function v19PingBackend(silent){
     const b = {
       version: d.version || "?",
       chunked: !!d.chunked,
+      stato: !!d.stato,
       toggl: !!d.toggl,
       togglToken: !!d.togglToken,
       at: new Date().toISOString()
     };
     v19SetBackend(b);
-    if (!silent) logOk("Backend " + b.version, "blocchi:" + (b.chunked?"si":"no") + " · toggl:" + (b.toggl?"si":"no") + " · token:" + (b.togglToken?"presente":"assente"));
+    if (!silent) logOk("Backend " + b.version, "blocchi:" + (b.chunked?"si":"no") + " · stato:" + (b.stato?"si":"no") + " · toggl:" + (b.toggl?"si":"no") + " · token:" + (b.togglToken?"presente":"assente"));
     return b;
   } catch(e){
     if (!silent) logError("Ping backend fallito", v19SpiegaErrore(e));
@@ -5478,9 +5489,10 @@ async function v19Diagnostica(){
     jsonpOk = true;
     add("✅", "JSONP: risponde, backend " + (backend.version || "?")
       + " · blocchi " + (backend.chunked ? "SI" : "no")
+      + " · stato " + (backend.stato ? "SI" : "no")
       + " · toggl " + (backend.toggl ? "SI" : "no")
       + (backend.toggl ? (" · token " + (backend.togglToken ? "presente" : "ASSENTE")) : ""));
-    v19SetBackend({ version:backend.version||"?", chunked:!!backend.chunked, toggl:!!backend.toggl, togglToken:!!backend.togglToken, at:new Date().toISOString() });
+    v19SetBackend({ version:backend.version||"?", chunked:!!backend.chunked, stato:!!backend.stato, toggl:!!backend.toggl, togglToken:!!backend.togglToken, at:new Date().toISOString() });
   } catch(e){
     add("❌", "JSONP: " + v19SpiegaErrore(e));
   }
@@ -5500,8 +5512,8 @@ async function v19Diagnostica(){
   let verdetto;
   if (jsonpOk && backend){
     const v = String(backend.version || "");
-    if (v.indexOf("v10") < 0)
-      verdetto = "Il canale verso Sheets FUNZIONA. Il backend e' ancora " + v + ": finche' non installi la v10 i payload lunghi (giornate con molti pasti, note lunghe) continueranno a fallire, e Toggl non e' disponibile.";
+    if (v.indexOf("v11") < 0)
+      verdetto = "Il canale verso Sheets FUNZIONA. Il backend e' ancora " + v + ". Con la v11 arrivano lo stato condiviso (stesso tracker da ogni dispositivo), la scrittura a blocchi per i payload lunghi e Toggl.";
     else if (!backend.togglToken)
       verdetto = "Tutto a posto lato canale e backend v10, ma manca il token Toggl nelle Script Properties: la sincronizzazione Toggl non puo' partire.";
     else
@@ -5535,7 +5547,7 @@ function v19MostraDiagnostica(righe, verdetto){
   } catch(e){}
 
   v19UltimoReport = ["Marathon Tracker \u2014 diagnostica",
-      new Date().toLocaleString("it-CH") + " \u00b7 app v19 \u00b7 aperta da: " + aperta, ""]
+      new Date().toLocaleString("it-CH") + " \u00b7 app v20 \u00b7 aperta da: " + aperta, ""]
     .concat(righe)
     .concat(["", "VERDETTO: " + verdetto, "",
       "backend: " + (b.version || "non sondato")
@@ -5990,6 +6002,7 @@ function v19RiempiSoglie(){
       + (b.toggl ? (" · token: " + (b.togglToken ? "presente" : "ASSENTE")) : "");
   }
   v19RenderBackupBox();
+  try { v20RenderStato(); } catch(e){}
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -6006,13 +6019,233 @@ function v19Avvio(){
 
     if (sheetUrl){
       v19PingBackend(true).then(async function(b){
-        // prima si rilegge cio' che c'e' sul foglio, poi si chiede a Toggl:
-        // cosi' il sync corregge l'ultima parola invece di partire da dati vecchi
+        // ordine non casuale: prima lo stato condiviso (puo' far ricaricare la
+        // pagina), poi la crescita dal foglio, infine Toggl, che ha l'ultima parola
+        if (b && b.stato) await v20SyncAvvio();
         await v19PullCrescita(true);
-        if (b && b.toggl && v19Cfg().togglAuto) v19TogglSync(todayStr(), true);
+        if (b && b.toggl && v19Cfg().togglAuto) await v19TogglSync(todayStr(), true);
+        if (b && b.stato) v20AvviaTimer();
       });
     }
   } catch(e){ try { logError("Avvio v19 fallito", e.message); } catch(_){} }
+}
+
+
+// ═══════════════════════════════════════════════════════════════════════
+// v20 — STATO CONDIVISO: l'app uguale da ogni dispositivo
+// ═══════════════════════════════════════════════════════════════════════
+// Fino alla v19 l'app era sincronizzata a chiazze: corsa, abitudini, pasti e
+// crescita passavano dal foglio, tutto il resto viveva solo nel dispositivo.
+// Le chiazze non si vedono finche' non fregano qualcuno.
+//
+// Qui si sincronizza TUTTO IL RESTO con un elenco di esclusione, non di
+// inclusione: cosi' una chiave aggiunta domani entra nella sincronizzazione
+// da sola, invece di restarne fuori in silenzio come e' gia' successo.
+// ═══════════════════════════════════════════════════════════════════════
+
+const V20_KEY_META = "mt_v20_meta";
+const V20_KEY_LAST = "mt_v20_last";
+
+// Restano fuori: le chiavi che descrivono QUESTO dispositivo (sincronizzarle
+// farebbe danno) e quelle che hanno gia' una sincronizzazione riga per riga,
+// che e' migliore di "ultima scrittura vince".
+const V20_ESCLUSE = [
+  "mt_url_v4", "mt_secret_v12", "mt_device_id", "mt_pending_v4",
+  "mt_v19_backend", "mt_v19_last_backup", "mt_v19_last_toggl",
+  V20_KEY_META, V20_KEY_LAST,
+  "mt_logs_v4",                    // gia' sincronizzata per giorno (getAll)
+  "mt_habit_logs_v10",             // gia' sincronizzata per riga (getHabits)
+  "marathonCrescitaSessions_v1",   // gia' sincronizzata per sessione (getCrescita)
+  "mt_habit_dirty_v1",
+  "marathon_sheet_url", "marathon_sheet_url_v2", "marathon_sheet_url_v3"
+];
+
+function v20Sincronizzabile(k){
+  if (!k) return false;
+  if (V20_ESCLUSE.indexOf(k) >= 0) return false;
+  if (k.indexOf("mt_extra_dismiss_") === 0) return false;   // roba di interfaccia, per dispositivo
+  return true;
+}
+
+function v20ChiaviLocali(){
+  const out = [];
+  for (let i = 0; i < localStorage.length; i++){
+    const k = localStorage.key(i);
+    if (v20Sincronizzabile(k)) out.push(k);
+  }
+  return out;
+}
+
+// Impronta a buon mercato: serve solo a sapere se il valore e' cambiato da
+// quando lo abbiamo spinto. Non e' crittografia, e la lunghezza in coda rende
+// improbabile una collisione fra due valori diversi.
+function v20Impronta(s){
+  let h = 5381;
+  for (let i = 0; i < s.length; i++) h = (((h * 33) ^ s.charCodeAt(i)) >>> 0);
+  return h.toString(36) + ":" + s.length;
+}
+
+function v20Meta(){ try { return JSON.parse(localStorage.getItem(V20_KEY_META) || "{}"); } catch(e){ return {}; } }
+function v20SetMeta(m){ try { localStorage.setItem(V20_KEY_META, JSON.stringify(m)); } catch(e){} }
+
+// ─── SCARICA ───
+async function v20Pull(){
+  const elenco = await v19Call(sheetUrl + "?action=statoList&key=" + encodeURIComponent(secretKey) + "&t=" + Date.now(), 20000);
+  if (!elenco || elenco.error) throw v19Err("BACKEND", (elenco && elenco.error) || "risposta vuota da statoList");
+
+  const meta = v20Meta();
+  const chiavi = (elenco.keys || []).filter(function(i){ return v20Sincronizzabile(i.key); });
+  let presi = 0;
+
+  for (const info of chiavi){
+    const locale = meta[info.key];
+    // il foglio vince solo se e' piu' recente di quello che abbiamo gia' preso
+    if (locale && locale.savedAt >= info.savedAt) continue;
+    const r = await v19Call(sheetUrl + "?action=statoGet&key=" + encodeURIComponent(secretKey)
+      + "&skey=" + encodeURIComponent(info.key) + "&t=" + Date.now(), 25000);
+    if (!r || r.error || !r.found) continue;
+    try { localStorage.setItem(info.key, r.value); } catch(e){ logWarn("Chiave non scritta", info.key + ": " + e.message); continue; }
+    meta[info.key] = { savedAt: r.savedAt, impronta: v20Impronta(r.value) };
+    presi++;
+    logInfo("Stato ← " + info.key, Math.round((r.value || "").length / 1024) + " KB dal " + String(r.savedAt).slice(0,16).replace("T"," "));
+  }
+  v20SetMeta(meta);
+  return { esaminate: chiavi.length, presi: presi };
+}
+
+// ─── CARICA ───
+async function v20Push(){
+  const meta = v20Meta();
+  const chiavi = v20ChiaviLocali();       // fotografate prima: scrivere il meta sposta gli indici
+  let spinte = 0;
+
+  for (const k of chiavi){
+    const val = localStorage.getItem(k);
+    if (val === null) continue;
+    const imp = v20Impronta(val);
+    if (meta[k] && meta[k].impronta === imp) continue;    // non cambiato: non si tocca il foglio
+    const savedAt = new Date().toISOString();
+    await writeToSheets("stato", { key: k, value: val, savedAt: savedAt, device: localStorage.getItem("mt_device_id") || "" });
+    meta[k] = { savedAt: savedAt, impronta: imp };
+    spinte++;
+    logInfo("Stato → " + k, Math.round(val.length / 1024) + " KB");
+  }
+  v20SetMeta(meta);
+  return { esaminate: chiavi.length, spinte: spinte };
+}
+
+let v20InCorso = false;
+
+// Scarica sempre PRIMA di caricare: un browser appena aperto ha i valori di
+// default, e caricarli per primi cancellerebbe quelli veri sul foglio.
+async function v20Sync(silenzioso){
+  if (v20InCorso) return null;
+  if (!sheetUrl || !secretKey){
+    if (!silenzioso) showToast("⚠️ Configura URL e chiave in Settings", "warn");
+    return null;
+  }
+  if (!v19BackendHa("stato")){
+    const b = await v19PingBackend(true);
+    if (!b || !b.stato){
+      if (!silenzioso) showToast("⚠️ Il backend non ha lo stato condiviso — installa l'Apps Script v11", "warn");
+      return null;
+    }
+  }
+  v20InCorso = true;
+  try {
+    const giu = await v20Pull();
+    const su  = await v20Push();
+    try { localStorage.setItem(V20_KEY_LAST, new Date().toISOString()); } catch(e){}
+    logOk("Stato condiviso", giu.presi + " scaricate · " + su.spinte + " caricate");
+    if (!silenzioso) showToast("🔁 Stato: " + giu.presi + " scaricate, " + su.spinte + " caricate", "ok");
+    v20RenderStato();
+    return { giu: giu, su: su };
+  } catch(e){
+    const spiega = v19SpiegaErrore(e);
+    logError("Stato condiviso fallito", spiega);
+    if (!silenzioso) showToast("❌ Stato: " + spiega, "err");
+    return null;
+  } finally {
+    v20InCorso = false;
+  }
+}
+
+// Le abitudini, il VO2 e i piani vengono letti in memoria all'avvio: se il
+// foglio ne ha portati di nuovi, l'unico modo onesto di mostrarli e' ricaricare.
+// Una volta sola per sessione, altrimenti si entra in un ciclo.
+async function v20SyncAvvio(){
+  // Primo collegamento di QUESTO dispositivo: si scarica e basta.
+  // Un browser appena aperto ha i valori di fabbrica; caricarli in automatico
+  // quando il foglio e' ancora vuoto li renderebbe la verita' condivisa, e
+  // l'altro dispositivo se li ritroverebbe addosso al sync successivo.
+  // La prima pubblicazione dev'essere un gesto deliberato.
+  if (Object.keys(v20Meta()).length === 0){
+    if (!v19BackendHa("stato")) return;
+    try {
+      const giu = await v20Pull();
+      logInfo("Primo collegamento di questo dispositivo",
+        giu.presi + " blocchi scaricati. Per mandare al foglio i dati di QUESTO dispositivo usa Settings -> Sincronizza tutto adesso.");
+      if (giu.presi > 0){
+        let gia = false;
+        try { gia = sessionStorage.getItem("mt_v20_ricaricata") === "1"; } catch(e){ gia = true; }
+        if (!gia){
+          try { sessionStorage.setItem("mt_v20_ricaricata", "1"); } catch(e){}
+          setTimeout(function(){ location.reload(); }, 600);
+        }
+      }
+      v20RenderStato();
+    } catch(e){ logWarn("Primo collegamento non riuscito", v19SpiegaErrore(e)); }
+    return;
+  }
+
+  const r = await v20Sync(true);
+  if (!r) return;
+  if (r.giu.presi > 0){
+    let gia = false;
+    try { gia = sessionStorage.getItem("mt_v20_ricaricata") === "1"; } catch(e){ gia = true; }
+    if (!gia){
+      try { sessionStorage.setItem("mt_v20_ricaricata", "1"); } catch(e){}
+      logInfo("Ricarico", "arrivate " + r.giu.presi + " chiavi dal foglio");
+      setTimeout(function(){ location.reload(); }, 600);
+    }
+  }
+}
+
+// Controllo periodico: spinge solo cio' che e' cambiato davvero, quindi a
+// riposo non tocca la rete.
+let v20Timer = null;
+function v20AvviaTimer(){
+  if (v20Timer) return;
+  v20Timer = setInterval(function(){
+    if (!sheetUrl || !secretKey || !v19BackendHa("stato")) return;
+    if (document.hidden) return;
+    v20Push().then(function(r){
+      if (r && r.spinte) { try { localStorage.setItem(V20_KEY_LAST, new Date().toISOString()); } catch(e){} v20RenderStato(); }
+    }).catch(function(e){ logWarn("Push stato non riuscito", v19SpiegaErrore(e)); });
+  }, 30000);
+  // quando l'app va in secondo piano si spinge subito: e' il momento in cui
+  // l'utente passa a un altro dispositivo
+  document.addEventListener("visibilitychange", function(){
+    if (document.hidden && sheetUrl && secretKey && v19BackendHa("stato")){
+      v20Push().catch(function(){});
+    }
+  });
+}
+
+function v20RenderStato(){
+  const el = document.getElementById("v20Stato");
+  if (!el) return;
+  const iso = localStorage.getItem(V20_KEY_LAST);
+  const meta = v20Meta();
+  const n = Object.keys(meta).length;
+  const chiavi = v20ChiaviLocali();
+  if (!iso){
+    el.style.color = "#fcd34d";
+    el.textContent = "Mai sincronizzato — " + chiavi.length + " blocchi vivono solo qui";
+  } else {
+    el.style.color = "#6ee7b7";
+    el.textContent = "Ultima sincronizzazione: " + new Date(iso).toLocaleString("it-CH") + " · " + n + " blocchi condivisi";
+  }
 }
 
 </script>
