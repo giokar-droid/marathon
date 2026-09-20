@@ -551,6 +551,7 @@ code{background:rgba(255,255,255,.1);padding:2px 7px;border-radius:5px;font-size
     <div style="display:grid;gap:8px;">
       <button class="btn" style="background:var(--blue);color:#fff;" onclick="v19TogglSync(todayStr())">🔄 Sincronizza Toggl (oggi)</button>
       <button class="btn" style="background:rgba(255,255,255,.1);color:var(--text);border:1px solid var(--border);" onclick="v19TogglSync(currentDate)">🔄 Sincronizza il giorno selezionato</button>
+      <button class="btn" style="background:rgba(255,255,255,.1);color:var(--text);border:1px solid var(--border);" onclick="v19PullCrescita(false)">↓ Rileggi la Crescita dal foglio</button>
     </div>
   </div>
 
@@ -5804,6 +5805,63 @@ function v19MergeToggl(lista){
   return { aggiunte:aggiunte, aggiornate:aggiornate };
 }
 
+// Rilegge la Crescita dal foglio. Era l'unico dato che l'app scriveva senza mai
+// rileggerlo: aprendola da un altro browser la storia risultava vuota anche se
+// sul foglio c'era tutto. Non distrugge niente: aggiunge quello che manca e
+// aggiorna solo cio' che nessuno ha corretto a mano su questo dispositivo.
+async function v19PullCrescita(silenzioso){
+  if (!sheetUrl) return null;
+  try {
+    const dati = await fetchFromSheets("getCrescita");
+    if (!Array.isArray(dati)) throw new Error("risposta non valida dal backend");
+    let aggiunte = 0, aggiornate = 0;
+    const indice = {};
+    crescitaSessions.forEach(function(s, i){ indice[s.id] = i; });
+
+    dati.forEach(function(r){
+      const sid = String(r.session_id || "").trim();
+      const d = String(r.date || "").slice(0, 10);
+      if (!sid || !/^\d{4}-\d{2}-\d{2}$/.test(d)) return;
+      const s = {
+        id: sid, date: d,
+        activity_id: String(r.activity_id || ""),
+        category: String(r.category || ""),
+        minutes: parseInt(r.minutes) || 0,
+        description: String(r.description || ""),
+        timestamp: String(r.timestamp || "")
+      };
+      if (!s.activity_id) return;
+
+      const pos = indice[sid];
+      if (pos === undefined){
+        crescitaSessions.push(s);
+        indice[sid] = crescitaSessions.length - 1;
+        aggiunte++;
+        return;
+      }
+      const loc = crescitaSessions[pos];
+      // una correzione fatta a mano qui e non ancora spinta sul foglio vince sempre
+      if (loc.manual_override) return;
+      if (loc.activity_id !== s.activity_id || loc.minutes !== s.minutes || loc.description !== s.description){
+        s.toggl_id = loc.toggl_id || "";
+        s.unmapped = !!loc.unmapped;
+        crescitaSessions[pos] = s;
+        aggiornate++;
+      }
+    });
+
+    if (aggiunte || aggiornate) saveCrescita(crescitaSessions);
+    logOk("Crescita riletta dal foglio", dati.length + " righe · " + aggiunte + " nuove · " + aggiornate + " aggiornate");
+    if (!silenzioso) showToast("↓ Crescita: " + aggiunte + " nuove, " + aggiornate + " aggiornate", "ok");
+    if (typeof renderCrescita === "function") renderCrescita();
+    return { righe: dati.length, aggiunte: aggiunte, aggiornate: aggiornate };
+  } catch(e){
+    logWarn("Rilettura crescita fallita", v19SpiegaErrore(e));
+    if (!silenzioso) showToast("⚠️ Rilettura crescita: " + v19SpiegaErrore(e), "warn");
+    return null;
+  }
+}
+
 // ─── Assegnazione delle voci non mappate: due tap ───
 function v19ApriNonMappate(ds){
   const lista = v19SessioniNonMappate(ds);
@@ -5947,7 +6005,10 @@ function v19Avvio(){
     else if (info.giorni >= 14) logWarn("Backup vecchio", "Ultimo backup " + info.giorni + " giorni fa.");
 
     if (sheetUrl){
-      v19PingBackend(true).then(function(b){
+      v19PingBackend(true).then(async function(b){
+        // prima si rilegge cio' che c'e' sul foglio, poi si chiede a Toggl:
+        // cosi' il sync corregge l'ultima parola invece di partire da dati vecchi
+        await v19PullCrescita(true);
         if (b && b.toggl && v19Cfg().togglAuto) v19TogglSync(todayStr(), true);
       });
     }
