@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>🏅 Tracker v18</title>
+<title>🏅 Tracker v19</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -291,7 +291,7 @@ code{background:rgba(255,255,255,.1);padding:2px 7px;border-radius:5px;font-size
   <div class="topbar-inner">
     <div class="topbar-row1">
       <div>
-        <div class="topbar-sub">Tracker <span class="v-badge">v18</span></div>
+        <div class="topbar-sub">Tracker <span class="v-badge">v19</span></div>
         <div class="topbar-title">⚖️ <span id="topbarWeight" title="Peso attuale → target di fase">…</span></div>
       </div>
       <!-- SYNC STATUS STRIP -->
@@ -431,6 +431,7 @@ code{background:rgba(255,255,255,.1);padding:2px 7px;border-radius:5px;font-size
     </div>
     <div class="btn-row" style="margin-top:14px;">
       <button class="btn btn-export" style="font-size:16px;" onclick="exportCSV()">⬇️ CSV</button>
+      <button class="btn btn-export" style="font-size:16px;" onclick="v19ExportBackup()">💾 Backup</button>
       <button class="btn btn-copy" style="font-size:16px;" id="copyBtn" onclick="copySheets()">📋 Sheets</button>
     </div>
   </div>
@@ -498,6 +499,58 @@ code{background:rgba(255,255,255,.1);padding:2px 7px;border-radius:5px;font-size
       <span>Errori: <b id="dbErrors" style="color:#fca5a5;">0</b></span>
       <span>Warning: <b id="dbWarns" style="color:#fcd34d;">0</b></span>
       <span>URL: <b id="dbUrl" style="color:#93c5fd;">—</b></span>
+    </div>
+  </div>
+
+  <!-- ═══ v19: SALVAGENTE DATI ═══ -->
+  <div class="card" style="background:rgba(16,185,129,.08);border-color:rgba(16,185,129,.28);">
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:800;color:#6ee7b7;margin-bottom:6px;">💾 Salvagente dati</div>
+    <div style="font-size:14px;color:var(--muted);margin-bottom:10px;">Il CSV esporta solo il log corsa. Qui esce <strong>tutto</strong> quello che l'app tiene su questo dispositivo: pasti, abitudini, crescita, forza, VO2, impostazioni. Una pulizia dati del browser cancella tutto per sempre: questo e' l'unico modo per rimetterlo.</div>
+    <div id="v19BackupStatus" style="font-size:14px;font-weight:700;margin-bottom:12px;">—</div>
+    <div style="display:grid;gap:8px;">
+      <button class="btn" style="background:var(--green);color:#fff;" onclick="v19ExportBackup()">💾 Scarica backup completo (.json)</button>
+      <button class="btn" style="background:rgba(255,255,255,.1);color:var(--text);border:1px solid var(--border);" onclick="v19CopyBackup()">📋 Copia backup negli appunti</button>
+      <button class="btn" style="background:rgba(255,255,255,.1);color:var(--text);border:1px solid var(--border);" onclick="document.getElementById('v19BackupFile').click()">♻️ Ripristina da backup...</button>
+      <input type="file" id="v19BackupFile" accept="application/json,.json" style="display:none;" onchange="v19OnBackupFile(this)">
+    </div>
+  </div>
+
+  <!-- ═══ v19: DIAGNOSTICA ═══ -->
+  <div class="card">
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:800;margin-bottom:6px;">🩺 Diagnostica sincronizzazione</div>
+    <div style="font-size:14px;color:var(--muted);margin-bottom:10px;">Prova la connessione a scalini e dice <strong>quale gradino cede</strong>: script bloccato dal dispositivo, timeout, chiave rifiutata o payload troppo lungo. Non accusa piu' il deployment quando il deployment e' sano.</div>
+    <div id="v19BackendStatus" style="font-size:14px;color:#93c5fd;font-weight:700;margin-bottom:12px;">—</div>
+    <button class="btn" style="background:var(--blue);color:#fff;" onclick="v19Diagnostica()">🩺 Esegui diagnostica</button>
+  </div>
+
+  <!-- ═══ v19: SOGLIE TEMPO DELIBERATO ═══ -->
+  <div class="card">
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:800;margin-bottom:6px;">🎯 Soglie tempo deliberato</div>
+    <div style="font-size:14px;color:var(--muted);margin-bottom:12px;">Il <strong>pavimento</strong> e' il minimo che non si sgarra: deve essere un numero raggiungibile anche nel giorno peggiore del mese, come le 11 push-up. Si alza solo dopo 3 settimane consecutive centrate.</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <div><label style="font-size:13px;color:var(--muted);text-transform:uppercase;font-weight:800;">Pavimento (min)</label>
+        <input type="number" inputmode="numeric" id="v19Floor" class="settings-input" style="margin-top:4px;"></div>
+      <div><label style="font-size:13px;color:var(--muted);text-transform:uppercase;font-weight:800;">di cui sales</label>
+        <input type="number" inputmode="numeric" id="v19FloorSales" class="settings-input" style="margin-top:4px;"></div>
+      <div><label style="font-size:13px;color:var(--muted);text-transform:uppercase;font-weight:800;">Target (min)</label>
+        <input type="number" inputmode="numeric" id="v19Target" class="settings-input" style="margin-top:4px;"></div>
+      <div><label style="font-size:13px;color:var(--muted);text-transform:uppercase;font-weight:800;">Ora sveglia</label>
+        <input type="number" inputmode="numeric" id="v19Wake" class="settings-input" style="margin-top:4px;"></div>
+      <div><label style="font-size:13px;color:var(--muted);text-transform:uppercase;font-weight:800;">Ore sveglio</label>
+        <input type="number" inputmode="numeric" id="v19Awake" class="settings-input" style="margin-top:4px;"></div>
+      <div><label style="font-size:13px;color:var(--muted);text-transform:uppercase;font-weight:800;">Chiusura (ora)</label>
+        <input type="number" inputmode="numeric" id="v19End" class="settings-input" style="margin-top:4px;"></div>
+    </div>
+    <button class="btn" style="background:var(--purple);color:#fff;margin-top:12px;" onclick="v19SalvaSoglie()">💾 Salva soglie</button>
+  </div>
+
+  <!-- ═══ v19: TOGGL ═══ -->
+  <div class="card">
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:800;margin-bottom:6px;">⏱️ Toggl Track</div>
+    <div style="font-size:14px;color:var(--muted);margin-bottom:12px;">Le time entries arrivano dall'Apps Script, che fa da proxy. Il <strong>token API non sta in questa app</strong> e non sta nel repo pubblico: vive solo nelle Script Properties del backend, alla voce <code>TOGGL_TOKEN</code>. Il mapping dei nomi delle entries si corregge dal foglio <code>TogglMap_v1</code>, senza rideployare niente.</div>
+    <div style="display:grid;gap:8px;">
+      <button class="btn" style="background:var(--blue);color:#fff;" onclick="v19TogglSync(todayStr())">🔄 Sincronizza Toggl (oggi)</button>
+      <button class="btn" style="background:rgba(255,255,255,.1);color:var(--text);border:1px solid var(--border);" onclick="v19TogglSync(currentDate)">🔄 Sincronizza il giorno selezionato</button>
     </div>
   </div>
 
@@ -872,11 +925,16 @@ function removeFromPending(date) {
 
 function jsonpFetch(url, timeoutMs=10000) {
   return new Promise((resolve, reject) => {
+    // v19: un URL oltre il limite non e' un problema di rete, e va detto subito
+    if (url.length > V19_URL_MAX) {
+      reject(v19Err("TROPPO_LUNGO", "URL di " + url.length + " caratteri: oltre il limite di " + V19_URL_MAX + "."));
+      return;
+    }
     const cbName = "_mtcb_" + Date.now() + "_" + Math.floor(Math.random()*9999);
     const script = document.createElement("script");
     const timer = setTimeout(() => {
       cleanup();
-      reject(new Error("Timeout — lo script non risponde. Verifica l'URL e riprova."));
+      reject(v19Err("TIMEOUT", "Nessuna risposta entro " + timeoutMs + " ms."));
     }, timeoutMs);
     window[cbName] = (data) => { cleanup(); resolve(data); };
     function cleanup() {
@@ -884,7 +942,16 @@ function jsonpFetch(url, timeoutMs=10000) {
       delete window[cbName];
       if (script.parentNode) script.parentNode.removeChild(script);
     }
-    script.onerror = () => { cleanup(); reject(new Error("URL non raggiungibile — controlla il deployment")); };
+    script.onerror = () => {
+      cleanup();
+      // v19: onerror NON significa deployment giu'. Significa che il tag <script>
+      // non si e' caricato: o l'URL era troppo lungo, o il dispositivo blocca.
+      const troppoLungo = (script.src || "").length > V19_URL_MAX;
+      reject(v19Err(troppoLungo ? "TROPPO_LUNGO" : "BLOCCATO",
+        troppoLungo
+          ? ("URL di " + script.src.length + " caratteri: l'Apps Script rifiuta oltre ~" + V19_URL_MAX + ".")
+          : "Lo script non si e' caricato. Il deployment puo' essere sano: controlla blocco contenuti, prevenzione tracciamento, VPN o filtro DNS sul dispositivo."));
+    };
     const sep = url.includes("?") ? "&" : "?";
     script.src = url + sep + "callback=" + cbName + "&t=" + Date.now();
     document.head.appendChild(script);
@@ -1265,35 +1332,10 @@ async function pullNutritionFromSheets() {
 async function writeToSheets(type, data) {
   if (!sheetUrl) throw new Error("URL Apps Script non configurato");
   if (!secretKey) throw new Error("Chiave segreta non configurata (Settings)");
-
-  const dataStr = encodeURIComponent(JSON.stringify(data));
-  const url = `${sheetUrl}?action=write&key=${encodeURIComponent(secretKey)}&type=${type}&data=${dataStr}&t=${Date.now()}`;
-
-  logDebug(`Write API → ${type}`, JSON.stringify(data).slice(0,100));
-
-  try {
-    const r = await Promise.race([
-      fetch(url),
-      new Promise((_,rej) => setTimeout(()=>rej(new Error("Timeout write")), 15000))
-    ]);
-    if (!r.ok) throw new Error("HTTP " + r.status);
-    const result = await r.json();
-    if (result.error) throw new Error(result.error);
-    logOk(`Write OK → ${type}`, JSON.stringify(result).slice(0,80));
-    return result;
-  } catch(fetchErr) {
-    // Fallback to JSONP (URL may be too long for GET if many meals)
-    logWarn("Fetch write fallito, retry JSONP", fetchErr.message);
-    try {
-      const result = await jsonpFetch(url, 15000);
-      if (result.error) throw new Error(result.error);
-      logOk(`Write OK (JSONP) → ${type}`, JSON.stringify(result).slice(0,80));
-      return result;
-    } catch(jsonpErr) {
-      logError(`Write API fallita → ${type}`, jsonpErr.message);
-      throw jsonpErr;
-    }
-  }
+  // v19: la scelta fra URL singolo e scrittura a blocchi sta in v19WriteSmart.
+  // La v18 riprovava in JSONP lo STESSO url troppo lungo, quindi falliva due volte
+  // e dava la colpa al deployment.
+  return await v19WriteSmart(type, data);
 }
 
 async function pushNutritionForDate(date, pasti) {
@@ -3123,7 +3165,7 @@ window.onload = function() {
   currentDate = todayStr();
 
   // Log startup info
-  logInfo("Tracker v18 avviato — modalità Essenziale");
+  logInfo("Tracker v19 avviato — modalità Essenziale");
   try{ updateTopbarReadiness(); }catch(e){}
 
   // Auto-seed baseline VO2max test if empty
@@ -3177,6 +3219,7 @@ window.onload = function() {
     updateSyncUI("syncing","Sync iniziale...",0);
     syncAll(true);
   }
+  v19Avvio();
 };
 
 // ═══════════════════════════════════════════════════════════
@@ -3366,6 +3409,8 @@ function renderCrescita(){
   // sessioni di oggi (per i badge sulle attività, la registrazione è sempre su currentDate)
   const todaySessions = crescitaSessionsByDate(viewDate);
   let html = "";
+  // v19: il widget non deve poter rompere la scheda. Se salta, Crescita resta usabile a mano.
+  try { html += v19Widget(viewDate); } catch(e){ try { logError("Widget v19 non renderizzato", e.message); } catch(_){} }
 
   // ─── SELETTORE PERIODO ───
   const presets = [["today","Oggi"],["7d","7gg"],["wtd","WTD"],["mtd","MTD"],["ytd","YTD"],["custom","Personalizzato"]];
@@ -4093,7 +4138,10 @@ function v18FilterHabits(arr){
 function v18ToggleBar(nShown, nAll){
   const on = v18EssentialMode();
   const btn = (active,label,fn) => '<button onclick="'+fn+'" style="flex:1;background:'+(active?"linear-gradient(90deg,var(--blue),#2563eb)":"transparent")+';color:'+(active?"#fff":"var(--muted)")+';border:1px solid '+(active?"transparent":"var(--border)")+';border-radius:10px;padding:10px;font-weight:800;font-size:14px;cursor:pointer;">'+label+'</button>';
-  return '<div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:12px;margin-bottom:14px;">'
+  // v19: in modalita' Essenziale il widget del tempo deliberato sta sopra le 5 core
+  let v19pre = "";
+  try { if (on) v19pre = v19Widget(todayStr()); } catch(e){}
+  return v19pre + '<div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:12px;margin-bottom:14px;">'
     + '<div style="display:flex;gap:8px;">'
     + btn(on,"🎯 Essenziali ("+nShown+")","v18SetEssentialMode(true)")
     + btn(!on,"Tutte ("+nAll+")","v18SetEssentialMode(false)")
@@ -4116,6 +4164,7 @@ function showTab(name) {
   if(name==="peso") renderPeso();
   if(name==="crescita") renderCrescita();
   if(name==="lettura") renderLettura();
+  if(name==="settings") { try { v19RiempiSoglie(); } catch(e){} }
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -5020,6 +5069,831 @@ function hideToast() {
   clearTimeout(toastTimer);
   document.getElementById("toast").classList.remove("show");
 }
+
+// ═══════════════════════════════════════════════════════════════════════
+// v19 — SALVAGENTE DATI · DIAGNOSTICA SYNC · TEMPO DELIBERATO (TOGGL)
+// ═══════════════════════════════════════════════════════════════════════
+// Tre cose, in ordine di importanza:
+//   1. Backup/ripristino completo del localStorage (prima di tutto: senza
+//      questo ogni intervento sull'app e' una scommessa).
+//   2. Diagnostica sync che distingue script bloccato / timeout / chiave
+//      rifiutata / payload troppo lungo, invece di accusare sempre il deployment.
+//   3. Dashboard del tempo deliberato alimentata da Toggl via Apps Script.
+// ═══════════════════════════════════════════════════════════════════════
+
+// Soglia misurata il 20.09.2026: l'Apps Script risponde HTTP 400 sopra i
+// ~11.700 caratteri di URL. Un tag <script> che riceve 400 fa scattare
+// onerror, che la v18 riportava come "URL non raggiungibile".
+const V19_URL_MAX          = 11000;
+const V19_KEY_CFG          = "mt_v19_cfg";
+const V19_KEY_LAST_BACKUP  = "mt_v19_last_backup";
+const V19_KEY_LAST_TOGGL   = "mt_v19_last_toggl";
+const V19_KEY_BACKEND      = "mt_v19_backend";
+
+const V19_CFG_DEFAULTS = {
+  floor: 120,        // PAVIMENTO: il minimo che non si sgarra mai
+  floorSales: 30,    // di cui almeno questi su sales
+  target: 400,       // TARGET: il core della v18
+  wakeHour: 6,       // ora di sveglia di riferimento
+  awakeHours: 16,    // ore sveglio, per il calcolo del non tracciato
+  endHour: 21,       // ora entro cui si punta a chiudere il target
+  togglAuto: true    // sync Toggl automatica all'apertura
+};
+
+function v19Cfg(){
+  try { return Object.assign({}, V19_CFG_DEFAULTS, JSON.parse(localStorage.getItem(V19_KEY_CFG) || "{}")); }
+  catch(e){ return Object.assign({}, V19_CFG_DEFAULTS); }
+}
+function v19SetCfg(patch){
+  const c = Object.assign(v19Cfg(), patch);
+  try { localStorage.setItem(V19_KEY_CFG, JSON.stringify(c)); } catch(e){}
+  return c;
+}
+function v19Esc(s){
+  return String(s == null ? "" : s).replace(/[&<>"']/g, function(m){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m];
+  });
+}
+function v19Pad(n){ return String(n).padStart(2,"0"); }
+function v19Hm(min){
+  const m = Math.max(0, Math.round(min||0));
+  const h = Math.floor(m/60);
+  return h ? (h + "h " + v19Pad(m%60) + "m") : (m + "m");
+}
+function v19DateStr(d){ return d.getFullYear()+"-"+v19Pad(d.getMonth()+1)+"-"+v19Pad(d.getDate()); }
+function v19NowMin(){ const n = new Date(); return n.getHours()*60 + n.getMinutes(); }
+function v19Err(code, msg){ const e = new Error(msg); e.v19code = code; return e; }
+
+// ═══════════════════════════════════════════════════════════
+// 1. SALVAGENTE DATI — backup e ripristino completo
+// ═══════════════════════════════════════════════════════════
+
+function v19DumpLocalStorage(){
+  const out = {};
+  for (let i = 0; i < localStorage.length; i++){
+    const k = localStorage.key(i);
+    if (k == null) continue;
+    try { out[k] = localStorage.getItem(k); } catch(e){}
+  }
+  return out;
+}
+
+function v19BackupPayload(){
+  const data = v19DumpLocalStorage();
+  let bytes = 0;
+  Object.keys(data).forEach(function(k){ bytes += k.length + (data[k] || "").length; });
+  return {
+    _meta: {
+      app: "Marathon Tracker",
+      schema: "mt-backup-1",
+      version: "v19",
+      exportedAt: new Date().toISOString(),
+      device: localStorage.getItem("mt_device_id") || "",
+      keys: Object.keys(data).length,
+      bytes: bytes,
+      userAgent: navigator.userAgent
+    },
+    data: data
+  };
+}
+
+function v19BackupFileName(){
+  const d = new Date();
+  return "marathon_backup_" + v19DateStr(d) + "_" + v19Pad(d.getHours()) + v19Pad(d.getMinutes()) + ".json";
+}
+
+function v19ExportBackup(){
+  try {
+    const p = v19BackupPayload();
+    const json = JSON.stringify(p, null, 2);
+    const name = v19BackupFileName();
+    const blob = new Blob([json], {type:"application/json"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = name;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 3000);
+    try { localStorage.setItem(V19_KEY_LAST_BACKUP, new Date().toISOString()); } catch(e){}
+    showToast("💾 Backup scaricato — " + p._meta.keys + " chiavi, " + Math.round(p._meta.bytes/1024) + " KB", "ok");
+    logOk("Backup completo esportato", name + " · " + p._meta.keys + " chiavi · " + Math.round(p._meta.bytes/1024) + " KB");
+    v19RenderBackupBox();
+  } catch(e){
+    showToast("❌ Backup fallito: " + e.message, "err");
+    logError("Backup fallito", e.message);
+  }
+}
+
+// Sul telefono il download di un blob a volte apre una scheda invece di
+// salvare. Copia negli appunti come via di fuga: si incolla dove si vuole.
+function v19CopyBackup(){
+  try {
+    const json = JSON.stringify(v19BackupPayload());
+    const done = function(){
+      try { localStorage.setItem(V19_KEY_LAST_BACKUP, new Date().toISOString()); } catch(e){}
+      showToast("📋 Backup copiato negli appunti (" + Math.round(json.length/1024) + " KB)", "ok");
+      logOk("Backup copiato negli appunti", Math.round(json.length/1024) + " KB");
+      v19RenderBackupBox();
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(json).then(done).catch(function(){ v19ShowBackupText(json); });
+    } else {
+      v19ShowBackupText(json);
+    }
+  } catch(e){ showToast("❌ Copia fallita: " + e.message, "err"); }
+}
+
+function v19ShowBackupText(json){
+  v19Modal("💾 Backup — seleziona e copia",
+    '<div style="font-size:14px;color:var(--muted);margin-bottom:10px;">Tieni premuto nel riquadro, Seleziona tutto, Copia. Poi incollalo dove vuoi (Note, mail a te stesso, Dropbox).</div>'
+    + '<textarea readonly onclick="this.select()" style="width:100%;height:46vh;background:rgba(0,0,0,.45);border:1px solid var(--border);border-radius:10px;color:#93c5fd;font-size:11px;padding:10px;">' + v19Esc(json) + '</textarea>');
+}
+
+function v19OnBackupFile(input){
+  const f = input.files && input.files[0];
+  if (!f) return;
+  const r = new FileReader();
+  r.onload = function(){
+    try { v19PrepareImport(JSON.parse(r.result)); }
+    catch(e){ showToast("❌ Non e' un backup valido: " + e.message, "err"); logError("Import: JSON non valido", e.message); }
+    input.value = "";
+  };
+  r.onerror = function(){ showToast("❌ Lettura del file fallita", "err"); input.value = ""; };
+  r.readAsText(f);
+}
+
+let v19PendingImport = null;
+
+function v19PrepareImport(payload){
+  if (!payload || !payload.data || typeof payload.data !== "object"){
+    showToast("❌ Struttura del backup non riconosciuta", "err"); return;
+  }
+  v19PendingImport = payload;
+  const data = payload.data;
+  const keys = Object.keys(data).sort();
+  let nuove = 0, diverse = 0, uguali = 0;
+  let rows = "";
+  keys.forEach(function(k){
+    const cur = localStorage.getItem(k);
+    let stato, colore;
+    if (cur === null){ stato = "mancante qui"; colore = "#6ee7b7"; nuove++; }
+    else if (cur === data[k]){ stato = "identica"; colore = "var(--muted)"; uguali++; }
+    else { stato = "diversa"; colore = "#fcd34d"; diverse++; }
+    rows += '<tr><td style="padding:5px 8px;border-bottom:1px solid var(--border);font-size:13px;">' + v19Esc(k) + '</td>'
+      + '<td style="padding:5px 8px;border-bottom:1px solid var(--border);font-size:13px;text-align:right;color:var(--muted);">' + Math.max(1, Math.round((data[k]||"").length/1024)) + ' KB</td>'
+      + '<td style="padding:5px 8px;border-bottom:1px solid var(--border);font-size:13px;color:' + colore + ';">' + stato + '</td></tr>';
+  });
+  const meta = payload._meta || {};
+  const quando = meta.exportedAt ? new Date(meta.exportedAt).toLocaleString("it-CH") : "data sconosciuta";
+
+  v19Modal("♻️ Ripristino backup",
+    '<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:12px;">'
+    + '<div style="font-size:15px;"><strong>Backup del ' + v19Esc(quando) + '</strong></div>'
+    + '<div style="font-size:14px;color:var(--muted);margin-top:4px;">' + keys.length + ' chiavi · '
+    + '<span style="color:#6ee7b7;">' + nuove + ' mancanti qui</span> · '
+    + '<span style="color:#fcd34d;">' + diverse + ' diverse</span> · ' + uguali + ' identiche</div></div>'
+    + '<div style="max-height:34vh;overflow:auto;border:1px solid var(--border);border-radius:10px;margin-bottom:14px;"><table style="width:100%;border-collapse:collapse;">' + rows + '</table></div>'
+    + '<div style="display:grid;gap:8px;">'
+    + '<button class="btn" style="background:var(--green);color:#fff;" onclick="v19ApplyImport(\'missing\')">➕ Ripristina solo le ' + nuove + ' mancanti (non tocca nulla di esistente)</button>'
+    + '<button class="btn" style="background:rgba(239,68,68,.2);color:var(--red);border:1px solid rgba(239,68,68,.35);" onclick="v19ApplyImport(\'all\')">⚠️ Sovrascrivi tutto con il backup</button>'
+    + '<button class="btn" style="background:rgba(255,255,255,.08);color:var(--text);" onclick="v19CloseModal()">Annulla</button>'
+    + '</div>'
+    + '<div style="font-size:13px;color:var(--muted);margin-top:10px;">Prima di sovrascrivere viene scaricato in automatico un backup di sicurezza dello stato attuale.</div>');
+}
+
+function v19ApplyImport(mode){
+  if (!v19PendingImport){ showToast("Nessun backup caricato", "warn"); return; }
+  const data = v19PendingImport.data;
+  if (mode === "all"){
+    // rete di sicurezza: lo stato attuale esce dalla porta prima di essere coperto
+    try { v19ExportBackup(); } catch(e){}
+  }
+  let scritte = 0, saltate = 0;
+  Object.keys(data).forEach(function(k){
+    const cur = localStorage.getItem(k);
+    if (mode === "missing" && cur !== null){ saltate++; return; }
+    try { localStorage.setItem(k, data[k]); scritte++; } catch(e){ saltate++; }
+  });
+  logOk("Ripristino backup", "modalita' " + mode + " · " + scritte + " chiavi scritte, " + saltate + " saltate");
+  v19CloseModal();
+  showToast("♻️ Ripristinate " + scritte + " chiavi — ricarico l'app", "ok");
+  setTimeout(function(){ location.reload(); }, 1400);
+}
+
+function v19LastBackupInfo(){
+  const iso = localStorage.getItem(V19_KEY_LAST_BACKUP);
+  if (!iso) return { mai:true, testo:"mai fatto", giorni:9999 };
+  const d = new Date(iso);
+  const giorni = Math.floor((Date.now() - d.getTime()) / 86400000);
+  return { mai:false, testo:d.toLocaleString("it-CH"), giorni:giorni };
+}
+
+function v19RenderBackupBox(){
+  const el = document.getElementById("v19BackupStatus");
+  if (!el) return;
+  const info = v19LastBackupInfo();
+  let colore = "#6ee7b7", testo = "Ultimo backup: " + info.testo;
+  if (info.mai){ colore = "#fca5a5"; testo = "⚠️ Nessun backup mai fatto — i dati vivono solo su questo telefono"; }
+  else if (info.giorni >= 14){ colore = "#fcd34d"; testo = "⚠️ Ultimo backup " + info.giorni + " giorni fa (" + info.testo + ")"; }
+  el.style.color = colore;
+  el.textContent = testo;
+}
+
+// ═══════════════════════════════════════════════════════════
+// 2. DIAGNOSTICA SYNC — quattro stati distinti, non uno solo
+// ═══════════════════════════════════════════════════════════
+
+const V19_STATI = {
+  TROPPO_LUNGO: "Payload troppo lungo per un URL GET",
+  BLOCCATO:     "Lo script non si e' caricato",
+  TIMEOUT:      "Nessuna risposta entro il tempo massimo",
+  CHIAVE:       "Chiave segreta rifiutata dal backend",
+  OK:           "Tutto a posto"
+};
+
+function v19SpiegaErrore(e){
+  const c = e && e.v19code;
+  if (c === "TROPPO_LUNGO")
+    return "Payload troppo grande per un URL GET (limite ~" + V19_URL_MAX + " caratteri). Serve il backend v10 con la scrittura a blocchi.";
+  if (c === "BLOCCATO")
+    return "Lo script non si e' caricato. Non e' il deployment: o l'URL era troppo lungo, oppure qualcosa sul telefono blocca le richieste a script.google.com (blocco contenuti, prevenzione tracciamento, filtro DNS, VPN).";
+  if (c === "TIMEOUT")
+    return "Il backend non ha risposto in tempo. Rete lenta o Apps Script fermo.";
+  if (c === "CHIAVE")
+    return "La chiave segreta dell'app non corrisponde a quella del backend.";
+  return e && e.message ? e.message : "Errore sconosciuto";
+}
+
+// Cache di cosa sa fare il backend: serve a degradare invece di rompersi.
+function v19Backend(){
+  try { return JSON.parse(localStorage.getItem(V19_KEY_BACKEND) || "{}"); } catch(e){ return {}; }
+}
+function v19SetBackend(o){
+  try { localStorage.setItem(V19_KEY_BACKEND, JSON.stringify(o || {})); } catch(e){}
+}
+function v19BackendHa(capacita){
+  const b = v19Backend();
+  return !!(b && b[capacita]);
+}
+
+async function v19Call(url, timeoutMs){
+  timeoutMs = timeoutMs || 15000;
+  if (url.length > V19_URL_MAX)
+    throw v19Err("TROPPO_LUNGO", "URL di " + url.length + " caratteri: oltre il limite di " + V19_URL_MAX);
+  try {
+    const r = await Promise.race([
+      fetch(url),
+      new Promise(function(_, rej){ setTimeout(function(){ rej(v19Err("TIMEOUT","Timeout fetch")); }, timeoutMs); })
+    ]);
+    if (!r.ok) throw v19Err("BLOCCATO", "HTTP " + r.status);
+    return await r.json();
+  } catch(e){
+    // fetch verso Apps Script fallisce spesso per CORS: JSONP e' la via normale, non un ripiego d'emergenza
+    return await jsonpFetch(url, timeoutMs);
+  }
+}
+
+// Sonda le capacita' del backend (nessuna scrittura).
+async function v19PingBackend(silent){
+  if (!sheetUrl) return null;
+  try {
+    const d = await v19Call(sheetUrl + "?action=test&t=" + Date.now(), 12000);
+    const b = {
+      version: d.version || "?",
+      chunked: !!d.chunked,
+      toggl: !!d.toggl,
+      togglToken: !!d.togglToken,
+      at: new Date().toISOString()
+    };
+    v19SetBackend(b);
+    if (!silent) logOk("Backend " + b.version, "blocchi:" + (b.chunked?"si":"no") + " · toggl:" + (b.toggl?"si":"no") + " · token:" + (b.togglToken?"presente":"assente"));
+    return b;
+  } catch(e){
+    if (!silent) logError("Ping backend fallito", v19SpiegaErrore(e));
+    return null;
+  }
+}
+
+// Scrittura intelligente: URL corto = come sempre; URL lungo = a blocchi
+// se il backend e' v10, altrimenti errore che dice la verita'.
+async function v19WriteSmart(type, data){
+  const dataStr = encodeURIComponent(JSON.stringify(data));
+  const base = sheetUrl + "?action=write&key=" + encodeURIComponent(secretKey) + "&type=" + type;
+  const url = base + "&data=" + dataStr + "&t=" + Date.now();
+
+  if (url.length <= V19_URL_MAX){
+    logDebug("Write API → " + type, "URL " + url.length + " car.");
+    const res = await v19Call(url, 15000);
+    if (res && res.error) throw v19Err(String(res.error).toLowerCase().indexOf("invalid key") >= 0 ? "CHIAVE" : "BACKEND", res.error);
+    logOk("Write OK → " + type, JSON.stringify(res).slice(0,80));
+    return res;
+  }
+
+  // Oltre il limite.
+  logWarn("Payload oltre il limite URL", type + " · " + url.length + " caratteri");
+  if (!v19BackendHa("chunked")){
+    throw v19Err("TROPPO_LUNGO",
+      "Il dato di tipo '" + type + "' occupa " + url.length + " caratteri di URL: l'Apps Script ne accetta ~" + V19_URL_MAX +
+      ". Il backend attuale non sa ricevere a blocchi — installa la v10.");
+  }
+
+  const cid = "c" + Date.now() + Math.floor(Math.random()*999);
+  const maxEnc = Math.max(1000, V19_URL_MAX - base.length - 140);
+  const raw = JSON.stringify(data);
+  // Si spezza il JSON GREZZO e si codifica ogni pezzo a parte. Tagliare la
+  // stringa gia' percent-encoded spaccherebbe una sequenza %XX a meta', e il
+  // blocco arriverebbe corrotto: un guasto che si vedrebbe solo sui dati con
+  // accenti o emoji, cioe' tardi e su un dato solo.
+  const parti = [];
+  let p = 0;
+  while (p < raw.length){
+    let len = Math.min(raw.length - p, Math.max(200, Math.floor(maxEnc / 3)));
+    const cc = raw.charCodeAt(p + len - 1);
+    if (cc >= 0xD800 && cc <= 0xDBFF && p + len < raw.length) len++;   // mai in mezzo a un'emoji
+    let pezzo = encodeURIComponent(raw.slice(p, p + len));
+    while (pezzo.length > maxEnc && len > 100){
+      len = Math.floor(len * 0.7);
+      const c2 = raw.charCodeAt(p + len - 1);
+      if (c2 >= 0xD800 && c2 <= 0xDBFF) len++;
+      pezzo = encodeURIComponent(raw.slice(p, p + len));
+    }
+    parti.push(pezzo);
+    p += len;
+  }
+  logInfo("Scrittura a blocchi", type + " -> " + parti.length + " blocchi");
+
+  let res = null;
+  for (let i = 0; i < parti.length; i++){
+    const u = sheetUrl + "?action=write&key=" + encodeURIComponent(secretKey)
+      + "&type=chunk&ctype=" + encodeURIComponent(type)
+      + "&cid=" + cid + "&i=" + i + "&n=" + parti.length
+      + "&data=" + parti[i] + "&t=" + Date.now();
+    res = await v19Call(u, 20000);
+    if (res && res.error) throw v19Err(String(res.error).toLowerCase().indexOf("invalid key") >= 0 ? "CHIAVE" : "BACKEND", res.error);
+  }
+  logOk("Write OK a blocchi → " + type, parti.length + " blocchi");
+  return res;
+}
+
+// Diagnostica a scalini: dice quale gradino cede.
+async function v19Diagnostica(){
+  const out = [];
+  const add = function(icona, riga){ out.push(icona + " " + riga); };
+  showToast("🩺 Diagnostica in corso...", "info");
+
+  add(navigator.onLine ? "✅" : "❌", "Rete del dispositivo: " + (navigator.onLine ? "online" : "OFFLINE"));
+  add(sheetUrl ? "✅" : "❌", "URL configurato: " + (sheetUrl ? sheetUrl.slice(0,58) + "..." : "NESSUNO"));
+  add(secretKey ? "✅" : "⚠️", "Chiave segreta: " + (secretKey ? "presente" : "assente"));
+
+  if (!sheetUrl){ v19MostraDiagnostica(out, "Manca l'URL dell'Apps Script: vai in Settings e incollalo."); return; }
+
+  // Gradino 1 — fetch diretta
+  let fetchOk = false;
+  try {
+    const r = await Promise.race([
+      fetch(sheetUrl + "?action=test&t=" + Date.now()),
+      new Promise(function(_,rej){ setTimeout(function(){ rej(new Error("timeout")); }, 12000); })
+    ]);
+    const j = await r.json();
+    fetchOk = true;
+    add("✅", "Fetch diretta: risponde, backend " + (j.version || "?"));
+  } catch(e){
+    add("⚠️", "Fetch diretta fallita (" + e.message + ") — normale su iOS per via del CORS, si passa a JSONP");
+  }
+
+  // Gradino 2 — JSONP, la via che usa davvero l'app
+  let jsonpOk = false, backend = null;
+  try {
+    backend = await jsonpFetch(sheetUrl + "?action=test", 12000);
+    jsonpOk = true;
+    add("✅", "JSONP: risponde, backend " + (backend.version || "?")
+      + " · blocchi " + (backend.chunked ? "SI" : "no")
+      + " · toggl " + (backend.toggl ? "SI" : "no")
+      + (backend.toggl ? (" · token " + (backend.togglToken ? "presente" : "ASSENTE")) : ""));
+    v19SetBackend({ version:backend.version||"?", chunked:!!backend.chunked, toggl:!!backend.toggl, togglToken:!!backend.togglToken, at:new Date().toISOString() });
+  } catch(e){
+    add("❌", "JSONP: " + v19SpiegaErrore(e));
+  }
+
+  // Gradino 3 — URL lungo (non scrive niente: action=test ignora i parametri in piu')
+  if (jsonpOk){
+    try {
+      const zav = new Array(V19_URL_MAX - sheetUrl.length - 80).join("x");
+      await jsonpFetch(sheetUrl + "?action=test&zav=" + zav, 15000);
+      add("✅", "URL lungo (~" + V19_URL_MAX + " car.): accettato");
+    } catch(e){
+      add("❌", "URL lungo (~" + V19_URL_MAX + " car.): RIFIUTATO — abbassa V19_URL_MAX");
+    }
+  }
+
+  // Verdetto
+  let verdetto;
+  if (jsonpOk && backend){
+    const v = String(backend.version || "");
+    if (v.indexOf("v10") < 0)
+      verdetto = "Il canale verso Sheets FUNZIONA. Il backend e' ancora " + v + ": finche' non installi la v10 i payload lunghi (giornate con molti pasti, note lunghe) continueranno a fallire, e Toggl non e' disponibile.";
+    else if (!backend.togglToken)
+      verdetto = "Tutto a posto lato canale e backend v10, ma manca il token Toggl nelle Script Properties: la sincronizzazione Toggl non puo' partire.";
+    else
+      verdetto = "Tutto a posto: canale, backend v10 e token Toggl al loro posto.";
+  } else if (fetchOk && !jsonpOk){
+    verdetto = "Il server risponde alla fetch ma il tag <script> non si carica: qualcosa su QUESTO dispositivo blocca gli script di terze parti (blocco contenuti, prevenzione tracciamento di Safari, filtro DNS, VPN). Prova con un altro browser sul telefono.";
+  } else {
+    verdetto = "Nessuna delle due vie raggiunge il backend. Controlla la rete, poi riprova; se la rete c'e', e' il dispositivo a bloccare script.google.com.";
+  }
+  v19MostraDiagnostica(out, verdetto);
+}
+
+function v19MostraDiagnostica(righe, verdetto){
+  righe.forEach(function(r){ logInfo("Diagnostica", r); });
+  logInfo("Diagnostica — verdetto", verdetto);
+  v19Modal("🩺 Diagnostica sincronizzazione",
+    '<div style="font-size:14px;line-height:1.85;margin-bottom:14px;">' + righe.map(function(r){ return v19Esc(r); }).join("<br>") + '</div>'
+    + '<div style="background:rgba(59,130,246,.12);border:1px solid rgba(99,102,241,.35);border-radius:12px;padding:14px;">'
+    + '<div style="font-size:13px;text-transform:uppercase;letter-spacing:1px;color:#a5b4fc;font-weight:800;margin-bottom:6px;">Verdetto</div>'
+    + '<div style="font-size:15px;line-height:1.6;">' + v19Esc(verdetto) + '</div></div>');
+}
+
+// ═══════════════════════════════════════════════════════════
+// 3. TEMPO DELIBERATO — soglie, streak, non tracciato
+// ═══════════════════════════════════════════════════════════
+
+function v19MinutiGiorno(ds){ return crescitaMinutesByDate(ds); }
+function v19SalesGiorno(ds){ const c = crescitaByCategoryForDate(ds); return c.sales || 0; }
+
+function v19PavimentoOk(ds){
+  const cfg = v19Cfg();
+  return v19MinutiGiorno(ds) >= cfg.floor && v19SalesGiorno(ds) >= cfg.floorSales;
+}
+
+// Streak = giorni consecutivi con il pavimento raggiunto.
+// Se oggi non e' ancora raggiunto la catena non si considera spezzata:
+// si conta fino a ieri, perche' oggi e' ancora salvabile.
+function v19Streak(){
+  const oggi = todayStr();
+  const oggiOk = v19PavimentoOk(oggi);
+  const d = new Date(oggi + "T12:00:00");
+  if (!oggiOk) d.setDate(d.getDate() - 1);
+  let n = 0;
+  for (let i = 0; i < 730; i++){
+    if (v19PavimentoOk(v19DateStr(d))){ n++; d.setDate(d.getDate() - 1); }
+    else break;
+  }
+  return { n:n, oggiOk:oggiOk };
+}
+
+function v19Media7(ds){
+  const d = new Date(ds + "T12:00:00");
+  let tot = 0;
+  for (let i = 0; i < 7; i++){ tot += v19MinutiGiorno(v19DateStr(d)); d.setDate(d.getDate() - 1); }
+  return Math.round(tot / 7);
+}
+
+// Non tracciato = finestra di veglia trascorsa meno i minuti deliberati.
+// Non e' "spreco": dentro ci sono pasti, spostamenti, doccia. Numero neutro.
+function v19NonTracciato(ds){
+  const cfg = v19Cfg();
+  const fatti = v19MinutiGiorno(ds);
+  let finestra;
+  if (ds === todayStr()){
+    finestra = Math.max(0, Math.min(v19NowMin() - cfg.wakeHour*60, cfg.awakeHours*60));
+  } else {
+    finestra = cfg.awakeHours * 60;
+  }
+  return { finestra:finestra, valore:Math.max(0, finestra - fatti) };
+}
+
+function v19SessioniNonMappate(ds){
+  return crescitaSessions.filter(function(s){ return s.date === ds && s.unmapped; });
+}
+
+// ═══════════════════════════════════════════════════════════
+// 4. IL WIDGET — leggibile in 5 secondi dal telefono
+// ═══════════════════════════════════════════════════════════
+
+function v19Widget(ds){
+  const cfg = v19Cfg();
+  const fatti = v19MinutiGiorno(ds);
+  const sales = v19SalesGiorno(ds);
+  const pct = Math.min(100, Math.round(fatti / cfg.target * 100));
+  const pavOk = v19PavimentoOk(ds);
+  const st = v19Streak();
+  const nt = v19NonTracciato(ds);
+  const cats = crescitaByCategoryForDate(ds);
+  const nonMap = v19SessioniNonMappate(ds);
+  const oggi = ds === todayStr();
+
+  const lastT = localStorage.getItem(V19_KEY_LAST_TOGGL);
+  const agg = lastT ? new Date(lastT).toTimeString().slice(0,5) : "mai";
+
+  const dd = new Date(ds + "T12:00:00");
+  const intest = v19Pad(dd.getDate()) + "." + v19Pad(dd.getMonth()+1);
+
+  let h = '<div style="background:linear-gradient(135deg,rgba(59,130,246,.16),rgba(168,85,247,.12));border:1px solid rgba(99,102,241,.32);border-radius:18px;padding:16px;margin-bottom:16px;">';
+
+  // riga 1: data, ultimo aggiornamento, pulsante sync
+  h += '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:12px;">'
+     + '<div style="font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:800;">'
+     + (oggi ? "OGGI" : "GIORNO") + ' · ' + intest + ' · agg. ' + v19Esc(agg) + '</div>'
+     + '<button onclick="v19TogglSync(\'' + ds + '\')" style="background:rgba(255,255,255,.1);border:1px solid var(--border);color:var(--text);border-radius:10px;padding:7px 12px;font-size:14px;font-weight:700;cursor:pointer;">🔄 Toggl</button>'
+     + '</div>';
+
+  // riga 2: il numero grande
+  h += '<div style="display:flex;justify-content:space-between;align-items:flex-end;gap:10px;">'
+     + '<div><div style="font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:800;">Deliberato</div>'
+     + '<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:46px;font-weight:800;line-height:1;color:#fff;">'
+     + fatti + '<span style="font-size:22px;color:var(--muted);font-weight:700;"> / ' + cfg.target + ' min</span></div></div>'
+     + '<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:34px;font-weight:800;color:#a5b4fc;line-height:1;">' + pct + '%</div>'
+     + '</div>';
+
+  // barra
+  h += '<div style="height:12px;background:rgba(255,255,255,.09);border-radius:7px;overflow:hidden;margin:10px 0 14px;">'
+     + '<div style="height:100%;width:' + pct + '%;background:linear-gradient(90deg,#3b82f6,#6366f1);border-radius:7px;"></div></div>';
+
+  // pavimento + streak, in due riquadri grandi
+  h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">';
+  h += '<div style="background:' + (pavOk ? 'rgba(16,185,129,.16)' : 'rgba(245,158,11,.14)') + ';border:1px solid ' + (pavOk ? 'rgba(16,185,129,.4)' : 'rgba(245,158,11,.4)') + ';border-radius:12px;padding:11px;">'
+     + '<div style="font-size:12px;text-transform:uppercase;letter-spacing:1px;font-weight:800;color:var(--muted);">Pavimento</div>'
+     + '<div style="font-size:19px;font-weight:800;margin-top:3px;color:' + (pavOk ? '#6ee7b7' : '#fcd34d') + ';">' + (pavOk ? '✅ superato' : '○ mancano ' + Math.max(0, cfg.floor - fatti) + ' min') + '</div>'
+     + '<div style="font-size:13px;color:var(--muted);margin-top:3px;">' + cfg.floor + ' min · sales ' + sales + '/' + cfg.floorSales + '</div></div>';
+  h += '<div style="background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:12px;padding:11px;">'
+     + '<div style="font-size:12px;text-transform:uppercase;letter-spacing:1px;font-weight:800;color:var(--muted);">Streak</div>'
+     + '<div style="font-size:19px;font-weight:800;margin-top:3px;color:#fff;">' + st.n + (st.n === 1 ? ' giorno' : ' giorni') + '</div>'
+     + '<div style="font-size:13px;color:var(--muted);margin-top:3px;">' + (st.oggiOk ? 'oggi dentro' : 'oggi ancora aperto') + '</div></div>';
+  h += '</div>';
+
+  // categorie
+  const chiavi = Object.keys(cats).filter(function(k){ return cats[k] > 0; }).sort(function(a,b){ return cats[b] - cats[a]; });
+  if (chiavi.length){
+    h += '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;">';
+    chiavi.forEach(function(k){
+      const c = CRESCITA_CATEGORIES[k] || { name:k, icon:"•", color:"#94a3b8" };
+      h += '<span style="background:' + c.color + '22;border:1px solid ' + c.color + '55;color:' + c.color + ';border-radius:8px;padding:4px 9px;font-size:14px;font-weight:700;">' + c.icon + ' ' + v19Esc(c.name.split(" /")[0]) + ' ' + cats[k] + '</span>';
+    });
+    h += '</div>';
+  }
+
+  // non mappate
+  if (nonMap.length){
+    h += '<div onclick="v19ApriNonMappate(\'' + ds + '\')" style="background:rgba(245,158,11,.14);border:1px solid rgba(245,158,11,.4);border-radius:12px;padding:11px;margin-bottom:10px;cursor:pointer;">'
+       + '<div style="font-size:15px;font-weight:800;color:#fcd34d;">⚠️ ' + nonMap.length + (nonMap.length === 1 ? ' voce non mappata' : ' voci non mappate') + '</div>'
+       + '<div style="font-size:13px;color:var(--muted);margin-top:2px;">Tocca per assegnarle — i minuti sono gia' + "'" + ' contati, ma nella categoria sbagliata.</div></div>';
+  }
+
+  // non tracciato + ritmo, in tabella
+  let ritmo = "";
+  if (oggi){
+    const mancano = Math.max(0, cfg.target - fatti);
+    const allaFine = cfg.endHour * 60 - v19NowMin();
+    if (mancano === 0) ritmo = "Target centrato";
+    else if (allaFine <= 0) ritmo = "Mancano " + mancano + " min, ma le " + cfg.endHour + " sono passate";
+    else ritmo = mancano + " min entro le " + cfg.endHour;
+  } else {
+    ritmo = "Media 7 giorni: " + v19Media7(ds) + " min";
+  }
+  h += '<table style="width:100%;border-collapse:collapse;font-size:15px;">'
+     + '<tr><td style="padding:6px 0;color:var(--muted);white-space:nowrap;">Non tracciato</td>'
+     + '<td style="padding:6px 0;text-align:right;font-weight:800;">' + v19Hm(nt.valore) + '</td></tr>'
+     + '<tr><td style="padding:6px 0;color:var(--muted);white-space:nowrap;">' + (oggi ? 'Per il target' : 'Riferimento') + '</td>'
+     + '<td style="padding:6px 0;text-align:right;font-weight:800;">' + v19Esc(ritmo) + '</td></tr>'
+     + '</table>';
+
+  h += '</div>';
+  return h;
+}
+
+// ═══════════════════════════════════════════════════════════
+// 5. SINCRONIZZAZIONE TOGGL
+// ═══════════════════════════════════════════════════════════
+
+let v19TogglInCorso = false;
+
+async function v19TogglSync(ds, silenzioso){
+  ds = ds || currentDate || todayStr();
+  if (v19TogglInCorso) return;
+  if (!sheetUrl || !secretKey){
+    if (!silenzioso) showToast("⚠️ Configura URL e chiave in Settings", "warn");
+    return;
+  }
+  if (!v19BackendHa("toggl")){
+    const b = await v19PingBackend(true);
+    if (!b || !b.toggl){
+      if (!silenzioso) showToast("⚠️ Il backend non espone Toggl — installa l'Apps Script v10", "warn");
+      logWarn("Toggl non disponibile", "backend " + ((b && b.version) || "sconosciuto") + " senza action=togglSync");
+      return;
+    }
+  }
+  v19TogglInCorso = true;
+  if (!silenzioso) showToast("🔄 Sincronizzo Toggl...", "info");
+  try {
+    const url = sheetUrl + "?action=togglSync&key=" + encodeURIComponent(secretKey) + "&date=" + ds + "&t=" + Date.now();
+    const res = await v19Call(url, 30000);
+    if (!res || res.error) throw v19Err(res && String(res.error).toLowerCase().indexOf("invalid key") >= 0 ? "CHIAVE" : "BACKEND", (res && res.error) || "risposta vuota");
+
+    const esito = v19MergeToggl(res.sessions || []);
+    try { localStorage.setItem(V19_KEY_LAST_TOGGL, new Date().toISOString()); } catch(e){}
+
+    let msg = "⏱️ Toggl: " + (res.total_minutes || 0) + " min";
+    if (esito.aggiunte) msg += " · +" + esito.aggiunte + " nuove";
+    if (esito.aggiornate) msg += " · " + esito.aggiornate + " aggiornate";
+    if (res.running && res.running.minutes) msg += " · timer in corso " + res.running.minutes + " min";
+    if (!silenzioso) showToast(msg, "ok");
+    logOk("Toggl sync " + ds, (res.sessions||[]).length + " voci · " + esito.aggiunte + " nuove · " + esito.aggiornate + " aggiornate · " + (res.unmapped_count||0) + " non mappate");
+
+    if (typeof renderCrescita === "function") renderCrescita();
+    if (typeof renderAbitudini === "function" && document.getElementById("tab-abitudini") && document.getElementById("tab-abitudini").style.display !== "none") renderAbitudini();
+  } catch(e){
+    const spiega = v19SpiegaErrore(e);
+    if (!silenzioso) showToast("❌ Toggl: " + spiega, "err");
+    logError("Toggl sync fallita", spiega);
+  } finally {
+    v19TogglInCorso = false;
+  }
+}
+
+// Idempotenza: il session_id viene dal toggl_id, quindi rileggere lo stesso
+// giorno tre volte non moltiplica i minuti.
+function v19MergeToggl(lista){
+  let aggiunte = 0, aggiornate = 0;
+  const indice = {};
+  crescitaSessions.forEach(function(s, i){ indice[s.id] = i; });
+  lista.forEach(function(r){
+    const s = {
+      id: r.session_id,
+      date: r.date,
+      activity_id: r.activity_id,
+      category: r.category,
+      minutes: parseInt(r.minutes) || 0,
+      description: r.description || "",
+      timestamp: r.timestamp || "",
+      toggl_id: String(r.toggl_id || ""),
+      unmapped: !!r.unmapped
+    };
+    if (!s.id) return;
+    const pos = indice[s.id];
+    if (pos === undefined){ crescitaSessions.push(s); aggiunte++; }
+    else {
+      const vecchia = crescitaSessions[pos];
+      if (vecchia.minutes !== s.minutes || vecchia.activity_id !== s.activity_id || vecchia.description !== s.description){
+        // non sovrascrivo un'assegnazione fatta a mano dall'app
+        if (vecchia.manual_override) return;
+        crescitaSessions[pos] = s; aggiornate++;
+      }
+    }
+  });
+  if (aggiunte || aggiornate) saveCrescita(crescitaSessions);
+  return { aggiunte:aggiunte, aggiornate:aggiornate };
+}
+
+// ─── Assegnazione delle voci non mappate: due tap ───
+function v19ApriNonMappate(ds){
+  const lista = v19SessioniNonMappate(ds);
+  if (!lista.length){ showToast("Nessuna voce da assegnare", "info"); return; }
+  let h = '<div style="font-size:14px;color:var(--muted);margin-bottom:12px;">Tocca una voce, poi l\'attivita\' giusta. I minuti sono gia\' contati: qui si sistema solo la categoria.</div>';
+  lista.forEach(function(s){
+    h += '<div onclick="v19ScegliAttivita(\'' + s.id + '\')" style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:8px;cursor:pointer;">'
+       + '<div style="display:flex;justify-content:space-between;gap:10px;">'
+       + '<div style="font-size:15px;font-weight:700;">' + v19Esc(s.description || "(senza descrizione)") + '</div>'
+       + '<div style="font-size:15px;font-weight:800;color:#a5b4fc;white-space:nowrap;">' + s.minutes + ' min</div></div>'
+       + '<div style="font-size:13px;color:var(--muted);margin-top:3px;">' + v19Esc(s.timestamp || "") + ' · ora su ' + v19Esc(s.activity_id) + '</div></div>';
+  });
+  v19Modal("⚠️ Voci non mappate", h);
+}
+
+function v19ScegliAttivita(sessionId){
+  const s = crescitaSessions.find(function(x){ return x.id === sessionId; });
+  if (!s) return;
+  let h = '<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:12px;">'
+        + '<div style="font-size:15px;font-weight:700;">' + v19Esc(s.description || "(senza descrizione)") + '</div>'
+        + '<div style="font-size:14px;color:var(--muted);margin-top:3px;">' + s.minutes + ' min · ' + v19Esc(s.date) + '</div></div>';
+  h += '<label style="display:flex;align-items:center;gap:9px;font-size:14px;margin-bottom:12px;cursor:pointer;">'
+     + '<input type="checkbox" id="v19Impara" checked style="width:19px;height:19px;">'
+     + '<span>Ricorda questa parola chiave per le prossime volte</span></label>';
+  h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;">';
+  CRESCITA_ACTIVITIES.forEach(function(a){
+    const c = CRESCITA_CATEGORIES[a.cat] || { color:"#94a3b8" };
+    h += '<button onclick="v19AssegnaAttivita(\'' + sessionId + '\',\'' + a.id + '\')" style="background:' + c.color + '1f;border:1px solid ' + c.color + '55;color:var(--text);border-radius:11px;padding:11px 8px;font-size:14px;font-weight:700;cursor:pointer;text-align:left;">'
+       + a.icon + ' ' + v19Esc(a.name) + '</button>';
+  });
+  h += '</div>';
+  v19Modal("Assegna a quale attivita'", h);
+}
+
+async function v19AssegnaAttivita(sessionId, activityId){
+  const s = crescitaSessions.find(function(x){ return x.id === sessionId; });
+  const act = CRESCITA_ACTIVITIES.find(function(a){ return a.id === activityId; });
+  if (!s || !act) return;
+  const impara = (document.getElementById("v19Impara") || {}).checked;
+  const pattern = v19PatternDa(s.description);
+
+  s.activity_id = act.id;
+  s.category = act.cat;
+  s.unmapped = false;
+  s.manual_override = true;
+  saveCrescita(crescitaSessions);
+  v19CloseModal();
+  showToast("✅ Assegnata a " + act.name, "ok");
+  logOk("Voce Toggl assegnata a mano", (s.description || "") + " → " + act.name);
+  if (typeof renderCrescita === "function") renderCrescita();
+
+  try { if (typeof pushCrescitaToSheets === "function") await pushCrescitaToSheets(s); } catch(e){}
+
+  if (impara && pattern && pattern.length >= 3 && v19BackendHa("toggl")){
+    try {
+      const url = sheetUrl + "?action=togglMap&key=" + encodeURIComponent(secretKey)
+        + "&pattern=" + encodeURIComponent(pattern) + "&activity_id=" + encodeURIComponent(act.id) + "&t=" + Date.now();
+      await v19Call(url, 15000);
+      logOk("Regola di mapping imparata", '"' + pattern + '" → ' + act.id);
+      showToast('🧠 Imparato: "' + pattern + '" → ' + act.name, "ok");
+    } catch(e){ logWarn("Mapping non salvato", v19SpiegaErrore(e)); }
+  }
+}
+
+// Prende la parola piu' lunga e significativa della descrizione: e' quella che
+// ha piu' probabilita' di tornare identica la prossima volta.
+function v19PatternDa(desc){
+  const parole = String(desc || "").split(/[^A-Za-zÀ-ÿ0-9]+/).filter(function(p){ return p.length >= 4; });
+  if (!parole.length) return "";
+  parole.sort(function(a,b){ return b.length - a.length; });
+  return parole[0];
+}
+
+// ═══════════════════════════════════════════════════════════
+// 6. MODALE GENERICA
+// ═══════════════════════════════════════════════════════════
+
+function v19Modal(titolo, corpo){
+  let m = document.getElementById("v19Modal");
+  if (!m){ m = document.createElement("div"); m.id = "v19Modal"; document.body.appendChild(m); }
+  m.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:9999;display:flex;align-items:flex-end;justify-content:center;";
+  m.innerHTML = '<div onclick="event.stopPropagation()" style="background:var(--bg);border:1px solid var(--border);border-radius:20px 20px 0 0;width:100%;max-width:660px;max-height:90vh;overflow:auto;padding:18px;">'
+    + '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px;">'
+    + '<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:22px;font-weight:800;">' + titolo + '</div>'
+    + '<button onclick="v19CloseModal()" style="background:rgba(255,255,255,.09);border:none;color:var(--muted);width:34px;height:34px;border-radius:50%;font-size:20px;cursor:pointer;flex:none;">×</button>'
+    + '</div>' + corpo + '</div>';
+  m.onclick = function(e){ if (e.target === m) v19CloseModal(); };
+}
+function v19CloseModal(){ const m = document.getElementById("v19Modal"); if (m) m.style.display = "none"; }
+
+// ═══════════════════════════════════════════════════════════
+// 7. IMPOSTAZIONI SOGLIE
+// ═══════════════════════════════════════════════════════════
+
+function v19SalvaSoglie(){
+  const num = function(id, def){
+    const el = document.getElementById(id);
+    const v = el ? parseInt(el.value) : NaN;
+    return isNaN(v) ? def : v;
+  };
+  const d = V19_CFG_DEFAULTS;
+  v19SetCfg({
+    floor:      Math.max(0, num("v19Floor", d.floor)),
+    floorSales: Math.max(0, num("v19FloorSales", d.floorSales)),
+    target:     Math.max(1, num("v19Target", d.target)),
+    wakeHour:   Math.min(23, Math.max(0, num("v19Wake", d.wakeHour))),
+    awakeHours: Math.min(24, Math.max(1, num("v19Awake", d.awakeHours))),
+    endHour:    Math.min(23, Math.max(1, num("v19End", d.endHour)))
+  });
+  showToast("✅ Soglie salvate", "ok");
+  if (typeof renderCrescita === "function") renderCrescita();
+}
+
+function v19RiempiSoglie(){
+  const c = v19Cfg();
+  const set = function(id, v){ const el = document.getElementById(id); if (el) el.value = v; };
+  set("v19Floor", c.floor); set("v19FloorSales", c.floorSales); set("v19Target", c.target);
+  set("v19Wake", c.wakeHour); set("v19Awake", c.awakeHours); set("v19End", c.endHour);
+  const b = v19Backend();
+  const el = document.getElementById("v19BackendStatus");
+  if (el){
+    if (!b.version) el.textContent = "Backend non ancora sondato — tocca Diagnostica.";
+    else el.textContent = "Backend " + b.version
+      + " · scrittura a blocchi: " + (b.chunked ? "si" : "NO")
+      + " · Toggl: " + (b.toggl ? "si" : "NO")
+      + (b.toggl ? (" · token: " + (b.togglToken ? "presente" : "ASSENTE")) : "");
+  }
+  v19RenderBackupBox();
+}
+
+// ═══════════════════════════════════════════════════════════
+// 8. AVVIO
+// ═══════════════════════════════════════════════════════════
+
+function v19Avvio(){
+  try {
+    v19RiempiSoglie();
+    v19RenderBackupBox();
+    const info = v19LastBackupInfo();
+    if (info.mai) logWarn("Nessun backup", "I dati vivono solo nel localStorage di questo dispositivo. Settings → Salvagente dati.");
+    else if (info.giorni >= 14) logWarn("Backup vecchio", "Ultimo backup " + info.giorni + " giorni fa.");
+
+    if (sheetUrl){
+      v19PingBackend(true).then(function(b){
+        if (b && b.toggl && v19Cfg().togglAuto) v19TogglSync(todayStr(), true);
+      });
+    }
+  } catch(e){ try { logError("Avvio v19 fallito", e.message); } catch(_){} }
+}
+
 </script>
 </body>
 </html>
